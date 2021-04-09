@@ -68,3 +68,51 @@ def t_ID(t):
  def t_error(t):
      print("Illegal character '%s'" % t.value[0])
      t.lexer.skip(1)
+#escribe
+def t_ESCRIBE(t):
+    r'\[escribe]'
+    t.type = 'ESCRIBE'
+    return t
+#float
+def t_CTEFLOAT(t):
+    r'\d+\.\d+'
+    t.value = float(t.value)
+    return t
+#Int
+def t_CTEINT(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
+#construimos el lexico
+lexer = lex.lex()
+#precedencia de operadores
+precedence = (
+    ( 'left', 'PLUS', 'MINUS' ),
+    ( 'left', 'MULT', 'DIV' ),
+)
+# er para el programa
+def p_programa(p):
+    '''
+    programa : PROGRAMA ID SEMICOLON  principal
+    '''
+    p[0] = None
+
+def principal(p):
+    '''
+    principal : OPENBRACKET cuerpo CLOSEBRACKET
+    '''
+    p[0] = None
+def cuerpo(p) :
+    '''
+    cuerpo : estatutos_funciones
+    |
+    '''
+    p[0] = None
+def estatutos_funciones(p):
+    '''
+    estatutos_funciones : asignacion
+    | lee
+    | llamada
+    '''
+    
+
