@@ -7,6 +7,7 @@ import sys
 reserved = {
     'programa': 'PROGRAMA',
     'escribe': 'ESCRIBE',
+    'fila' : 'FILA',
     'variable': 'VARIABLE',
     'int': 'INT',
     'float': 'FLOAT',
@@ -31,10 +32,13 @@ tokens = [
     'DOTS', 'EQUALS', 'SEMICOLON', 'PERIOD', 'COMMA',
     'LESS', 'BIGGER', 'DIFFERENT','EQUAL','BIGGER_EQUAL', 'LESS_EQUAL',
     'L_PARENTHESIS', 'R_PARENTHESIS', 'L_BRACKET', 'R_BRACKET',
-    'OR', 'AND'
+    'OR', 'AND',
+    'L_CORCHETE', 'R_CORCHETE',
 ] + list(reserved.values())
 
 # Expresiones regulares para tokens simples
+t_L_CORCHETE = r'\['
+t_R_CORCHETE = r'\]'
 t_PLUS = r'\+'
 t_MINUS = r'\-'
 t_TIMES = r'\*'
@@ -93,7 +97,7 @@ precedence = (
 #falta declaracion de variable
 def p_programa(p):
     '''
-    programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones principal
+    programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones declaracion_var principal
     | PROGRAMA ID SEMICOLON
     '''
     p[0] = None
@@ -150,7 +154,8 @@ def p_estatutos_funciones(p):
     estatutos_funciones : lee
     | escribe
     | llamada
-    |
+    | asignacion
+    | condicion
     '''
     p[0] = None
 def p_declaracion_parametros(p):
@@ -201,12 +206,11 @@ def p_declaracion_clases_aux(p):
     | AGRANDA ID L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
     '''
     p[0] = None
-def p_declaracion_var(p):
+def p_tipo_especial(p):
     '''
-    declaracion_var : VARIABLE tipo_retorno ID declaracion_var
-    |
+    tipo_especial : FILA
     '''
-
+    p[0] = None
 
 def p_declaracion_funciones(p):
     '''
@@ -303,8 +307,44 @@ def p_tipo_retorno(p):
     | CHAR
     '''
     p[0] = None
+def p_asignacion(p):
+    '''
+    asignacion : VARIABLE ID EQUALS asignacion_aux
+    '''
+    p[0] = None
+def p_asignacion_aux(p):
+    '''
+    asignacion_aux : expresion
+    | arreglo
+    | estatutos_funciones
+    | ID PERIOD ID
+    '''
+    p[0] = None
+def p_arreglo(p):
+    '''
+    arreglo : ID L_CORCHETE expresion R_CORCHETE arreglo2
+    '''
+    p[0] = None
+def p_arreglo2(p):
+    '''
+    arreglo2 : L_CORCHETE expresion R_CORCHETE
+    |
+    '''
+    p[0] = None
+def p_condicion(p):
+    '''
+    condicion : IF L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET condicion_aux
+    '''
+    p[0] = None
+def p_condicion_aux(p):
+    '''
+    condicion_aux : ELSE L_BRACKET cuerpo R_BRACKET
+    |
+    '''
+    p[0] = None
 
 #expresiones
+
 def p_expresion(p):
     '''
     expresion : t_exp expresion_aux
@@ -373,7 +413,47 @@ def p_factor(p):
     | llamada
     '''
     p[0] = None
-
+def p_declaracion_var(p):
+    '''
+    declaracion_var : declaracion_var_aux
+    '''
+    p[0] = None
+def p_declaracion_var_aux(p):
+    '''
+    declaracion_var_aux : VARIABLE declaracion_var_aux2 declaracion_var
+    |
+    '''
+    p[0] = None
+def p_declaracion_var_aux2(p):
+    '''
+    declaracion_var_aux2 : tipo_especial ID declaracion_var_aux3
+    | tipo_retorno ID declaracion_var_aux5
+    '''
+    p[0] = None
+def p_declaracion_var_aux3(p):
+    '''
+    declaracion_var_aux3 : COMMA ID declaracion_var_aux3
+    |
+    '''
+    p[0] = None
+def p_declaracion_var_aux5(p):
+    '''
+    declaracion_var_aux5 : declaracion_var_aux6 
+    |
+    '''
+    p[0] = None
+def p_declaracion_var_aux6(p):
+    '''
+    declaracion_var_aux6 : L_CORCHETE CTEI R_CORCHETE declaracion_var_aux7
+    |
+    '''
+    p[0] = None
+def p_declaracion_var_aux7(p):
+    '''
+    declaracion_var_aux7 : L_CORCHETE CTEI R_CORCHETE
+    |
+    '''
+    p[0] = None
 def p_error(p):
    if p:
       print("Syntax error at token", p.type)
