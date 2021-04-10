@@ -3,6 +3,8 @@ import ply.yacc as yacc         # Parser
 from pathlib import Path        # Read files
 import sys
 
+
+#--------------------------------------- palabras reservadas---------------------------------------
 #tokens reservados o palabras reservadas
 reserved = {
     'programa': 'PROGRAMA',
@@ -24,6 +26,7 @@ reserved = {
     'while' : 'WHILE',
     'to' : 'TO'
 }
+#--------------------------------------- Tokens---------------------------------------
 
 tokens = [
     'ID',
@@ -35,6 +38,7 @@ tokens = [
     'OR', 'AND',
     'L_CORCHETE', 'R_CORCHETE',
 ] + list(reserved.values())
+#--------------------------------------- Simple regular expresion---------------------------------------
 
 # Expresiones regulares para tokens simples
 t_L_CORCHETE = r'\['
@@ -95,6 +99,11 @@ precedence = (
 )
 # er para el programa
 #falta declaracion de variable
+
+#--------------------------------------- RE par el lexer---------------------------------------
+
+#-------------- principal---------------
+
 def p_programa(p):
     '''
     programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones declaracion_var principal
@@ -117,6 +126,17 @@ def p_cuerpo_aux(p) :
     '''
     cuerpo_aux : estatutos_repeticion
     | estatutos_funciones
+    '''
+    p[0] = None
+#-------------- estatutos---------------
+#estatutos general
+def p_estatutos_funciones(p):
+    '''
+    estatutos_funciones : lee
+    | escribe
+    | llamada
+    | asignacion
+    | condicion
     '''
     p[0] = None
 #estatutos repeticion
@@ -148,29 +168,8 @@ def p_repeticion_condicional(p):
     repeticion_condicional : WHILE L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
     '''
     p[0]= None
-#falta agregar funciones
-def p_estatutos_funciones(p):
-    '''
-    estatutos_funciones : lee
-    | escribe
-    | llamada
-    | asignacion
-    | condicion
-    '''
-    p[0] = None
-def p_declaracion_parametros(p):
-    '''
-    declaracion_parametros : tipo_retorno ID declaracion_parametros_aux
-	|
-    '''
-    p[0] = None
-def p_declaracion_parametros_aux(p):
-    '''
-    declaracion_parametros_aux : COMMA declaracion_parametros
-    |
-    '''
-    p[0] = None
 
+#estatutos funcionales
 def p_lee(p):
     '''
     lee : LEE L_PARENTHESIS variable lee_aux
@@ -180,61 +179,6 @@ def p_lee_aux(p):
     '''
     lee_aux : R_PARENTHESIS
     | COMMA  variable lee_aux
-    '''
-    p[0] = None
-def p_variable(p):
-    '''
-    variable : ID variable_aux
-    '''
-    p[0] = None
-def p_variable_aux(p):
-    '''
-    variable_aux : COMMA ID variable_aux
-    |
-    '''
-    p[0] = None
-def p_declaracion_clases(p):
-    '''
-    declaracion_clases : PEQUE ID declaracion_clases_aux declaracion_clases
-    |
-
-    '''
-    p[0] = None
-def p_declaracion_clases_aux(p):
-    '''
-    declaracion_clases_aux :  L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
-    | AGRANDA ID L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
-    '''
-    p[0] = None
-def p_tipo_especial(p):
-    '''
-    tipo_especial : FILA
-    '''
-    p[0] = None
-
-def p_declaracion_funciones(p):
-    '''
-    declaracion_funciones : declaracion_funciones_aux
-    |
-    '''
-    p[0] = None
-
-def p_declaracion_funciones_aux(p):
-    '''
-    declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
-    |
-    '''
-    p[0] = None
-def p_declaracion_funciones_aux2(p):
-    '''
-    declaracion_funciones_aux2 : VOID
-    | tipo_retorno
-    '''
-    p[0] = None
-def p_declaracion_funciones_aux3(p):
-    '''
-    declaracion_funciones_aux3 : regreso
-    | 
     '''
     p[0] = None
 def p_regreso(p):
@@ -265,19 +209,6 @@ def p_llamada_aux3(p):
     |
     '''
     p[0]=None
-def p_parametros(p):
-    '''
-    parametros : ID parametros_aux
-    | expresion
-    |
-    '''
-    p[0] = None
-def p_parametros_aux(p):
-    '''
-    parametros_aux : PERIOD ID
-    |
-    '''
-    p[0] = None
 def p_escribe(p):
     '''
     escribe : ESCRIBE L_PARENTHESIS escribe_var R_PARENTHESIS
@@ -300,13 +231,6 @@ def p_escribe_var_aux2(p):
     | expresion
     '''
     p[0] = None
-def p_tipo_retorno(p):
-    '''
-    tipo_retorno : INT
-    | FLOAT
-    | CHAR
-    '''
-    p[0] = None
 def p_asignacion(p):
     '''
     asignacion : VARIABLE ID EQUALS asignacion_aux
@@ -320,17 +244,6 @@ def p_asignacion_aux(p):
     | ID PERIOD ID
     '''
     p[0] = None
-def p_arreglo(p):
-    '''
-    arreglo : ID L_CORCHETE expresion R_CORCHETE arreglo2
-    '''
-    p[0] = None
-def p_arreglo2(p):
-    '''
-    arreglo2 : L_CORCHETE expresion R_CORCHETE
-    |
-    '''
-    p[0] = None
 def p_condicion(p):
     '''
     condicion : IF L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET condicion_aux
@@ -342,8 +255,161 @@ def p_condicion_aux(p):
     |
     '''
     p[0] = None
+#-------------- declaraciones---------------
 
-#expresiones
+def p_declaracion_parametros(p):
+    '''
+    declaracion_parametros : tipo_retorno ID declaracion_parametros_aux
+	|
+    '''
+    p[0] = None
+def p_declaracion_parametros_aux(p):
+    '''
+    declaracion_parametros_aux : COMMA declaracion_parametros
+    |
+    '''
+    p[0] = None
+
+def p_declaracion_clases(p):
+    '''
+    declaracion_clases : PEQUE ID declaracion_clases_aux declaracion_clases
+    |
+
+    '''
+    p[0] = None
+def p_declaracion_clases_aux(p):
+    '''
+    declaracion_clases_aux :  L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
+    | AGRANDA ID L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
+    '''
+    p[0] = None
+def p_declaracion_funciones(p):
+    '''
+    declaracion_funciones : declaracion_funciones_aux
+    |
+    '''
+    p[0] = None
+
+def p_declaracion_funciones_aux(p):
+    '''
+    declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
+    |
+    '''
+    p[0] = None
+def p_declaracion_funciones_aux2(p):
+    '''
+    declaracion_funciones_aux2 : VOID
+    | tipo_retorno
+    '''
+    p[0] = None
+def p_declaracion_funciones_aux3(p):
+    '''
+    declaracion_funciones_aux3 : regreso
+    | 
+    '''
+    p[0] = None
+def p_declaracion_var(p):
+    '''
+    declaracion_var : declaracion_var_aux
+    '''
+    p[0] = None
+def p_declaracion_var_aux(p):
+    '''
+    declaracion_var_aux : VARIABLE declaracion_var_aux2 declaracion_var
+    |
+    '''
+    p[0] = None
+def p_declaracion_var_aux2(p):
+    '''
+    declaracion_var_aux2 : tipo_especial ID declaracion_var_aux3
+    | tipo_retorno ID declaracion_var_aux5
+    '''
+    p[0] = None
+def p_declaracion_var_aux3(p):
+    '''
+    declaracion_var_aux3 : COMMA ID declaracion_var_aux3
+    |
+    '''
+    p[0] = None
+def p_declaracion_var_aux5(p):
+    '''
+    declaracion_var_aux5 : declaracion_var_aux6 
+    |
+    '''
+    p[0] = None
+def p_declaracion_var_aux6(p):
+    '''
+    declaracion_var_aux6 : L_CORCHETE CTEI R_CORCHETE declaracion_var_aux7
+    |
+    '''
+    p[0] = None
+def p_declaracion_var_aux7(p):
+    '''
+    declaracion_var_aux7 : L_CORCHETE CTEI R_CORCHETE
+    |
+    '''
+    p[0] = None
+
+#-------------- Variables---------------
+
+def p_variable(p):
+    '''
+    variable : ID variable_aux
+    '''
+    p[0] = None
+def p_variable_aux(p):
+    '''
+    variable_aux : COMMA ID variable_aux
+    |
+    '''
+    p[0] = None
+#-------------- Tipos---------------
+
+def p_tipo_especial(p):
+    '''
+    tipo_especial : FILA
+    '''
+    p[0] = None
+def p_tipo_retorno(p):
+    '''
+    tipo_retorno : INT
+    | FLOAT
+    | CHAR
+    '''
+    p[0] = None
+#-------------- parametros---------------
+
+def p_parametros(p):
+    '''
+    parametros : ID parametros_aux
+    | expresion
+    |
+    '''
+    p[0] = None
+def p_parametros_aux(p):
+    '''
+    parametros_aux : PERIOD ID
+    |
+    '''
+    p[0] = None
+
+
+#-------------- arreglo---------------
+
+def p_arreglo(p):
+    '''
+    arreglo : ID L_CORCHETE expresion R_CORCHETE arreglo2
+    '''
+    p[0] = None
+def p_arreglo2(p):
+    '''
+    arreglo2 : L_CORCHETE expresion R_CORCHETE
+    |
+    '''
+    p[0] = None
+
+
+#-------------- expresiones---------------
 
 def p_expresion(p):
     '''
@@ -413,47 +479,7 @@ def p_factor(p):
     | llamada
     '''
     p[0] = None
-def p_declaracion_var(p):
-    '''
-    declaracion_var : declaracion_var_aux
-    '''
-    p[0] = None
-def p_declaracion_var_aux(p):
-    '''
-    declaracion_var_aux : VARIABLE declaracion_var_aux2 declaracion_var
-    |
-    '''
-    p[0] = None
-def p_declaracion_var_aux2(p):
-    '''
-    declaracion_var_aux2 : tipo_especial ID declaracion_var_aux3
-    | tipo_retorno ID declaracion_var_aux5
-    '''
-    p[0] = None
-def p_declaracion_var_aux3(p):
-    '''
-    declaracion_var_aux3 : COMMA ID declaracion_var_aux3
-    |
-    '''
-    p[0] = None
-def p_declaracion_var_aux5(p):
-    '''
-    declaracion_var_aux5 : declaracion_var_aux6 
-    |
-    '''
-    p[0] = None
-def p_declaracion_var_aux6(p):
-    '''
-    declaracion_var_aux6 : L_CORCHETE CTEI R_CORCHETE declaracion_var_aux7
-    |
-    '''
-    p[0] = None
-def p_declaracion_var_aux7(p):
-    '''
-    declaracion_var_aux7 : L_CORCHETE CTEI R_CORCHETE
-    |
-    '''
-    p[0] = None
+
 def p_error(p):
    if p:
       print("Syntax error at token", p.type)
@@ -467,6 +493,8 @@ def prueba(data):
   result = parser.parse(data)
   print(result)
 
+
+# lectura de archivo
 from pathlib import Path
 
 aceptado = Path('prueba.txt').read_text()
