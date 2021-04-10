@@ -1,3 +1,10 @@
+#--------------------------------------- Autores---------------------------------------
+# Benjamín Valdez Rodríguez A00822027
+#Juan Carlos Garza Lopez A00822601
+
+#ITESM
+#--------------------------------------- Autores---------------------------------------
+
 import ply.lex as lex           # Scanner
 import ply.yacc as yacc         # Parser
 from pathlib import Path        # Read files
@@ -479,6 +486,7 @@ def p_factor(p):
     | llamada
     '''
     p[0] = None
+#-------------- error---------------
 
 def p_error(p):
    if p:
@@ -488,7 +496,13 @@ def p_error(p):
       print("column: '%s'" % p.lexpos)
    else:
       print("Syntax error at EOF")
+#--------------------------------------- Error---------------------------------------
+
+# crear el parser
 parser = yacc.yacc()
+
+#--------------------------------------- funciones de prueba---------------------------------------
+
 def prueba(data):
   result = parser.parse(data)
   print(result)
