@@ -20,7 +20,8 @@ reserved = {
     'regreso':'REGRESO',
     'lee' : 'LEE',
     'for':'FOR',
-    'while' : 'WHILE'
+    'while' : 'WHILE',
+    'to' : 'TO'
 }
 
 tokens = [
@@ -71,18 +72,13 @@ def t_ID(t):
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
-#escribe
-def t_ESCRIBE(t):
-    r'\[escribe]'
-    t.type = 'ESCRIBE'
-    return t
 #float
-def t_CTEFLOAT(t):
+def t_CTEF(t):
     r'\d+\.\d+'
     t.value = float(t.value)
     return t
 #Int
-def t_CTEINT(t):
+def t_CTEI(t):
     r'\d+'
     t.value = int(t.value)
     return t
@@ -109,10 +105,45 @@ def p_principal(p):
 #falta agregar estatutos repeticion
 def p_cuerpo(p) :
     '''
-    cuerpo : estatutos_funciones cuerpo
+    cuerpo : cuerpo_aux cuerpo
     |
     '''
     p[0] = None
+def p_cuerpo_aux(p) :
+    '''
+    cuerpo_aux : estatutos_repeticion
+    | estatutos_funciones
+    '''
+    p[0] = None
+#estatutos repeticion
+def p_estatutos_repeticion(p):
+    '''
+    estatutos_repeticion : estatutos_repeticion_aux
+    | 
+    '''
+    p[0]= None
+def p_estatutos_repeticion_aux(p):
+    '''
+    estatutos_repeticion_aux : estatutos_repeticion_aux2 estatutos_repeticion
+    '''
+    p[0]= None
+def p_estatutos_repeticion_aux2(p):
+    '''
+    estatutos_repeticion_aux2 : repeticion_condicional
+    | repeticion_no_condicional
+    '''
+    p[0]= None
+#repeticion_no_condicional
+def p_repeticion_no_condicional(p):
+    '''
+    repeticion_no_condicional : FOR L_PARENTHESIS m_exp TO m_exp R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
+    '''
+    p[0]= None
+def p_repeticion_condicional(p):
+    '''
+    repeticion_condicional : WHILE L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
+    '''
+    p[0]= None
 #falta agregar funciones
 def p_estatutos_funciones(p):
     '''
@@ -151,7 +182,7 @@ def p_variable(p):
     p[0] = None
 def p_variable_aux(p):
     '''
-    variable_aux : PERIOD ID variable_aux
+    variable_aux : COMMA ID variable_aux
     |
     '''
     p[0] = None
@@ -173,11 +204,6 @@ def p_declaracion_var(p):
     declaracion_var : VARIABLE tipo_retorno ID declaracion_var
     |
     '''
-def p_expresion(p):
-    '''
-    expresion : 
-    '''
-    p[0] = None
 
 
 def p_declaracion_funciones(p):
@@ -207,7 +233,7 @@ def p_declaracion_funciones_aux3(p):
     p[0] = None
 def p_regreso(p):
     '''
-    regreso : REGRESO ID
+    regreso : REGRESO expresion
     '''
     p[0] = None
 def p_tipo_retorno(p):
@@ -217,7 +243,65 @@ def p_tipo_retorno(p):
     | CHAR
     '''
     p[0] = None
+#expresiones
+def p_expresion(p):
+    '''
+    expresion : t_exp expresion_aux
+    '''
+    p[0] = None
+def p_expresion_aux(p):
+    '''
+    expresion_aux : OR expresion
+    | 
+    '''
+    p[0] = None
+def p_t_exp(p):
+    '''
+    t_exp : g_exp t_exp_aux
+    '''
+    p[0] = None
+def p_t_exp_aux(p):
+    '''
+    t_exp_aux : AND t_exp
+    |
+    '''
+    p[0] = None
 
+def p_g_exp(p):
+    '''
+    g_exp : m_exp
+    | m_exp BIGGER m_exp
+    | m_exp LESS m_exp
+    | m_exp BIGGER_EQUAL m_exp
+    | m_exp LESS_EQUAL m_exp
+    | m_exp EQUAL m_exp
+    | m_exp DIFFERENT m_exp
+    '''
+    p[0]=None
+def p_m_exp(p):
+    '''
+    m_exp : termino m_exp_aux
+    '''
+    p[0] = None
+def p_m_exp_aux(p):
+    '''
+    m_exp_aux : PLUS termino
+    | MINUS termino
+    |
+    '''
+    p[0]=None
+def p_termino(p):
+    '''
+    termino : factor termino_aux
+    '''
+    p[0] = None
+def p_termino_aux(p):
+    '''
+    termino_aux : TIMES factor
+    | DIVIDE factor
+    |
+    '''
+    p[0]=None
 def p_factor(p):
     '''
     factor : L_BRACKET expresion R_BRACKET
@@ -227,7 +311,6 @@ def p_factor(p):
     | variable
     '''
     p[0] = None
-
 
 def p_error(p):
    if p:
