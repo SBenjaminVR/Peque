@@ -148,6 +148,8 @@ def p_repeticion_condicional(p):
 def p_estatutos_funciones(p):
     '''
     estatutos_funciones : lee
+    | escribe
+    | llamada
     |
     '''
     p[0] = None
@@ -236,6 +238,64 @@ def p_regreso(p):
     regreso : REGRESO expresion
     '''
     p[0] = None
+def p_llamada(p):
+    '''
+    llamada : ID llamada_aux L_PARENTHESIS llamada_aux2 R_PARENTHESIS
+    '''
+    p[0]=None
+def p_llamada_aux(p):
+    '''
+    llamada_aux : PERIOD ID
+    |
+    '''
+    p[0]=None
+def p_llamada_aux2(p):
+    '''
+    llamada_aux2 : parametros llamada_aux3
+    |
+    '''
+    p[0]=None
+def p_llamada_aux3(p):
+    '''
+    llamada_aux3 : COMMA llamada_aux2
+    |
+    '''
+    p[0]=None
+def p_parametros(p):
+    '''
+    parametros : ID parametros_aux
+    | expresion
+    |
+    '''
+    p[0] = None
+def p_parametros_aux(p):
+    '''
+    parametros_aux : PERIOD ID
+    |
+    '''
+    p[0] = None
+def p_escribe(p):
+    '''
+    escribe : ESCRIBE L_PARENTHESIS escribe_var R_PARENTHESIS
+    '''
+    p[0] = None
+def p_escribe_var(p):
+    '''
+    escribe_var : escribe_var_aux
+    '''
+    p[0] = None
+def p_escribe_var_aux(p):
+    '''
+    escribe_var_aux : escribe_var_aux2 COMMA
+    | escribe_var_aux2
+    '''
+    p[0] = None
+def p_escribe_var_aux2(p):
+    '''
+    escribe_var_aux2 : llamada 
+    | expresion
+    '''
+    p[0] = None
 def p_tipo_retorno(p):
     '''
     tipo_retorno : INT
@@ -243,6 +303,7 @@ def p_tipo_retorno(p):
     | CHAR
     '''
     p[0] = None
+
 #expresiones
 def p_expresion(p):
     '''
@@ -309,6 +370,7 @@ def p_factor(p):
     | CTEF
     | CTEC
     | variable
+    | llamada
     '''
     p[0] = None
 
