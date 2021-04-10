@@ -1,5 +1,5 @@
 #specific compiler files
-.out
+*.out
 parsetab.py
 prueba.txt
 # Byte-compiled / optimized / DLL files
