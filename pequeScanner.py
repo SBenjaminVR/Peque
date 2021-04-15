@@ -10,6 +10,8 @@ import ply.yacc as yacc         # Parser
 from pathlib import Path        # Read files
 import sys
 
+Directory = {}
+Glovalvar = {}
 
 #--------------------------------------- palabras reservadas---------------------------------------
 #tokens reservados o palabras reservadas
@@ -82,6 +84,7 @@ def t_newline(t):
 def t_ID(t):
     r'[a-zA-Z][a-zA-Z_0-9]*'
     t.type = reserved.get(t.value, 'ID')
+    #Directory[t.value] = []
     return t
  #error 
 def t_error(t):
@@ -109,6 +112,22 @@ precedence = (
 
 #--------------------------------------- RE par el lexer---------------------------------------
 
+
+#--------------function dir symb table ---------
+def addScope(name):
+    if Directory.get(name) == None:
+        Directory[name] = [name,"retorno",{}]
+    
+def addType(name,type):
+    if Directory.get(name) != None:
+        Directory[name] = [name,type,{}]
+    
+def addToScopeVar(name,var):
+    if Directory.get(name) != None :
+        directoryScope = Directory.get(name)
+        if directoryScope[2].get(var) == None :
+            directoryScope[2][var] = []
+stack = []
 #-------------- principal---------------
 
 def p_programa(p):
@@ -116,6 +135,7 @@ def p_programa(p):
     programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones declaracion_var principal
     | PROGRAMA ID SEMICOLON
     '''
+    addScope(p[2])
     p[0] = None
 def p_principal(p):
     '''
@@ -242,6 +262,7 @@ def p_asignacion(p):
     '''
     asignacion : VARIABLE ID EQUALS asignacion_aux
     '''
+    addScope(p[2])
     p[0] = None
 def p_asignacion_aux(p):
     '''
@@ -292,9 +313,10 @@ def p_declaracion_clases_aux(p):
     p[0] = None
 def p_declaracion_funciones(p):
     '''
-    declaracion_funciones : declaracion_funciones_aux
+    declaracion_funciones : declaracion_funciones_aux declaracion_funciones
     |
     '''
+
     p[0] = None
 
 def p_declaracion_funciones_aux(p):
@@ -302,6 +324,8 @@ def p_declaracion_funciones_aux(p):
     declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
     |
     '''
+    addScope(p[3])
+
     p[0] = None
 def p_declaracion_funciones_aux2(p):
     '''
@@ -325,18 +349,22 @@ def p_declaracion_var_aux(p):
     declaracion_var_aux : VARIABLE declaracion_var_aux2 declaracion_var
     |
     '''
+
     p[0] = None
 def p_declaracion_var_aux2(p):
     '''
     declaracion_var_aux2 : tipo_especial ID declaracion_var_aux3
     | tipo_retorno ID declaracion_var_aux5
     '''
+    addScope(p[2])
+
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
     declaracion_var_aux3 : COMMA ID declaracion_var_aux3
     |
     '''
+    addScope(p[2])
     p[0] = None
 def p_declaracion_var_aux5(p):
     '''
@@ -514,3 +542,4 @@ from pathlib import Path
 aceptado = Path('prueba.txt').read_text()
 aceptado = aceptado
 prueba(aceptado)
+print(Directory)
