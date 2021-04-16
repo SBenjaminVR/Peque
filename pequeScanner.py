@@ -10,8 +10,13 @@ import ply.yacc as yacc         # Parser
 from pathlib import Path        # Read files
 import sys
 
-Directory = {}
+Directory = {
+    'Clases': {},
+    'Funciones': {},
+    'Variables': {}
+}
 Glovalvar = {}
+AuxList = ['temp', 'tempo']
 
 #--------------------------------------- palabras reservadas---------------------------------------
 #tokens reservados o palabras reservadas
@@ -114,6 +119,23 @@ precedence = (
 
 
 #--------------function dir symb table ---------
+def addVariable(name, type):
+    if Directory.get('Variables').get(name) == None:
+        Directory['Variables'][name] = {
+            'Id': name, 
+            'DataType': type
+        }
+
+def addFuncion(name, type):
+    print('addFuncion name: ' + name + ' type: ' + type)
+    if Directory.get('Funciones').get(name) == None:
+        Directory['Funciones'][name] = {
+            'Id': name, 
+            'DataType': type,
+            'Variables': {},
+            'Parametros': {}
+        }
+
 def addScope(name):
     if Directory.get(name) == None:
         Directory[name] = [name,"retorno",{}]
@@ -135,7 +157,7 @@ def p_programa(p):
     programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones declaracion_var principal
     | PROGRAMA ID SEMICOLON
     '''
-    addScope(p[2])
+    #addScope(p[2])
     p[0] = None
 def p_principal(p):
     '''
@@ -262,7 +284,7 @@ def p_asignacion(p):
     '''
     asignacion : VARIABLE ID EQUALS asignacion_aux
     '''
-    addScope(p[2])
+    #addScope(p[2])
     p[0] = None
 def p_asignacion_aux(p):
     '''
@@ -324,14 +346,18 @@ def p_declaracion_funciones_aux(p):
     declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
     |
     '''
-    addScope(p[3])
-
+    AuxList[0] = 'Funcion'
+    print('p_delcaracion_funciones_aux ' + AuxList[1])
+    addFuncion(p[3], AuxList[1])
+    #addScope(p[3])
     p[0] = None
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
     | tipo_retorno
     '''
+    AuxList[1] = p[1]
+    print('p_delcaracion_funciones_aux2 ' + AuxList[1])
     p[0] = None
 def p_declaracion_funciones_aux3(p):
     '''
@@ -356,15 +382,15 @@ def p_declaracion_var_aux2(p):
     declaracion_var_aux2 : tipo_especial ID declaracion_var_aux3
     | tipo_retorno ID declaracion_var_aux5
     '''
-    addScope(p[2])
-
+    #addScope(p[2])
+    addVariable(p[2], AuxList[1])
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
     declaracion_var_aux3 : COMMA ID declaracion_var_aux3
     |
     '''
-    addScope(p[2])
+    #addScope(p[2])
     p[0] = None
 def p_declaracion_var_aux5(p):
     '''
@@ -411,6 +437,7 @@ def p_tipo_retorno(p):
     | FLOAT
     | CHAR
     '''
+    AuxList[1] = p[1]
     p[0] = None
 #-------------- parametros---------------
 
