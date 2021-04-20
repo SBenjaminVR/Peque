@@ -29,6 +29,7 @@ reserved = {
     'float': 'FLOAT',
     'char': 'CHAR',
     'void' : 'VOID',
+    'bool': 'BOOL',
     'if': 'IF',
     'else': 'ELSE',
     'mini' : 'MINI',
@@ -436,6 +437,7 @@ def p_tipo_retorno(p):
     tipo_retorno : INT
     | FLOAT
     | CHAR
+    | BOOL
     '''
     AuxList[1] = p[1]
     p[0] = None
