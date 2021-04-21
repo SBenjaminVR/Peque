@@ -1,7 +1,7 @@
 '''
 Implementacion de cubo semantico
 
-
+utilizamos un dictionario anidado, ya que en python tiene una complejidad constante el utilizar este tipo de estructura
 '''
 cuboSemantico = {
     'int' : {

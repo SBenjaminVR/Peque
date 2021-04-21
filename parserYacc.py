@@ -4,12 +4,7 @@ import ply.lex as lex           # Scanner
 import ply.yacc as yacc  
 import lexico
 
-Directory = {
-    'Clases': {},
-    'Funciones': {},
-    'Variables': {}
-}
-Glovalvar = {}
+
 AuxList = ['temp', 'tempo']
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
@@ -22,37 +17,8 @@ tokens = lexico.tokens
 lexer = lexico.lexer
 
 #--------------function dir symb table ---------
+import symbTableFunctions as symb
 
-def addVariable(name, type):
-    if Directory.get('Variables').get(name) == None:
-        Directory['Variables'][name] = {
-            'Id': name, 
-            'DataType': type
-        }
-
-def addFuncion(name, type):
-    print('addFuncion name: ' + name + ' type: ' + type)
-    if Directory.get('Funciones').get(name) == None:
-        Directory['Funciones'][name] = {
-            'Id': name, 
-            'DataType': type,
-            'Variables': {},
-            'Parametros': {}
-        }
-
-def addScope(name):
-    if Directory.get(name) == None:
-        Directory[name] = [name,"retorno",{}]
-    
-def addType(name,type):
-    if Directory.get(name) != None:
-        Directory[name] = [name,type,{}]
-    
-def addToScopeVar(name,var):
-    if Directory.get(name) != None :
-        directoryScope = Directory.get(name)
-        if directoryScope[2].get(var) == None :
-            directoryScope[2][var] = []
 stack = []
 #-------------- principal---------------
 
@@ -252,7 +218,7 @@ def p_declaracion_funciones_aux(p):
     '''
     AuxList[0] = 'Funcion'
     print('p_delcaracion_funciones_aux ' + AuxList[1])
-    addFuncion(p[3], AuxList[1])
+    symb.addFuncion(p[3], AuxList[1])
     #addScope(p[3])
     p[0] = None
 def p_declaracion_funciones_aux2(p):
@@ -287,7 +253,7 @@ def p_declaracion_var_aux2(p):
     | tipo_retorno ID declaracion_var_aux5
     '''
     #addScope(p[2])
-    addVariable(p[2], AuxList[1])
+    symb.addVariable(p[2], AuxList[1])
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
