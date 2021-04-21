@@ -4,12 +4,19 @@ import ply.lex as lex           # Scanner
 import ply.yacc as yacc  
 import lexico
 
-
 AuxList = ['temp', 'tempo']
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
 
 #cuboSemantico tiene todas las consideraciones semanticas
+
+#-Generacion de codigo de expresiones aritmeticas
+from stack import Stack
+popper = Stack()
+stack = Stack()
+tipos = Stack()
+
+print(stack.top())
 
 #--------------------------------------- Variables ncesarias para usar yacc, lista de tokens y lexer---------------------------------------
 
@@ -19,7 +26,6 @@ lexer = lexico.lexer
 #--------------function dir symb table ---------
 import symbTableFunctions as symb
 
-stack = []
 #-------------- principal---------------
 
 def p_programa(p):
@@ -217,7 +223,7 @@ def p_declaracion_funciones_aux(p):
     |
     '''
     AuxList[0] = 'Funcion'
-    print('p_delcaracion_funciones_aux ' + AuxList[1])
+    print('p_declaracion_funciones_aux ' + AuxList[1])
     symb.addFuncion(p[3], AuxList[1])
     #addScope(p[3])
     p[0] = None
@@ -377,6 +383,8 @@ def p_g_exp(p):
     | m_exp EQUAL m_exp
     | m_exp DIFFERENT m_exp
     '''
+    if len(p) > 2:
+        print(p[2])
     p[0]=None
 def p_m_exp(p):
     '''
@@ -389,6 +397,9 @@ def p_m_exp_aux(p):
     | MINUS termino
     |
     '''
+    if len(p) > 1:
+        popper.push(p[1])
+        print(p[1])
     p[0]=None
 def p_termino(p):
     '''
@@ -401,6 +412,9 @@ def p_termino_aux(p):
     | DIVIDE factor
     |
     '''
+    if len(p) > 1:
+        popper.push(p[1])
+        print(p[1])
     p[0]=None
 def p_factor(p):
     '''
@@ -411,6 +425,7 @@ def p_factor(p):
     | variable
     | llamada
     '''
+    print(p[1])
     p[0] = None
 #-------------- error---------------
 
@@ -426,5 +441,3 @@ def p_error(p):
 
 # crear el parser
 parser = yacc.yacc()
-
-
