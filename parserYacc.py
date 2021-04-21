@@ -11,6 +11,10 @@ Directory = {
 }
 Glovalvar = {}
 AuxList = ['temp', 'tempo']
+#--------------------------------------- importar cuboSemantico---------------------------------------
+from cuboSemantico import cuboSemantico
+
+#cuboSemantico tiene todas las consideraciones semanticas
 
 #--------------------------------------- Variables ncesarias para usar yacc, lista de tokens y lexer---------------------------------------
 
