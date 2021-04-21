@@ -10,23 +10,15 @@ from pathlib import Path        # Read files
 import sys
 
 
+
+#--------------------------------------- Adding the parser ---------------------------------------
+
 #local modules
 import parserYacc as py
-
-
-
-parser = py.parser
-
-#--------------------------------------- funciones de prueba---------------------------------------
-
-def prueba(data):
-  result = parser.parse(data)
-  print(result)
-
 
 # lectura de archivo
 from pathlib import Path
 
-aceptado = Path('prueba.txt').read_text()
-aceptado = aceptado
-prueba(aceptado)
+fileData = Path('prueba.txt').read_text()
+resultado = py.parser.parse(fileData)
+print(resultado)

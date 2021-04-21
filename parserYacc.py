@@ -16,7 +16,9 @@ AuxList = ['temp', 'tempo']
 
 tokens = lexico.tokens
 lexer = lexico.lexer
+
 #--------------function dir symb table ---------
+
 def addVariable(name, type):
     if Directory.get('Variables').get(name) == None:
         Directory['Variables'][name] = {
@@ -454,3 +456,5 @@ def p_error(p):
 
 # crear el parser
 parser = yacc.yacc()
+
+
