@@ -90,6 +90,10 @@ def t_CTEI(t):
     r'\d+'
     t.value = int(t.value)
     return t
+def t_CTEC(t):
+    r'"."'
+    t.value = str(t.value)
+    return t
 #construimos el lexico
 lexer = lex.lex()
 #precedencia de operadores

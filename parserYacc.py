@@ -13,10 +13,9 @@ from cuboSemantico import cuboSemantico
 #-Generacion de codigo de expresiones aritmeticas
 from stack import Stack
 popper = Stack()
-stack = Stack()
+values = Stack()
 tipos = Stack()
 
-print(stack.top())
 
 #--------------------------------------- Variables ncesarias para usar yacc, lista de tokens y lexer---------------------------------------
 
@@ -233,7 +232,7 @@ def p_declaracion_funciones_aux2(p):
     | tipo_retorno
     '''
     AuxList[1] = p[1]
-    print('p_delcaracion_funciones_aux2 ' + AuxList[1])
+    print('p_declaracion_funciones_aux2 ' + AuxList[1])
     p[0] = None
 def p_declaracion_funciones_aux3(p):
     '''
@@ -383,8 +382,7 @@ def p_g_exp(p):
     | m_exp EQUAL m_exp
     | m_exp DIFFERENT m_exp
     '''
-    if len(p) > 2:
-        print(p[2])
+    #if len(p) > 2:
     p[0]=None
 def p_m_exp(p):
     '''
@@ -399,7 +397,6 @@ def p_m_exp_aux(p):
     '''
     if len(p) > 1:
         popper.push(p[1])
-        print(p[1])
     p[0]=None
 def p_termino(p):
     '''
@@ -414,7 +411,7 @@ def p_termino_aux(p):
     '''
     if len(p) > 1:
         popper.push(p[1])
-        print(p[1])
+  
     p[0]=None
 def p_factor(p):
     '''
@@ -425,7 +422,24 @@ def p_factor(p):
     | variable
     | llamada
     '''
-    print(p[1])
+    if p[1] != '[':
+        if isinstance(p[1],int) :
+            tipos.push('int')
+            values.push(int(p[1]))
+            print('int: ', p[1])
+        elif isinstance(p[1],float) :
+            tipos.push('float')
+            values.push(float(p[1]))
+            print('float: ', p[1])
+        elif isinstance(p[1],str) and len(p[1]) == 3 :
+            tipos.push('char')
+            values.push(p[1][1])
+            print('char: ', p[1])
+        else :
+            tipos.push('err')
+            print('err: ', p[1])
+    
+        
     p[0] = None
 #-------------- error---------------
 
