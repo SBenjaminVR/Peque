@@ -16,7 +16,14 @@ import parserYacc as py
 
 # lectura de archivo
 from pathlib import Path
+from parserYacc import tipos, popper, values
 
 fileData = Path('prueba.txt').read_text()
 resultado = py.parser.parse(fileData)
 print(resultado)
+popper.printStack()
+print(popper.length())
+values.printStack()
+print(values.length())
+tipos.printStack()
+print(tipos.length())
