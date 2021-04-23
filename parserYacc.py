@@ -359,6 +359,8 @@ def p_expresion_aux(p):
     expresion_aux : OR expresion
     | 
     '''
+    if len(p) > 2:
+        popper.push(p[1])
     p[0] = None
 def p_t_exp(p):
     '''
@@ -370,6 +372,8 @@ def p_t_exp_aux(p):
     t_exp_aux : AND t_exp
     |
     '''
+    if len(p) > 2:
+        popper.push(p[1])
     p[0] = None
 
 def p_g_exp(p):
@@ -382,7 +386,8 @@ def p_g_exp(p):
     | m_exp EQUAL m_exp
     | m_exp DIFFERENT m_exp
     '''
-    #if len(p) > 2:
+    if len(p) > 2:
+        popper.push(p[2])
     p[0]=None
 def p_m_exp(p):
     '''
