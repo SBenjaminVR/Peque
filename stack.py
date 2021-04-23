@@ -13,3 +13,5 @@ class Stack:
             return self.stack[self.length()-1]
     def length(self):
         return len(self.stack)
+    def printStack(self):
+        print(self.stack)
