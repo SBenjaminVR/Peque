@@ -397,6 +397,7 @@ def p_m_exp_aux(p):
     '''
     if len(p) > 1:
         popper.push(p[1])
+        popper.printStack()
     p[0]=None
 def p_termino(p):
     '''
@@ -426,19 +427,15 @@ def p_factor(p):
         if isinstance(p[1],int) :
             tipos.push('int')
             values.push(int(p[1]))
-            print('int: ', p[1])
         elif isinstance(p[1],float) :
             tipos.push('float')
             values.push(float(p[1]))
-            print('float: ', p[1])
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
             values.push(p[1][1])
-            print('char: ', p[1])
-        else :
-            tipos.push('err')
-            print('err: ', p[1])
-    
+        
+            
+        
         
     p[0] = None
 #-------------- error---------------
