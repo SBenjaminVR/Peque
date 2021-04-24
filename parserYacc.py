@@ -421,14 +421,14 @@ def p_termino_aux(p):
     p[0]=None
 def p_factor(p):
     '''
-    factor : L_BRACKET expresion R_BRACKET
+    factor : L_PARENTHESIS expresion R_PARENTHESIS
     | CTEI
     | CTEF
     | CTEC
     | variable
     | llamada
     '''
-    if p[1] != '[':
+    if p[1] != '(':
         if isinstance(p[1],int) :
             tipos.push('int')
             values.push(int(p[1]))
@@ -438,7 +438,8 @@ def p_factor(p):
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
             values.push(p[1][1])
-        
+    else :
+        popper.push('FF')
             
         
         
