@@ -7,7 +7,6 @@ import lexico
 AuxList = ['temp', 'tempo']
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
-
 #cuboSemantico tiene todas las consideraciones semanticas
 
 #-Generacion de codigo de expresiones aritmeticas
@@ -51,6 +50,7 @@ def p_cuerpo_aux(p) :
     cuerpo_aux : estatutos_repeticion
     | estatutos_funciones
     '''
+    popper.push('inicio')
     p[0] = None
 #-------------- estatutos---------------
 #estatutos general
@@ -173,7 +173,6 @@ def p_condicion(p):
     '''
     condicion : IF L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET condicion_aux
     '''
-    imprimirP(p)
     p[0] = None
 def p_condicion_aux(p):
     '''
@@ -358,8 +357,6 @@ def p_expresion_aux(p):
     expresion_aux : OR expresion
     | 
     '''
-    if len(p) > 2:
-        popper.push(p[1])
     p[0] = None
 def p_t_exp(p):
     '''
@@ -371,8 +368,6 @@ def p_t_exp_aux(p):
     t_exp_aux : AND t_exp
     |
     '''
-    if len(p) > 2:
-        popper.push(p[1])
     p[0] = None
 
 def p_g_exp(p):
@@ -386,7 +381,7 @@ def p_g_exp(p):
     | m_exp DIFFERENT m_exp
     '''
     if len(p) > 2:
-        popper.push(p[2])
+        realizarCuartetosBinarios(p,popper,values,tipos)
     p[0]=None
 def p_m_exp(p):
     '''
@@ -399,9 +394,11 @@ def p_m_exp_aux(p):
     | MINUS termino
     |
     '''
-    
     if len(p) > 1:
-        popper.push(p[1])
+        realizarCuartetos(p,popper,values,tipos)
+
+
+
     p[0]=None
 def p_termino(p):
     '''
@@ -415,8 +412,8 @@ def p_termino_aux(p):
     |
     '''
     if len(p) > 1:
-        popper.push(p[1])
-  
+        realizarCuartetos(p,popper,values,tipos)
+    
     p[0]=None
 def p_factor(p):
     '''
@@ -427,7 +424,6 @@ def p_factor(p):
     | variable
     | llamada
     '''
-    last = values.top() if not values.isEmpty() else 'empty'
     if p[1] != '(':
         if isinstance(p[1],int) :
             tipos.push('int')
@@ -438,26 +434,12 @@ def p_factor(p):
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
             values.push(p[1][1])
-    else :
-        popper.push('FF')
+        
+        #values.printStack()
+    #else :
+       # values.push('FF')
+    
     #algoritmo de quartos
-    '''if popper.top() =='*' :
-        print('entra al ciclo')
-        if last != 'empty':
-            #para los tipos
-            print('ultimo no multi')
-
-            temporalTipo = tipo.top()
-            tipo.pop()
-            temporalTipoResult = cuboSemantico[tipo.top()][tipo.top()]
-            tipo.pop()
-            #para los values
-            if temporalTipoResult != 'err':
-                temporalValueResult = last * values.top()
-        values.pop()
-        values.pop()
-        popper.pop()
- '''
     p[0] = None
 #-------------- error---------------
 
@@ -477,5 +459,71 @@ def imprimirP(p):
             print(p[i], end=" ")
     print()
 
+def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
+    tipo = cuboSemantico[tipoA][tipoB][operador]
+    result = None
+    if operador == '*':
+        result = valorB * valorA
+    elif operador == '/':
+        result = valorB / valorA
+    elif operador == '+':
+        result = valorB + valorA
+    elif operador == '-':
+        result = valorB - valorA
+    elif operador == '>=':
+        result = True if valorB >= valorA else False
+    elif operador == '==':
+        result = True if valorB == valorA else False
+    elif operador == '<=':
+        result = True if valorB <= valorA else False
+    elif operador == '<':
+        result = True if valorB < valorA else False
+    elif operador == '>':
+        result = True if valorB > valorA else False
+    elif operador == '!=':
+        result = True if valorB != valorA else False
+    else:
+        result = 'err'
+    return result,tipo
+
+def realizarCuartetosBinarios(p,popper,values,tipos):
+    popper.push(p[1])
+    #values.printStack()
+    #popper.printStack()
+    if values.length() >= 2:
+        #print('-------------start-----------')
+        lastVal = values.top()
+        lastType = tipos.top()
+        values.pop()
+        tipos.pop()
+        print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[2])
+        resultVal, resultType= operacionesSemantica(p[2],lastVal,values.top(),lastType,tipos.top())
+        values.pop()
+        tipos.pop()
+        values.push(resultVal)
+        tipos.push(resultType)
+        #print('-------------ending--------')
+        #values.printStack()
+        #tipos.printStack()
+def realizarCuartetos(p,popper,values,tipos):
+    popper.push(p[1])
+    #values.printStack()
+    #popper.printStack()
+    if values.length() >= 2:
+        #print('-------------start-----------')
+        
+        lastVal = values.top()
+        lastType = tipos.top()
+        values.pop()
+        tipos.pop()
+        print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[1])
+        resultVal, resultType= operacionesSemantica(p[1],lastVal,values.top(),lastType,tipos.top())
+        values.pop()
+        tipos.pop()
+        values.push(resultVal)
+        tipos.push(resultType)
+        #print('-------------ending--------')
+        #values.printStack()
+        #tipos.printStack()
 # crear el parser
 parser = yacc.yacc()
