@@ -29,6 +29,7 @@ También se hizo la implementación de una tabla de variables que guarda el id d
 
 Queda pendiente por implementar las tabla de variables de las funciones y el tipo de retorno bool.
 
+
 ## IMPORTANTE ##
  comando para ejectura
 python pequeScanner.py
