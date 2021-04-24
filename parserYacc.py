@@ -5,6 +5,8 @@ import ply.yacc as yacc
 import lexico
 
 AuxList = ['temp', 'tempo']
+Cuartetos = []
+Temporales = []
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
 #cuboSemantico tiene todas las consideraciones semanticas
@@ -484,6 +486,7 @@ def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
         result = True if valorB != valorA else False
     else:
         result = 'err'
+    agregarCuarteto(operador, valorA, valorB, 't' + str(len(Temporales)))
     return result,tipo
 
 def realizarCuartetosBinarios(p,popper,values,tipos):
@@ -500,6 +503,7 @@ def realizarCuartetosBinarios(p,popper,values,tipos):
         resultVal, resultType= operacionesSemantica(p[2],lastVal,values.top(),lastType,tipos.top())
         values.pop()
         tipos.pop()
+        Temporales.append(resultVal)
         values.push(resultVal)
         tipos.push(resultType)
         #print('-------------ending--------')
@@ -520,10 +524,15 @@ def realizarCuartetos(p,popper,values,tipos):
         resultVal, resultType= operacionesSemantica(p[1],lastVal,values.top(),lastType,tipos.top())
         values.pop()
         tipos.pop()
+        Temporales.append(resultVal)
         values.push(resultVal)
         tipos.push(resultType)
         #print('-------------ending--------')
         #values.printStack()
         #tipos.printStack()
+
+def agregarCuarteto(op, iz, der, res):
+    Cuartetos.append({'o': op, 'i': iz, 'd': der, 'r':res})
+
 # crear el parser
 parser = yacc.yacc()
