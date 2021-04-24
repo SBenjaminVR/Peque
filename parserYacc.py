@@ -173,6 +173,7 @@ def p_condicion(p):
     '''
     condicion : IF L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET condicion_aux
     '''
+    imprimirP(p)
     p[0] = None
 def p_condicion_aux(p):
     '''
@@ -469,6 +470,12 @@ def p_error(p):
    else:
       print("Syntax error at EOF")
 #--------------------------------------- Error---------------------------------------
+
+def imprimirP(p):
+    for i in range(len(p)):
+        if (i != 0):
+            print(p[i], end=" ")
+    print()
 
 # crear el parser
 parser = yacc.yacc()
