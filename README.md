@@ -29,6 +29,9 @@ También se hizo la implementación de una tabla de variables que guarda el id d
 
 Queda pendiente por implementar las tabla de variables de las funciones y el tipo de retorno bool.
 
+--------Cubo Semantico y codigo intermedio 04/23/2021--------
+Se realizo la tabla de consideraciones semanticas, el cual pasamos a un cubo semantico que usamos para poder realizar el codigo intermedio y poder resolver las expresiones utilizando los algoritmos vistos en clase, a su vez, preparamos el primer paso para que nuestro compilador produzca el codigo intermedio completo.
+
 
 ## IMPORTANTE ##
  comando para ejectura
