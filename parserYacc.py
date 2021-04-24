@@ -222,7 +222,6 @@ def p_declaracion_funciones_aux(p):
     |
     '''
     AuxList[0] = 'Funcion'
-    print('p_declaracion_funciones_aux ' + AuxList[1])
     symb.addFuncion(p[3], AuxList[1])
     #addScope(p[3])
     p[0] = None
@@ -232,7 +231,6 @@ def p_declaracion_funciones_aux2(p):
     | tipo_retorno
     '''
     AuxList[1] = p[1]
-    print('p_declaracion_funciones_aux2 ' + AuxList[1])
     p[0] = None
 def p_declaracion_funciones_aux3(p):
     '''
@@ -400,9 +398,9 @@ def p_m_exp_aux(p):
     | MINUS termino
     |
     '''
+    
     if len(p) > 1:
         popper.push(p[1])
-        popper.printStack()
     p[0]=None
 def p_termino(p):
     '''
@@ -428,6 +426,7 @@ def p_factor(p):
     | variable
     | llamada
     '''
+    last = values.top() if not values.isEmpty() else 'empty'
     if p[1] != '(':
         if isinstance(p[1],int) :
             tipos.push('int')
@@ -440,9 +439,24 @@ def p_factor(p):
             values.push(p[1][1])
     else :
         popper.push('FF')
-            
-        
-        
+    #algoritmo de quartos
+    '''if popper.top() =='*' :
+        print('entra al ciclo')
+        if last != 'empty':
+            #para los tipos
+            print('ultimo no multi')
+
+            temporalTipo = tipo.top()
+            tipo.pop()
+            temporalTipoResult = cuboSemantico[tipo.top()][tipo.top()]
+            tipo.pop()
+            #para los values
+            if temporalTipoResult != 'err':
+                temporalValueResult = last * values.top()
+        values.pop()
+        values.pop()
+        popper.pop()
+ '''
     p[0] = None
 #-------------- error---------------
 
