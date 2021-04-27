@@ -493,46 +493,28 @@ def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
     return result,tipo
 
 def realizarCuartetosBinarios(p,popper,values,tipos):
-    popper.push(p[1])
-    #values.printStack()
-    #popper.printStack()
-    if values.length() >= 2:
-        #print('-------------start-----------')
-        lastVal = values.top()
-        lastType = tipos.top()
-        values.pop()
-        tipos.pop()
-        print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[2])
-        resultVal, resultType  = operacionesSemantica(p[2],lastVal,values.top(),lastType,tipos.top())
-        values.pop()
-        tipos.pop()
-        Temporales.append(resultVal)
-        values.push(resultVal)
-        tipos.push(resultType)
-        #print('-------------ending--------')
-        #values.printStack()
-        #tipos.printStack()
+    TIPO = 2
+    HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO)
+
+
 def realizarCuartetos(p,popper,values,tipos):
+    TIPO = 1
+    HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO)
+
+def HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO):
     popper.push(p[1])
-    #values.printStack()
-    #popper.printStack()
     if values.length() >= 2:
-        #print('-------------start-----------')
-        
         lastVal = values.top()
         lastType = tipos.top()
         values.pop()
         tipos.pop()
-        print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[1])
-        resultVal, resultType= operacionesSemantica(p[1],lastVal,values.top(),lastType,tipos.top())
+        print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[TIPO])
+        resultVal, resultType= operacionesSemantica(p[TIPO],lastVal,values.top(),lastType,tipos.top())
         values.pop()
         tipos.pop()
         Temporales.append(resultVal)
         values.push(resultVal)
         tipos.push(resultType)
-        #print('-------------ending--------')
-        #values.printStack()
-        #tipos.printStack()
 
 def agregarCuarteto(op, iz, der, res):
     Cuartetos.append({'op': op, 'iz': iz, 'de': der, 'res':res})
