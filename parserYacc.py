@@ -464,6 +464,7 @@ def imprimirP(p):
 def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
     tipo = cuboSemantico[tipoA][tipoB][operador]
     result = None
+    """
     if operador == '*':
         result = valorB * valorA
     elif operador == '/':
@@ -486,7 +487,9 @@ def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
         result = True if valorB != valorA else False
     else:
         result = 'err'
-    agregarCuarteto(operador, valorA, valorB, 't' + str(len(Temporales)))
+    """
+    result = 't' + str(len(Temporales))
+    agregarCuarteto(operador, valorA, valorB, result)
     return result,tipo
 
 def realizarCuartetosBinarios(p,popper,values,tipos):
@@ -500,7 +503,7 @@ def realizarCuartetosBinarios(p,popper,values,tipos):
         values.pop()
         tipos.pop()
         print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[2])
-        resultVal, resultType= operacionesSemantica(p[2],lastVal,values.top(),lastType,tipos.top())
+        resultVal, resultType  = operacionesSemantica(p[2],lastVal,values.top(),lastType,tipos.top())
         values.pop()
         tipos.pop()
         Temporales.append(resultVal)
@@ -532,7 +535,7 @@ def realizarCuartetos(p,popper,values,tipos):
         #tipos.printStack()
 
 def agregarCuarteto(op, iz, der, res):
-    Cuartetos.append({'o': op, 'i': iz, 'd': der, 'r':res})
+    Cuartetos.append({'op': op, 'iz': iz, 'de': der, 'res':res})
 
 # crear el parser
 parser = yacc.yacc()
