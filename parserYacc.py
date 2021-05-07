@@ -7,6 +7,7 @@ import lexico
 AuxList = ['temp', 'tempo']
 Cuartetos = []
 Temporales = []
+Saltos = []
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
 #cuboSemantico tiene todas las consideraciones semanticas
@@ -175,6 +176,12 @@ def p_condicion(p):
     '''
     condicion : IF L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET condicion_aux
     '''
+    result = popper.top()
+    popper.pop()
+    salto = len(Cuartetos) - 1
+    Saltos.append(salto)
+
+    Cuartetos.append({'op': GotoF, 'iz': result, 'de': '_', 'res':'_'})
     p[0] = None
 def p_condicion_aux(p):
     '''
