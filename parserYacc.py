@@ -182,12 +182,25 @@ def p_condicion(p):
     Saltos.append(salto)
 
     Cuartetos.append({'op': 'GotoF', 'iz': result, 'de': '_', 'res':'_'})
+
+    
+
     p[0] = None
 def p_condicion_aux(p):
     '''
     condicion_aux : ELSE L_BRACKET cuerpo R_BRACKET
     |
     '''
+    if(len(p) > 1)
+    {
+        
+    }
+    
+    final = Saltos.top()
+    Saltos.pop()
+    Cuartetos[Saltos]
+
+    
     p[0] = None
 #-------------- declaraciones---------------
 
