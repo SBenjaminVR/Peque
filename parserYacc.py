@@ -176,9 +176,13 @@ def p_condicion(p):
     '''
     condicion : IF L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET condicion_aux
     '''
+    
+    print('if')
+
     result = Temporales[-1]
     salto = len(Cuartetos) - 1
     Saltos.append(salto)
+    
     Cuartetos.append({'op': 'GotoF', 'iz': result, 'de': '_', 'res':'_'})
     p[0] = None
 def p_condicion_aux(p):
@@ -186,11 +190,16 @@ def p_condicion_aux(p):
     condicion_aux : ELSE L_BRACKET cuerpo R_BRACKET
     |
     '''
+
+    print('else')
     if(len(p) > 1):
-        result = Saltos.top()
+        result = Saltos[-1]
         Saltos.pop()
-        Cuartetos.append({'op': 'Goto', 'iz': result, 'de': '', 'res':''})
+        Cuartetos.append({'op': 'Goto', 'iz': result, 'de': '_', 'res':'_'})
         Saltos.append(len(Cuartetos-1))
+    
+    #end = Saltos[-1]
+    #Cuartetos[end][res] = end
     p[0] = None
 #-------------- declaraciones---------------
 
