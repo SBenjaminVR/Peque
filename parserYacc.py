@@ -176,12 +176,12 @@ def p_condicion(p):
     '''
     condicion : IF L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET condicion_aux
     '''
-    result = popper.top()
+    result = Temporales[-1]
     popper.pop()
     salto = len(Cuartetos) - 1
     Saltos.append(salto)
 
-    Cuartetos.append({'op': GotoF, 'iz': result, 'de': '_', 'res':'_'})
+    Cuartetos.append({'op': 'GotoF', 'iz': result, 'de': '_', 'res':'_'})
     p[0] = None
 def p_condicion_aux(p):
     '''
@@ -495,7 +495,8 @@ def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
     else:
         result = 'err'
     """
-    result = 't' + str(len(Temporales))
+    crearTemporal()
+    result = Temporales[-1]
     agregarCuarteto(operador, valorA, valorB, result)
     return result,tipo
 
@@ -515,16 +516,21 @@ def HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO):
         lastType = tipos.top()
         values.pop()
         tipos.pop()
-        print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[TIPO])
+        #print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[TIPO])
         resultVal, resultType= operacionesSemantica(p[TIPO],lastVal,values.top(),lastType,tipos.top())
         values.pop()
         tipos.pop()
-        Temporales.append(resultVal)
         values.push(resultVal)
         tipos.push(resultType)
 
 def agregarCuarteto(op, iz, der, res):
     Cuartetos.append({'op': op, 'iz': iz, 'de': der, 'res':res})
+
+def crearTemporal():
+    Temporales.append('t' + str(len(Temporales)))
+
+def fill(cuarteto, llenado):
+    Cuartetos[cuarteto]['res'] = llenado
 
 # crear el parser
 parser = yacc.yacc()
