@@ -33,6 +33,9 @@ Queda pendiente por implementar las tabla de variables de las funciones y el tip
 Se realizo la tabla de consideraciones semanticas, el cual pasamos a un cubo semantico que usamos para poder realizar el codigo intermedio y poder resolver las expresiones utilizando los algoritmos vistos en clase, a su vez, preparamos el primer paso para que nuestro compilador produzca el codigo intermedio completo.
 
 
+------Codigo Intermedio de Condicionales 05/08/2021----------
+Se realizó la generación de código intermedio para las condicionales y se empezo a trabajar en el codigo intermedio de los ciclos. No esta funcionando al 100% ya que hay unos bugs donde el else aparece antes que el if pero se esta trabajando en eso
+
 ## IMPORTANTE ##
  comando para ejectura
 python pequeScanner.py
