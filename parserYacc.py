@@ -509,7 +509,6 @@ def HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO):
         lastType = tipos.top()
         values.pop()
         tipos.pop()
-        print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[TIPO])
         resultVal, resultType= operacionesSemantica(p[TIPO],lastVal,values.top(),lastType,tipos.top())
         values.pop()
         tipos.pop()
