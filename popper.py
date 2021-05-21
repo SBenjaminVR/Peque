@@ -14,7 +14,6 @@ for item in inputString:
         tipos.push('int')
         if item != '(' or item != ')':
             pilaO.push(int(item))
-        else
 popper.printStack()
 tipos.printStack()
 pilaO.printStack()
