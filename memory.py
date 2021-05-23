@@ -6,7 +6,7 @@ class Memory:
     ARR = 2000
     def __init__(self):
         self.memory = [None]*5000
-    def getValue(self, type, address) {
+    def getValue(self, type, address):
         if type == "Int":
             return self.memory[self.INT + address]
         elif type == "Float":
@@ -17,8 +17,8 @@ class Memory:
             return self.memory[self.CHAR + address]
         elif type == "Arr":
             return self.memory[self.ARR + address]
-    }
-    def addValueToMemory(self, value, type, address) {
+            
+    def addValueToMemory(self, value, type, address):
         if type == "Int":
             self.memory[self.INT + address] = value
         elif type == "Float":
@@ -29,4 +29,3 @@ class Memory:
             self.memory[self.CHAR + address] = value
         elif type == "Arr":
             self.memory[self.ARR + address] = value
-    }
