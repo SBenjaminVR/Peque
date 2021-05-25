@@ -38,6 +38,8 @@ def p_programa(p):
     programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones declaracion_var principal
     | PROGRAMA ID SEMICOLON
     '''
+    agregarCuarteto('END','_','_','_')
+
     #addScope(p[2])
     p[0] = None
 def p_principal(p):
@@ -94,12 +96,52 @@ def p_repeticion_no_condicional(p):
     repeticion_no_condicional : FOR L_PARENTHESIS m_exp TO m_exp R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
     '''
     p[0]= None
+#--------------------------While--------------------
 def p_repeticion_condicional(p):
     '''
-    repeticion_condicional : WHILE L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
+    repeticion_condicional : WHILE startWhile L_PARENTHESIS expresion R_PARENTHESIS checkCond L_BRACKET cuerpo R_BRACKET finalWhile
     '''
     p[0]= None
+def p_startWhile(p):
+    '''
+    startWhile : empty
+    '''
+    Saltos.append(cont)
+    
+    p[0] = None
+def p_checkCond(p):
+    '''
+    checkCond : empty
+    '''
+    global cont
 
+    cond = Temporales[-1]
+    tCond = tipos.top()
+    if tCond != 'bool' :
+        print('Error')
+    else :
+        Saltos.append(cont)
+        agregarCuarteto('GotoF',cond,'_','_')
+        
+        
+
+    p[0] = None
+def p_finalWhile(p):
+    '''
+    finalWhile : empty
+    '''
+    global cont
+    falseJump = Saltos[-1]
+    print(Saltos)
+    print(falseJump)
+    Saltos.pop()
+    Ret = Saltos[-1]
+    print(Ret)
+    Saltos.pop()
+    agregarCuarteto('Goto','_','_',Ret)
+    fill(falseJump,cont)
+    
+    p[0] = None
 #estatutos funcionales
 def p_lee(p):
     '''
@@ -192,8 +234,11 @@ def p_else_after(p):
     '''
     else_after : empty
     '''
+    print('3')
+
     end = Saltos[-1]
     Saltos.pop()
+    print(end)
     fill(end,cont)
     
 
@@ -202,13 +247,13 @@ def p_rp_seen(p):
     '''
     rp_seen : empty
     '''
+    print('1')
     global cont
     result = Temporales[-1]
     salto = cont
     Saltos.append(salto)
+    agregarCuarteto('GotoF',result,'_','_')
     
-    Cuartetos.append({'op': 'GotoF', 'iz': result, 'de': '_', 'res':'_'})
-    cont += 1
     
     p[0] = None
 def p_condicion_aux(p):
@@ -227,6 +272,7 @@ def p_else_seen(p):
     else_seen : empty
     '''
     global cont
+    print('2')
 
     result = Saltos[-1]
     Saltos.pop()
