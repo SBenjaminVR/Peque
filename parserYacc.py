@@ -1,5 +1,6 @@
 #--------------------------------------- RE par el lexer---------------------------------------
 
+import re
 import ply.lex as lex           # Scanner
 import ply.yacc as yacc  
 import lexico
@@ -7,6 +8,11 @@ import lexico
 AuxList = ['temp', 'tempo']
 Cuartetos = []
 Temporales = []
+Saltos = []
+
+global cont
+cont = 0
+=======
 Memoria = []
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
@@ -33,6 +39,8 @@ def p_programa(p):
     programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones declaracion_var principal
     | PROGRAMA ID SEMICOLON
     '''
+    agregarCuarteto('END','_','_','_')
+
     #addScope(p[2])
     p[0] = None
 def p_principal(p):
@@ -89,12 +97,52 @@ def p_repeticion_no_condicional(p):
     repeticion_no_condicional : FOR L_PARENTHESIS m_exp TO m_exp R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
     '''
     p[0]= None
+#--------------------------While--------------------
 def p_repeticion_condicional(p):
     '''
-    repeticion_condicional : WHILE L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
+    repeticion_condicional : WHILE startWhile L_PARENTHESIS expresion R_PARENTHESIS checkCond L_BRACKET cuerpo R_BRACKET finalWhile
     '''
     p[0]= None
+def p_startWhile(p):
+    '''
+    startWhile : empty
+    '''
+    Saltos.append(cont)
+    
+    p[0] = None
+def p_checkCond(p):
+    '''
+    checkCond : empty
+    '''
+    global cont
 
+    cond = Temporales[-1]
+    tCond = tipos.top()
+    if tCond != 'bool' :
+        print('Error')
+    else :
+        Saltos.append(cont)
+        agregarCuarteto('GotoF',cond,'_','_')
+        
+        
+
+    p[0] = None
+def p_finalWhile(p):
+    '''
+    finalWhile : empty
+    '''
+    global cont
+    falseJump = Saltos[-1]
+    print(Saltos)
+    print(falseJump)
+    Saltos.pop()
+    Ret = Saltos[-1]
+    print(Ret)
+    Saltos.pop()
+    agregarCuarteto('Goto','_','_',Ret)
+    fill(falseJump,cont)
+    
+    p[0] = None
 #estatutos funcionales
 def p_lee(p):
     '''
@@ -171,17 +219,74 @@ def p_asignacion_aux(p):
     | ID PERIOD ID
     '''
     p[0] = None
+def p_empty(p):
+    'empty :'
+    pass
+
 def p_condicion(p):
     '''
-    condicion : IF L_PARENTHESIS expresion R_PARENTHESIS L_BRACKET cuerpo R_BRACKET condicion_aux
+    condicion : IF L_PARENTHESIS expresion R_PARENTHESIS rp_seen L_BRACKET cuerpo R_BRACKET condicion_aux else_after
     '''
+    
+    print('if')
+    p[0] = None
+
+def p_else_after(p):
+    '''
+    else_after : empty
+    '''
+    print('3')
+
+    end = Saltos[-1]
+    Saltos.pop()
+    print(end)
+    fill(end,cont)
+    
+
+    p[0] = None
+def p_rp_seen(p):
+    '''
+    rp_seen : empty
+    '''
+    print('1')
+    global cont
+    result = Temporales[-1]
+    salto = cont
+    Saltos.append(salto)
+    agregarCuarteto('GotoF',result,'_','_')
+    
+    
     p[0] = None
 def p_condicion_aux(p):
     '''
-    condicion_aux : ELSE L_BRACKET cuerpo R_BRACKET
+    condicion_aux : ELSE else_seen L_BRACKET cuerpo R_BRACKET
     |
     '''
+  
+    print('else')
+
+    #end = Saltos[-1]
+    #Cuartetos[end][res] = end
     p[0] = None
+def p_else_seen(p):
+    '''
+    else_seen : empty
+    '''
+    global cont
+    print('2')
+
+    result = Saltos[-1]
+    Saltos.pop()
+    print(Saltos)
+    
+    Cuartetos.append({'op': 'Goto', 'iz': '_', 'de': '_', 'res':'_'})
+    Saltos.append(cont)
+    cont += 1
+    fill(result,cont)
+    # se fillea lo que este en result con el cont actual
+
+    p[0] = None
+
 #-------------- declaraciones---------------
 
 def p_declaracion_parametros(p):
@@ -465,31 +570,8 @@ def imprimirP(p):
 def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
     tipo = cuboSemantico[tipoA][tipoB][operador]
     result = None
-    """
-    if operador == '*':
-        result = valorB * valorA
-    elif operador == '/':
-        result = valorB / valorA
-    elif operador == '+':
-        result = valorB + valorA
-    elif operador == '-':
-        result = valorB - valorA
-    elif operador == '>=':
-        result = True if valorB >= valorA else False
-    elif operador == '==':
-        result = True if valorB == valorA else False
-    elif operador == '<=':
-        result = True if valorB <= valorA else False
-    elif operador == '<':
-        result = True if valorB < valorA else False
-    elif operador == '>':
-        result = True if valorB > valorA else False
-    elif operador == '!=':
-        result = True if valorB != valorA else False
-    else:
-        result = 'err'
-    """
-    result = 't' + str(len(Temporales))
+    crearTemporal()
+    result = Temporales[-1]
     agregarCuarteto(operador, valorA, valorB, result)
     return result,tipo
 
@@ -512,12 +594,21 @@ def HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO):
         resultVal, resultType= operacionesSemantica(p[TIPO],lastVal,values.top(),lastType,tipos.top())
         values.pop()
         tipos.pop()
-        Temporales.append(resultVal)
         values.push(resultVal)
         tipos.push(resultType)
 
 def agregarCuarteto(op, iz, der, res):
+    global cont
+    cont += 1
     Cuartetos.append({'op': op, 'iz': iz, 'de': der, 'res':res})
+
+def crearTemporal():
+    Temporales.append('t' + str(len(Temporales)))
+
+def fill(cuarteto, llenado):
+    global Cuartetos
+    print('fill ' + Cuartetos[cuarteto]['res'])
+    Cuartetos[cuarteto]['res'] = llenado
 
 # crear el parser
 parser = yacc.yacc()
