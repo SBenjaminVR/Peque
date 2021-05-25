@@ -17,9 +17,9 @@ import parserYacc as py
 # lectura de archivo
 from pathlib import Path
 from parserYacc import tipos, popper, values, Cuartetos, Temporales, symb
-import maquinaVirtual as mv
+import virtualMachine as mv
 
-fileData = Path('prueba.txt').read_text()
+fileData = Path('prueba2.pq').read_text()
 resultado = py.parser.parse(fileData)
 print(resultado)
 popper.printStack()
@@ -30,7 +30,7 @@ print(Temporales)
 
 #Memoria de las variables
 #print(symb.Directory.get('Variables')) #Imprimir Variables
-for item, val in symb.Directory.get('Variables').items():
-    mv.AsignarMemoriaGlobal(val.get('EspacioMemoria'))
+#for item, val in symb.Directory.get('Variables').items():
+    #mv.AsignarMemoriaGlobal(val.get('EspacioMemoria'))
 
-print(mv.memoriaVirtual.ds)
+#print(mv.memoriaVirtual.ds)

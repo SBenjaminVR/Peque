@@ -6,7 +6,7 @@ import ply.yacc as yacc
 #tokens reservados o palabras reservadas
 reserved = {
     'programa': 'PROGRAMA',
-    'escribe': 'ESCRIBE',
+    'print': 'PRINT',
     'fila' : 'FILA',
     'variable': 'VARIABLE',
     'int': 'INT',

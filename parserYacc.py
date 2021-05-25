@@ -12,7 +12,7 @@ Saltos = []
 
 global cont
 cont = 0
-=======
+
 Memoria = []
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
@@ -182,29 +182,31 @@ def p_llamada_aux3(p):
     |
     '''
     p[0]=None
-def p_escribe(p):
+def p_print(p):
     '''
-    escribe : ESCRIBE L_PARENTHESIS escribe_var R_PARENTHESIS
-    '''
-    
-    p[0] = None
-def p_escribe_var(p):
-    '''
-    escribe_var : escribe_var_aux
+    escribe : PRINT L_PARENTHESIS print_var R_PARENTHESIS
     '''
     
     p[0] = None
-def p_escribe_var_aux(p):
+def p_print_var(p):
     '''
-    escribe_var_aux : escribe_var_aux2 COMMA
-    | escribe_var_aux2
+    print_var : print_var_aux
+    '''
+    
+    p[0] = None
+def p_print_var_aux(p):
+    '''
+    print_var_aux : print_var_aux2 COMMA
+    | print_var_aux2
     '''
     p[0] = None
-def p_escribe_var_aux2(p):
+def p_print_var_aux2(p):
     '''
-    escribe_var_aux2 : llamada 
+    print_var_aux2 : llamada 
     | expresion
     '''
+    res = Temporales[-1]
+    agregarCuarteto('print',res,'_','_')
     p[0] = None
 def p_asignacion(p):
     '''

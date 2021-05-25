@@ -20,9 +20,9 @@ variable int jose
 
     }
     for(2 - 1 to 2 + 3){
-        escribe(2+3)
+        print(2 + 3)
     }
     while(2 > 3){
-        escribe(3)
+        print(3 + 4)
     }
 }
