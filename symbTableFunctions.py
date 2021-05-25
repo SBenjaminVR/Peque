@@ -6,11 +6,12 @@ Directory = {
 }
 Glovalvar = {}
 
-def addVariable(name, type):
+def addVariable(name, type, memoria):
     if Directory.get('Variables').get(name) == None:
         Directory['Variables'][name] = {
             'Id': name, 
-            'DataType': type
+            'DataType': type,
+            'EspacioMemoria': memoria
         }
 
 def addFuncion(name, type):
@@ -32,7 +33,7 @@ def addType(name,type):
         Directory[name] = [name,type,{}]
     
 def addToScopeVar(name,var):
-    if Directory.get(name) != None :
+    if Directory.get(name) != None:
         directoryScope = Directory.get(name)
-        if directoryScope[2].get(var) == None :
+        if directoryScope[2].get(var) == None:
             directoryScope[2][var] = []

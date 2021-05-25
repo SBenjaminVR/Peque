@@ -12,6 +12,8 @@ Saltos = []
 
 global cont
 cont = 0
+=======
+Memoria = []
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
 #cuboSemantico tiene todas las consideraciones semanticas
@@ -21,7 +23,6 @@ from stack import Stack
 popper = Stack()
 values = Stack()
 tipos = Stack()
-
 
 #--------------------------------------- Variables ncesarias para usar yacc, lista de tokens y lexer---------------------------------------
 
@@ -362,7 +363,8 @@ def p_declaracion_var_aux2(p):
     | tipo_retorno ID declaracion_var_aux5
     '''
     #addScope(p[2])
-    symb.addVariable(p[2], AuxList[1])
+    symb.addVariable(p[2], AuxList[1], len(Memoria))
+    Memoria.append(0)
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
@@ -589,7 +591,6 @@ def HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO):
         lastType = tipos.top()
         values.pop()
         tipos.pop()
-        #print('tipoA: ', lastType,'tipoB: ', tipos.top(), 'operador ', p[TIPO])
         resultVal, resultType= operacionesSemantica(p[TIPO],lastVal,values.top(),lastType,tipos.top())
         values.pop()
         tipos.pop()
