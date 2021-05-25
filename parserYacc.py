@@ -65,7 +65,7 @@ def p_cuerpo_aux(p) :
 #estatutos general
 def p_estatutos_funciones(p):
     '''
-    estatutos_funciones : lee
+    estatutos_funciones : input
     | escribe
     | llamada
     | asignacion
@@ -132,27 +132,26 @@ def p_finalWhile(p):
     '''
     global cont
     falseJump = Saltos[-1]
-    print(Saltos)
-    print(falseJump)
     Saltos.pop()
     Ret = Saltos[-1]
-    print(Ret)
     Saltos.pop()
     agregarCuarteto('Goto','_','_',Ret)
     fill(falseJump,cont)
     
     p[0] = None
 #estatutos funcionales
-def p_lee(p):
+def p_input(p):
     '''
-    lee : LEE L_PARENTHESIS variable lee_aux
+    input : INPUT L_PARENTHESIS variable input_aux
     '''
+    print(p[3])
     p[0] = None
 def p_lee_aux(p):
     '''
-    lee_aux : R_PARENTHESIS
-    | COMMA  variable lee_aux
+    input_aux : R_PARENTHESIS
+    | COMMA  variable input_aux
     '''
+
     p[0] = None
 def p_regreso(p):
     '''
@@ -186,11 +185,13 @@ def p_escribe(p):
     '''
     escribe : ESCRIBE L_PARENTHESIS escribe_var R_PARENTHESIS
     '''
+    
     p[0] = None
 def p_escribe_var(p):
     '''
     escribe_var : escribe_var_aux
     '''
+    
     p[0] = None
 def p_escribe_var_aux(p):
     '''
@@ -227,18 +228,15 @@ def p_condicion(p):
     condicion : IF L_PARENTHESIS expresion R_PARENTHESIS rp_seen L_BRACKET cuerpo R_BRACKET condicion_aux else_after
     '''
     
-    print('if')
     p[0] = None
 
 def p_else_after(p):
     '''
     else_after : empty
     '''
-    print('3')
 
     end = Saltos[-1]
     Saltos.pop()
-    print(end)
     fill(end,cont)
     
 
@@ -247,7 +245,6 @@ def p_rp_seen(p):
     '''
     rp_seen : empty
     '''
-    print('1')
     global cont
     result = Temporales[-1]
     salto = cont
@@ -262,7 +259,6 @@ def p_condicion_aux(p):
     |
     '''
   
-    print('else')
 
     #end = Saltos[-1]
     #Cuartetos[end][res] = end
@@ -272,12 +268,9 @@ def p_else_seen(p):
     else_seen : empty
     '''
     global cont
-    print('2')
 
     result = Saltos[-1]
     Saltos.pop()
-    print(Saltos)
-    
     Cuartetos.append({'op': 'Goto', 'iz': '_', 'de': '_', 'res':'_'})
     Saltos.append(cont)
     cont += 1
@@ -606,7 +599,6 @@ def crearTemporal():
 
 def fill(cuarteto, llenado):
     global Cuartetos
-    print('fill ' + Cuartetos[cuarteto]['res'])
     Cuartetos[cuarteto]['res'] = llenado
 
 # crear el parser

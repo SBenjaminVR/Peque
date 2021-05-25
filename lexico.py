@@ -20,7 +20,7 @@ reserved = {
     'agranda': 'AGRANDA',
     'peque': 'PEQUE',
     'regreso':'REGRESO',
-    'lee' : 'LEE',
+    'input' : 'INPUT',
     'for':'FOR',
     'while' : 'WHILE',
     'to' : 'TO'
