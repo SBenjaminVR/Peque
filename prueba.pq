@@ -1,15 +1,21 @@
 programa prueba;
-main() {
-    variable int hola, A, B, C, D, E, I, J, K, F ,G, H
-    
-    variable int hello
-    hola = (A + B) * C / (D + E) - F * G > H * (I + J) - K
 
-    if(2+2 > 3){
-        print(3/3)
-    }
-    for(A to B, C)
+mini void uno(int a){
+    variable int a , b
+    variable float f
+
+    while(a > 0)
     {
-        print(hola)
+        a = a+b*a+b
+        dos(a)
+        a = a - 1
     }
+    a = a + b * a
+    print(a,b,a+b)
+}
+
+main()
+{
+   
+    
 }
