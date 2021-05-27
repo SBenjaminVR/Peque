@@ -34,9 +34,9 @@ tokens = [
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
     'DOTS', 'EQUALS', 'SEMICOLON', 'PERIOD', 'COMMA',
     'LESS', 'BIGGER', 'DIFFERENT','EQUAL','BIGGER_EQUAL', 'LESS_EQUAL',
-    'L_PARENTHESIS', 'R_PARENTHESIS', 'L_BRACKET', 'R_BRACKET',
+    'L_PARENTHESIS', 'R_PARENTHESIS', 'L_BRACKET', 'R_BRACKET', 'L_CORCHETE', 'R_CORCHETE',
     'OR', 'AND',
-    'L_CORCHETE', 'R_CORCHETE',
+    'COMMENT',
 ] + list(reserved.values())
 #--------------------------------------- Simple regular expresion---------------------------------------
 
@@ -95,6 +95,10 @@ def t_CTEC(t):
     r'[a-z]'
     t.value = str(t.value)
     return t
+def t_COMMENT(t):
+     r'\#.*'
+     pass
+
 #construimos el lexico
 lexer = lex.lex()
 #precedencia de operadores

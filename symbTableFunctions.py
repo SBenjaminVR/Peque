@@ -53,15 +53,18 @@ def CheckIfVariableExists(scope, clase, funcion, name):
             return True
     return False
 
-def CheckIfFunctionExists(scope, clase, funcion, name):
-    if scope == 'function':
-        functionObj = Directory.get('Funciones').get(funcion)
-        if functionObj != None:
-            return True
-    elif scope == 'class':
+def CheckIfFunctionExists(scope, clase, funcion):     
+    if scope == 'class':
         classObj = Directory.get('Clases').get(clase)
-        functionObj = classObj.get('Funciones').get(funcion)
-        if functionObj != None:
+        if classObj.get('Funciones').get(funcion) != None:
+            return True
+    else:
+        if Directory.get('Funciones').get(funcion) != None:
+            return True
+    return False
+
+def CheckIfClassExists(clase):
+    if Directory.get('Clases').get(clase) != None:
             return True
     return False
     

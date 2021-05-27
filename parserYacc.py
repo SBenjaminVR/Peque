@@ -145,7 +145,7 @@ def p_finalWhile(p):
     Ret = Saltos[-1]
     Saltos.pop()
     CrearCuadruplo('Goto','_','_',Ret)
-    fill(falseJump,cont)
+    Fill(falseJump,cont)
     
     p[0] = None
 #estatutos funcionales
@@ -249,7 +249,7 @@ def p_else_after(p):
 
     end = Saltos[-1]
     Saltos.pop()
-    fill(end,cont)
+    Fill(end,cont)
     
 
     p[0] = None
@@ -284,8 +284,8 @@ def p_else_seen(p):
     Cuartetos.append({'op': 'Goto', 'iz': '_', 'de': '_', 'res':'_'})
     Saltos.append(cont)
     cont += 1
-    fill(result,cont)
-    # se fillea lo que este en result con el cont actual
+    Fill(result,cont)
+    # se Fillea lo que este en result con el cont actual
 
     p[0] = None
 
@@ -330,8 +330,11 @@ def p_declaracion_funciones_aux(p):
     declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
     |
     '''
-    AuxList[0] = 'Funcion'
-    symb.addFuncion(p[3], AuxList[1])
+    if symb.CheckIfFunctionExists(Scope[0], Scope[1], p[3]):
+        raise ErrorMsg('La funcion ' + p[3] + ' ya habia sido declarada previamente')
+    else:
+        AuxList[0] = 'Funcion'
+        symb.addFuncion(p[3], AuxList[1])
     #addScope(p[3])
     p[0] = None
 def p_declaracion_funciones_aux2(p):
@@ -365,9 +368,11 @@ def p_declaracion_var_aux2(p):
     | tipo_retorno ID declaracion_var_aux5
     | tipo_especial ID
     '''
-    #addScope(p[2])
-    symb.addVariable(p[2], AuxList[1], len(Memoria))
-    Memoria.append(0)
+    if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[2]):
+        raise ErrorMsg('La variable ' + p[2] + ' ya habia sido declarada previamente')
+    else:
+        symb.addVariable(p[2], AuxList[1], len(Memoria))
+        Memoria.append(0)
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
@@ -634,31 +639,6 @@ def imprimirP(p):
             print(p[i], end=" ")
     print()
 
-def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
-    tipo = cuboSemantico[tipoA][tipoB][operador]
-    result = None
-    GenerarNuevoTemporal()
-    result = Temporales[-1]
-    CrearCuadruplo(operador, valorA, valorB, result)
-    return result,tipo
-
-def HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO):
-    popper.push(p[1])
-    if values.length() >= 2:
-        lastVal = values.top()
-        lastType = tipos.top()
-
-        values.pop()
-        tipos.pop()
-
-        resultVal, resultType = operacionesSemantica(p[TIPO], lastVal, values.top(), lastType, tipos.top())
-
-        values.pop()
-        tipos.pop()
-
-        values.push(resultVal)
-        tipos.push(resultType)
-
 def GenerarCuadruploDeOperador(operandos, valores, tipos):
     der = valores.pop()
     iz = valores.pop()
@@ -666,9 +646,7 @@ def GenerarCuadruploDeOperador(operandos, valores, tipos):
     tipoDer = tipos.pop()
     tipoIzq = tipos.pop()
 
-    print(iz)
     tipoResultado = cuboSemantico[tipoIzq][tipoDer][op]
-    print(tipoResultado)
 
     if (tipoResultado != 'err'):
         GenerarNuevoTemporal(tipoResultado)
@@ -692,7 +670,7 @@ def GenerarNuevoTemporal(tipo):
     Temporales.append('t' + str(len(Temporales)))
     tipos.push(tipo)
 
-def fill(cuarteto, llenado):
+def Fill(cuarteto, llenado):
     global Cuartetos
     Cuartetos[cuarteto]['res'] = llenado
 
