@@ -363,6 +363,7 @@ def p_declaracion_var_aux2(p):
     '''
     declaracion_var_aux2 : tipo_retorno ID declaracion_var_aux3
     | tipo_retorno ID declaracion_var_aux5
+    | tipo_especial ID
     '''
     #addScope(p[2])
     symb.addVariable(p[2], AuxList[1], len(Memoria))
@@ -408,10 +409,11 @@ def p_variable_aux2(p):
     variable_aux2 : ID empty
     '''
     if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[1]):
-        print('Simon, existe carnal')
+        values.push(p[1])
+        tipos.push(symb.GetType(Scope[0], Scope[1], Scope[2], p[1]))
     else:
         raise ErrorMsg('No existe la variable ' + p[1])
-    values.push(p[1])
+    
     p[0] = None
 def p_variable_aux(p):
     '''
@@ -425,6 +427,7 @@ def p_tipo_especial(p):
     '''
     tipo_especial : FILA
     '''
+    AuxList[1] = p[1]
     p[0] = None
 def p_tipo_retorno(p):
     '''
@@ -639,15 +642,6 @@ def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
     CrearCuadruplo(operador, valorA, valorB, result)
     return result,tipo
 
-def realizarCuartetosBinarios(p,popper,values,tipos):
-    TIPO = 2
-    HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO)
-
-
-def realizarCuartetos(p,popper,values,tipos):
-    TIPO = 1
-    HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO)
-
 def HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO):
     popper.push(p[1])
     if values.length() >= 2:
@@ -669,21 +663,34 @@ def GenerarCuadruploDeOperador(operandos, valores, tipos):
     der = valores.pop()
     iz = valores.pop()
     op = operandos.pop()
+    tipoDer = tipos.pop()
+    tipoIzq = tipos.pop()
 
-    GenerarNuevoTemporal()
-    result = Temporales[-1]
+    print(iz)
+    tipoResultado = cuboSemantico[tipoIzq][tipoDer][op]
+    print(tipoResultado)
+
+    if (tipoResultado != 'err'):
+        GenerarNuevoTemporal(tipoResultado)
+        result = Temporales[-1]
+        
+        CrearCuadruplo(op, iz, der, result)
+        valores.push(result)
+    else:
+        raise ErrorMsg('Error en los tipos de la operacion: ' 
+        + iz + ' (' + tipoIzq + ') '
+        + op + ' ' 
+        + der + ' (' + tipoDer + ') ')
     
-    CrearCuadruplo(op, iz, der, result)
-    valores.push(result)
-
 
 def CrearCuadruplo(op, iz, der, res):
     global cont
     cont += 1
     Cuartetos.append({'op': op, 'iz': iz, 'de': der, 'res':res})
 
-def GenerarNuevoTemporal():
+def GenerarNuevoTemporal(tipo):
     Temporales.append('t' + str(len(Temporales)))
+    tipos.push(tipo)
 
 def fill(cuarteto, llenado):
     global Cuartetos
