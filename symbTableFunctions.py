@@ -37,3 +37,18 @@ def addToScopeVar(name,var):
         directoryScope = Directory.get(name)
         if directoryScope[2].get(var) == None:
             directoryScope[2][var] = []
+
+def CheckIfVariableExists(scope, clase, funcion, name):
+    if scope == 'main':
+        if Directory.get('Variables').get(name) != None:
+            return True
+    elif scope == 'function':
+        functionObj = Directory.get('Funciones').get(funcion)
+        if functionObj.get('Variables').get(name) != None:
+            return True
+    elif scope == 'class':
+        classObj = Directory.get('Clases').get(clase)
+        functionObj = classObj.get('Funciones').get(funcion)
+        if functionObj.get('Variables').get(name) != None:
+            return True
+    return False

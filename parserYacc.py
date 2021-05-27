@@ -9,6 +9,7 @@ AuxList = ['temp', 'tempo']
 Cuartetos = []
 Temporales = []
 Saltos = []
+Scope = ['main', '_', '_']
 
 global cont
 cont = 0
@@ -36,17 +37,23 @@ import symbTableFunctions as symb
 
 def p_programa(p):
     '''
-    programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones declaracion_var principal
+    programa : PROGRAMA ID SEMICOLON declaracion_clases declaracion_funciones principal
     | PROGRAMA ID SEMICOLON
     '''
-    agregarCuarteto('END','_','_','_')
+    CrearCuadruplo('END','_','_','_')
 
     #addScope(p[2])
     p[0] = None
 def p_principal(p):
     '''
-    principal : L_BRACKET cuerpo R_BRACKET
+    principal : MAIN L_PARENTHESIS R_PARENTHESIS L_BRACKET principal_aux cuerpo R_BRACKET
     '''
+    p[0] = None
+def p_principal_aux(p):
+    '''
+    principal_aux : empty
+    '''
+    Scope[0] = 'main'
     p[0] = None
 #falta agregar estatutos repeticion
 def p_cuerpo(p) :
@@ -59,6 +66,7 @@ def p_cuerpo_aux(p) :
     '''
     cuerpo_aux : estatutos_repeticion
     | estatutos_funciones
+    | declaracion_var
     '''
     popper.push('inicio')
     p[0] = None
@@ -122,7 +130,7 @@ def p_checkCond(p):
         print('Error')
     else :
         Saltos.append(cont)
-        agregarCuarteto('GotoF',cond,'_','_')
+        CrearCuadruplo('GotoF',cond,'_','_')
         
         
 
@@ -136,7 +144,7 @@ def p_finalWhile(p):
     Saltos.pop()
     Ret = Saltos[-1]
     Saltos.pop()
-    agregarCuarteto('Goto','_','_',Ret)
+    CrearCuadruplo('Goto','_','_',Ret)
     fill(falseJump,cont)
     
     p[0] = None
@@ -206,13 +214,14 @@ def p_print_var_aux2(p):
     | expresion
     '''
     res = Temporales[-1]
-    agregarCuarteto('print',res,'_','_')
+    CrearCuadruplo('print',res,'_','_')
     p[0] = None
 def p_asignacion(p):
     '''
-    asignacion : VARIABLE ID EQUALS asignacion_aux
+    asignacion : ID EQUALS asignacion_aux
     '''
-    #addScope(p[2])
+    iz = values.pop()
+    CrearCuadruplo(p[2], iz, '_', p[1])
     p[0] = None
 def p_asignacion_aux(p):
     '''
@@ -252,7 +261,7 @@ def p_rp_seen(p):
     result = Temporales[-1]
     salto = cont
     Saltos.append(salto)
-    agregarCuarteto('GotoF',result,'_','_')
+    CrearCuadruplo('GotoF',result,'_','_')
     
     
     p[0] = None
@@ -261,8 +270,6 @@ def p_condicion_aux(p):
     condicion_aux : ELSE else_seen L_BRACKET cuerpo R_BRACKET
     |
     '''
-  
-
     #end = Saltos[-1]
     #Cuartetos[end][res] = end
     p[0] = None
@@ -354,7 +361,7 @@ def p_declaracion_var_aux(p):
     p[0] = None
 def p_declaracion_var_aux2(p):
     '''
-    declaracion_var_aux2 : tipo_especial ID declaracion_var_aux3
+    declaracion_var_aux2 : tipo_retorno ID declaracion_var_aux3
     | tipo_retorno ID declaracion_var_aux5
     '''
     #addScope(p[2])
@@ -366,7 +373,9 @@ def p_declaracion_var_aux3(p):
     declaracion_var_aux3 : COMMA ID declaracion_var_aux3
     |
     '''
-    #addScope(p[2])
+    if (len(p) > 1):
+        symb.addVariable(p[2], AuxList[1], len(Memoria))
+        Memoria.append(0)
     p[0] = None
 def p_declaracion_var_aux5(p):
     '''
@@ -391,12 +400,22 @@ def p_declaracion_var_aux7(p):
 
 def p_variable(p):
     '''
-    variable : ID variable_aux
+    variable : variable_aux2 variable_aux
     '''
+    p[0] = None
+def p_variable_aux2(p):
+    '''
+    variable_aux2 : ID empty
+    '''
+    if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[1]):
+        print('Simon, existe carnal')
+    else:
+        raise ErrorMsg('No existe la variable ' + p[1])
+    values.push(p[1])
     p[0] = None
 def p_variable_aux(p):
     '''
-    variable_aux : COMMA ID variable_aux
+    variable_aux : PERIOD ID
     |
     '''
     p[0] = None
@@ -452,75 +471,115 @@ def p_arreglo2(p):
 
 def p_expresion(p):
     '''
-    expresion : t_exp expresion_aux
+    expresion : t_exp expresion_aux2
+    | t_exp expresion_aux2 expresion_aux expresion
     '''
     p[0] = None
 def p_expresion_aux(p):
     '''
-    expresion_aux : OR expresion
-    | 
+    expresion_aux : OR
     '''
+    if (len(p) > 1):
+        popper.push(p[1])
+    p[0] = None
+def p_expresion_aux2(p):
+    '''
+    expresion_aux2 : empty
+    '''
+    if popper.top() == '||':
+        GenerarCuadruploDeOperador(popper, values, tipos)
     p[0] = None
 def p_t_exp(p):
     '''
-    t_exp : g_exp t_exp_aux
+    t_exp : g_exp t_exp_aux2
+    | g_exp t_exp_aux2 t_exp_aux t_exp
     '''
     p[0] = None
 def p_t_exp_aux(p):
     '''
-    t_exp_aux : AND t_exp
-    |
+    t_exp_aux : AND
     '''
+    if (len(p) > 1):
+        popper.push(p[1])
     p[0] = None
-
+def p_t_exp_aux2(p):
+    '''
+    t_exp_aux2 : empty
+    '''
+    if popper.top() == '&&':
+        GenerarCuadruploDeOperador(popper, values, tipos)
+    p[0] = None
 def p_g_exp(p):
     '''
-    g_exp : m_exp
-    | m_exp BIGGER m_exp
-    | m_exp LESS m_exp
-    | m_exp BIGGER_EQUAL m_exp
-    | m_exp LESS_EQUAL m_exp
-    | m_exp EQUAL m_exp
-    | m_exp DIFFERENT m_exp
+    g_exp : m_exp g_exp_aux2
+    | m_exp g_exp_aux2 g_exp_aux g_exp
     '''
-    if len(p) > 2:
-        realizarCuartetosBinarios(p,popper,values,tipos)
-    p[0]=None
+    p[0] = None
+def p_g_exp_aux(p):
+    '''
+    g_exp_aux : BIGGER
+    | LESS
+    | BIGGER_EQUAL
+    | LESS_EQUAL
+    | EQUAL
+    | DIFFERENT
+    '''
+    if (len(p) > 1):
+        popper.push(p[1])
+    p[0] = None
+def p_g_exp_aux2(p):
+    '''
+    g_exp_aux2 : empty
+    '''
+    operadores = ['>', '<', '>=', '<=', '==', '<>']
+    if popper.top() in operadores:
+        GenerarCuadruploDeOperador(popper, values, tipos)
+    p[0] = None
 def p_m_exp(p):
     '''
-    m_exp : termino m_exp_aux
+    m_exp : termino m_exp_aux2
+    | termino m_exp_aux2 m_exp_aux m_exp
     '''
     p[0] = None
 def p_m_exp_aux(p):
     '''
-    m_exp_aux : PLUS termino
-    | MINUS termino
-    |
+    m_exp_aux : PLUS
+    | MINUS
     '''
-    if len(p) > 1:
-        realizarCuartetos(p,popper,values,tipos)
-
-
-
-    p[0]=None
+    if (len(p) > 1):
+        popper.push(p[1])
+    p[0] = None
+def p_m_exp_aux2(p):
+    '''
+    m_exp_aux2 : empty
+    '''
+    if popper.top() == '+' or popper.top() == '-':
+        GenerarCuadruploDeOperador(popper, values, tipos)
+    p[0] = None
 def p_termino(p):
     '''
-    termino : factor termino_aux
+    termino : factor termino_aux2 termino_aux termino
+    | factor termino_aux2
     '''
     p[0] = None
 def p_termino_aux(p):
     '''
-    termino_aux : TIMES factor
-    | DIVIDE factor
-    |
+    termino_aux : TIMES
+    | DIVIDE
     '''
-    if len(p) > 1:
-        realizarCuartetos(p,popper,values,tipos)
-    
-    p[0]=None
+    if (len(p) > 1):
+        popper.push(p[1])
+    p[0] = None
+def p_termino_aux2(p):
+    '''
+    termino_aux2 : empty
+    '''
+    if popper.top() == '*' or popper.top() == '/':
+        GenerarCuadruploDeOperador(popper, values, tipos)
+    p[0] = None
 def p_factor(p):
     '''
-    factor : L_PARENTHESIS expresion R_PARENTHESIS
+    factor : L_PARENTHESIS factor_aux expresion R_PARENTHESIS factor_aux2
     | CTEI
     | CTEF
     | CTEC
@@ -537,14 +596,24 @@ def p_factor(p):
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
             values.push(p[1][1])
-        
-        #values.printStack()
-    #else :
-       # values.push('FF')
-    
-    #algoritmo de quartos
     p[0] = None
+def p_factor_aux(p):
+    '''
+    factor_aux : empty
+    '''
+    popper.push('(')
+    p[0] = None
+def p_factor_aux2(p):
+    '''
+    factor_aux2 : empty
+    '''
+    popper.pop()
+    p[0] = None
+
 #-------------- error---------------
+class ErrorMsg(Exception):
+    def __init__(self, message):
+        self.message = message
 
 def p_error(p):
    if p:
@@ -565,9 +634,9 @@ def imprimirP(p):
 def operacionesSemantica(operador,valorA,valorB,tipoA,tipoB):
     tipo = cuboSemantico[tipoA][tipoB][operador]
     result = None
-    crearTemporal()
+    GenerarNuevoTemporal()
     result = Temporales[-1]
-    agregarCuarteto(operador, valorA, valorB, result)
+    CrearCuadruplo(operador, valorA, valorB, result)
     return result,tipo
 
 def realizarCuartetosBinarios(p,popper,values,tipos):
@@ -584,20 +653,36 @@ def HacerOperacionSemanticaYCuartetos(p, popper, values, tipos, TIPO):
     if values.length() >= 2:
         lastVal = values.top()
         lastType = tipos.top()
+
         values.pop()
         tipos.pop()
-        resultVal, resultType= operacionesSemantica(p[TIPO],lastVal,values.top(),lastType,tipos.top())
+
+        resultVal, resultType = operacionesSemantica(p[TIPO], lastVal, values.top(), lastType, tipos.top())
+
         values.pop()
         tipos.pop()
+
         values.push(resultVal)
         tipos.push(resultType)
 
-def agregarCuarteto(op, iz, der, res):
+def GenerarCuadruploDeOperador(operandos, valores, tipos):
+    der = valores.pop()
+    iz = valores.pop()
+    op = operandos.pop()
+
+    GenerarNuevoTemporal()
+    result = Temporales[-1]
+    
+    CrearCuadruplo(op, iz, der, result)
+    valores.push(result)
+
+
+def CrearCuadruplo(op, iz, der, res):
     global cont
     cont += 1
     Cuartetos.append({'op': op, 'iz': iz, 'de': der, 'res':res})
 
-def crearTemporal():
+def GenerarNuevoTemporal():
     Temporales.append('t' + str(len(Temporales)))
 
 def fill(cuarteto, llenado):

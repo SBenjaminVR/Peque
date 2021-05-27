@@ -19,18 +19,11 @@ from pathlib import Path
 from parserYacc import tipos, popper, values, Cuartetos, Temporales, symb
 import virtualMachine as mv
 
-fileData = Path('prueba2.pq').read_text()
+fileData = Path('prueba.pq').read_text()
 resultado = py.parser.parse(fileData)
 print(resultado)
+print(symb.Directory)
 popper.printStack()
-values.printStack()
 tipos.printStack()
 print(Cuartetos)
 print(Temporales)
-
-#Memoria de las variables
-#print(symb.Directory.get('Variables')) #Imprimir Variables
-#for item, val in symb.Directory.get('Variables').items():
-    #mv.AsignarMemoriaGlobal(val.get('EspacioMemoria'))
-
-#print(mv.memoriaVirtual.ds)
