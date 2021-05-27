@@ -23,7 +23,8 @@ reserved = {
     'input' : 'INPUT',
     'for':'FOR',
     'while' : 'WHILE',
-    'to' : 'TO'
+    'to' : 'TO',
+    'main': 'MAIN'
 }
 #--------------------------------------- Tokens---------------------------------------
 
@@ -91,7 +92,7 @@ def t_CTEI(t):
     t.value = int(t.value)
     return t
 def t_CTEC(t):
-    r'"."'
+    r'[a-z]'
     t.value = str(t.value)
     return t
 #construimos el lexico
