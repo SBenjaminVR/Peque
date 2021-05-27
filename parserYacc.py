@@ -11,6 +11,7 @@ Temporales = []
 Saltos = []
 Scope = ['main', '_', '_']
 
+
 global cont
 cont = 0
 
@@ -24,7 +25,7 @@ from stack import Stack
 popper = Stack()
 values = Stack()
 tipos = Stack()
-
+TemporalesFor = Stack()
 #--------------------------------------- Variables ncesarias para usar yacc, lista de tokens y lexer---------------------------------------
 
 tokens = lexico.tokens
@@ -46,8 +47,23 @@ def p_programa(p):
     p[0] = None
 def p_principal(p):
     '''
-    principal : MAIN L_PARENTHESIS R_PARENTHESIS L_BRACKET principal_aux cuerpo R_BRACKET
+    principal : MAIN mainInicio L_PARENTHESIS R_PARENTHESIS L_BRACKET mainFin principal_aux cuerpo R_BRACKET
     '''
+    p[0] = None
+def p_mainInicio(p):
+    '''
+    mainInicio : empty
+    '''
+    CrearCuadruplo('Goto','_','_','_')
+    Saltos.append(0)
+    p[0] = None
+def p_mainFin(p):
+    '''
+    mainFin : empty
+    '''
+
+    fill(Saltos[-1],cont)
+    Saltos.pop()
     p[0] = None
 def p_principal_aux(p):
     '''
@@ -102,9 +118,59 @@ def p_estatutos_repeticion_aux2(p):
 #repeticion_no_condicional
 def p_repeticion_no_condicional(p):
     '''
-    repeticion_no_condicional : FOR L_PARENTHESIS m_exp TO m_exp R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
+    repeticion_no_condicional : FOR L_PARENTHESIS for_inicio m_exp for_temp TO m_exp for_revision COMMA m_exp for_suma R_PARENTHESIS L_BRACKET cuerpo for_final R_BRACKET 
     '''
+
     p[0]= None
+def p_for_inicio(p):
+    '''
+    for_inicio : empty
+    '''
+    
+    Saltos.append(cont)
+    p[0]= None
+def p_for_temp(p):
+    '''
+    for_temp : empty
+    '''
+    TemporalesFor.push(values.top())
+    
+    
+    p[0]= None
+def p_for_revision(p):
+    '''
+    for_revision : empty
+    '''
+    GenerarNuevoTemporal()
+    #chechar por las variables y expresiones
+    popper.push('>=')
+    GenerarCuadruploDeOperador(popper,values,tipos)
+    Saltos.append(cont)
+    CrearCuadruplo('GotoF',Temporales[-1],'_','_')
+
+    p[0]= None
+
+def p_for_suma (p):
+    '''
+    for_suma : empty
+    '''
+    popper.push('+')
+    values.push(TemporalesFor.pop())
+    #PENDIENTE REVISION DE TIPOS
+    GenerarCuadruploDeOperador(popper,values,tipos)
+    p[0]=None
+def p_for_final(p):
+    '''
+    for_final : empty
+    '''
+    global cont
+    falseJump = Saltos[-1]
+    Saltos.pop()
+    Ret = Saltos[-1]
+    Saltos.pop()
+    CrearCuadruplo('Goto','_','_',Ret)
+    fill(falseJump,cont)
+    p[0] = None
 #--------------------------While--------------------
 def p_repeticion_condicional(p):
     '''
