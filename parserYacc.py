@@ -63,7 +63,7 @@ def p_mainFin(p):
     mainFin : empty
     '''
 
-    fill(0,cont)
+    Fill(0,cont)
 
 
     p[0] = None
@@ -171,7 +171,7 @@ def p_for_final(p):
     Ret = Saltos[-1]
     Saltos.pop()
     CrearCuadruplo('Goto','_','_',Ret)
-    fill(falseJump,cont)
+    Fill(falseJump,cont)
     p[0] = None
 #--------------------------While--------------------
 def p_repeticion_condicional(p):
