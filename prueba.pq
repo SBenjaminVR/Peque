@@ -15,7 +15,9 @@ mini void uno(int a){
     }
     a = a + b * a
     print(a,b,a+b)
-    a = c [34][12]
+   
+    input(a)
+    input(a,b,f)
     
 }
 

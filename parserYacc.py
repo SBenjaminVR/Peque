@@ -224,13 +224,26 @@ def p_finalWhile(p):
 #estatutos funcionales
 def p_input(p):
     '''
-    input : INPUT L_PARENTHESIS variable input_aux
+    input : INPUT L_PARENTHESIS input_aux  R_PARENTHESIS
     '''
+    
     p[0] = None
-def p_lee_aux(p):
+def p_input_aux(p):
     '''
-    input_aux : R_PARENTHESIS
-    | COMMA  variable input_aux
+    input_aux : input_aux2 leeInput COMMA input_aux
+    | input_aux2 leeInput
+    '''
+def p_leeInput(p):
+    '''
+    leeInput : empty
+    '''
+    res = values.pop()
+    CrearCuadruplo('input',res,'_','_')
+    p[0] = None
+def p_input_aux2(p):
+    '''
+    input_aux2 : variable
+    | arreglo
     '''
 
     p[0] = None
@@ -634,8 +647,12 @@ def p_checkLimits(p):
     
     varSize = symb.GetSize(Scope[0], Scope[1], Scope[2], lastVar)
     LS = symb.GetLS(Scope[0], Scope[1], Scope[2], lastVar,1)
+    LS2 = symb.GetLS(Scope[0], Scope[1], Scope[2], lastVar,2)
     print(LS)
     CrearCuadruplo('VER',values.pop(),0,LS)
+    
+    
+
     p[0] = None
 def p_arreglo2(p):
     '''
