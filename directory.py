@@ -53,6 +53,7 @@ class Directory():
             'Address': address,
             'Size': size
         }
+        print (newVar)
         if self.Scope == 'main':
             self.Variables[name] = newVar
         elif self.Scope == 'function':

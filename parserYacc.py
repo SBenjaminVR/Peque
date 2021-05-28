@@ -486,15 +486,20 @@ def p_funciones_end(p):
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
-    declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
+    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
     |
     '''
-    if tabla.CheckIfFunctionExists(p[3]):
-        raise ErrorMsg('La funcion ' + p[3] + ' ya habia sido declarada previamente')
+    p[0] = None
+def p_guardar_nombre_funcion(p):
+    '''
+    guardar_nombre_funcion : ID
+    '''
+    if tabla.CheckIfFunctionExists(p[1]):
+        raise ErrorMsg('La funcion ' + p[1] + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
-        tabla.addFunction(p[3], AuxList[1])
-    p[0] = None
+        tabla.addFunction(p[1], AuxList[1])
+        tabla.SetCurrentFunction(p[1])
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
