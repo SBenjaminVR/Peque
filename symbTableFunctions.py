@@ -52,3 +52,30 @@ def CheckIfVariableExists(scope, clase, funcion, name):
         if functionObj.get('Variables').get(name) != None:
             return True
     return False
+
+def CheckIfFunctionExists(scope, clase, funcion):     
+    if scope == 'class':
+        classObj = Directory.get('Clases').get(clase)
+        if classObj.get('Funciones').get(funcion) != None:
+            return True
+    else:
+        if Directory.get('Funciones').get(funcion) != None:
+            return True
+    return False
+
+def CheckIfClassExists(clase):
+    if Directory.get('Clases').get(clase) != None:
+            return True
+    return False
+    
+def GetType(scope, clase, funcion, name):
+    if scope == 'main':
+        return Directory.get('Variables').get(name).get('DataType')
+    elif scope == 'function':
+        functionObj = Directory.get('Funciones').get(funcion)
+        return functionObj.get('Variables').get(name).get('DataType')
+    elif scope == 'class':
+        classObj = Directory.get('Clases').get(clase)
+        functionObj = classObj.get('Funciones').get(funcion)
+        return functionObj.get('Variables').get(name).get('DataType')
+           
