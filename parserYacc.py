@@ -194,7 +194,6 @@ def p_checkCond(p):
 
     cond = values.pop()
     tCond = tipos.top()
-    print(tCond)
 
     #if tCond != 'bool' :
      #   print('Error')
@@ -217,8 +216,6 @@ def p_finalWhile(p):
     Ret = Saltos[-1]
     Saltos.pop()
     CrearCuadruplo('Goto','_','_',Ret)
-    print(falseJump)
-    print(cont)
     fill(falseJump,cont)
     
     p[0] = None
@@ -227,7 +224,6 @@ def p_input(p):
     '''
     input : INPUT L_PARENTHESIS variable input_aux
     '''
-    print(p[3])
     p[0] = None
 def p_lee_aux(p):
     '''
@@ -240,6 +236,7 @@ def p_regreso(p):
     '''
     regreso : REGRESO expresion
     '''
+
     p[0] = None
 def p_llamada(p):
     '''
@@ -292,9 +289,8 @@ def p_llamada_aux3(p):
 
 def p_parametros(p):
     '''
-    parametros : ID parametros_aux 
-    | expresion 
-    |
+    parametros :  expresion 
+    | 
     '''
     
     p[0] = None
@@ -304,6 +300,7 @@ def p_endParam(p):
 
     '''
     global parametros
+
     CrearCuadruplo('Parametro', values.pop(),'_','Param' + str(parametros))
     parametros += 1
     p[0] = None
@@ -453,7 +450,7 @@ def p_declaracion_clases_aux(p):
     p[0] = None
 def p_declaracion_funciones(p):
     '''
-    declaracion_funciones : declaracion_funciones_aux funciones_end declaracion_funciones 
+    declaracion_funciones : declaracion_funciones_aux funciones_end  declaracion_funciones 
     |
     '''
 
@@ -478,7 +475,8 @@ def p_declaracion_funciones_aux2(p):
     declaracion_funciones_aux2 : VOID
     | tipo_retorno
     '''
-    AuxList[1] = p[1]
+    if p[1] == 'void' :
+        AuxList[1] = p[1]
     p[0] = None
 def p_declaracion_funciones_aux3(p):
     '''
@@ -705,11 +703,11 @@ def p_termino_aux2(p):
 def p_factor(p):
     '''
     factor : L_PARENTHESIS factor_aux expresion R_PARENTHESIS factor_aux2
+    | variable
+    | llamada
     | CTEI
     | CTEF
     | CTEC
-    | variable
-    | llamada
     '''
     if p[1] != '(':
         if isinstance(p[1],int) :
