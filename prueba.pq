@@ -6,7 +6,7 @@ mini int dos(){
 mini void uno(int a){
     variable int a , b
     variable float f
-
+    variable int c[4][4]
     while(a > 0)
     {
         a = dos(a)
@@ -15,6 +15,8 @@ mini void uno(int a){
     }
     a = a + b * a
     print(a,b,a+b)
+    a = c [34][12]
+    
 }
 
 main()

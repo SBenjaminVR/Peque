@@ -11,7 +11,9 @@ Temporales = []
 Saltos = []
 Scope = ['main', '_', '_']
 parametros = 1
-
+sizeVar = 1
+global lastVar
+global DeclVar
 global cont
 cont = 0
 
@@ -497,28 +499,36 @@ def p_declaracion_var_aux(p):
     declaracion_var_aux : VARIABLE declaracion_var_aux2 declaracion_var
     |
     '''
+    global sizeVar
+    sizeVar = 1
 
     p[0] = None
 def p_declaracion_var_aux2(p):
     '''
-    declaracion_var_aux2 : tipo_retorno ID declaracion_var_aux3
-    | tipo_retorno ID declaracion_var_aux5
-    | tipo_especial ID
+    declaracion_var_aux2 : tipo_retorno idChecker declaracion_var_aux3
+    | tipo_retorno idChecker declaracion_var_aux5
+    | tipo_especial idChecker
     '''
-    if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[2]):
-        raise ErrorMsg('La variable ' + p[2] + ' ya habia sido declarada previamente')
+    
+    p[0] = None
+def p_idChecker(p):
+    '''
+    idChecker : ID
+    '''
+    if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[1]):
+        raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
-        symb.addVariable(p[2], AuxList[1], len(Memoria))
+        global DeclVar
+        DeclVar = p[1]
+        symb.addVariable(p[1], AuxList[1], len(Memoria),sizeVar)
         Memoria.append(0)
+
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
-    declaracion_var_aux3 : COMMA ID declaracion_var_aux3
+    declaracion_var_aux3 : COMMA idChecker declaracion_var_aux3
     |
     '''
-    if (len(p) > 1):
-        symb.addVariable(p[2], AuxList[1], len(Memoria))
-        Memoria.append(0)
     p[0] = None
 def p_declaracion_var_aux5(p):
     '''
@@ -528,17 +538,34 @@ def p_declaracion_var_aux5(p):
     p[0] = None
 def p_declaracion_var_aux6(p):
     '''
-    declaracion_var_aux6 : L_CORCHETE CTEI R_CORCHETE declaracion_var_aux7
+    declaracion_var_aux6 : L_CORCHETE save_size R_CORCHETE declaracion_var_aux7
     |
     '''
+   
+    
+    p[0] = None
+def p_save_size(p):
+    '''
+    save_size : CTEI
+    '''
+    global sizeVar
+    sizeVar *= p[1]
+    symb.addLimiteSuperior(DeclVar,p[1],1)
     p[0] = None
 def p_declaracion_var_aux7(p):
     '''
-    declaracion_var_aux7 : L_CORCHETE CTEI R_CORCHETE
+    declaracion_var_aux7 : L_CORCHETE last_size R_CORCHETE
     |
     '''
     p[0] = None
-
+def p_last_size(p):
+    '''
+    last_size : CTEI
+    '''
+    global sizeVar
+    sizeVar *= p[1]
+    symb.addLimiteSuperior(DeclVar,p[1],2)
+    p[0] = None
 #-------------- Variables---------------
 
 def p_variable(p):
@@ -587,16 +614,47 @@ def p_tipo_retorno(p):
 
 def p_arreglo(p):
     '''
-    arreglo : ID L_CORCHETE expresion R_CORCHETE arreglo2
+    arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
+    
+    p[0] = None
+def p_startArray(p):
+    '''
+    startArray : ID
+    '''
+    global lastVar
+    lastVar = p[1]
+    print('start')
+    p[0]= None
+def p_checkLimits(p):
+    '''
+    checkLimits : empty
+    '''
+    print(lastVar)
+    
+    varSize = symb.GetSize(Scope[0], Scope[1], Scope[2], lastVar)
+    LS = symb.GetLS(Scope[0], Scope[1], Scope[2], lastVar,1)
+    print(LS)
+    CrearCuadruplo('VER',values.pop(),0,LS)
     p[0] = None
 def p_arreglo2(p):
     '''
-    arreglo2 : L_CORCHETE expresion R_CORCHETE
+    arreglo2 : L_CORCHETE expresion p_checkLimits2 R_CORCHETE
     |
     '''
+    
+
     p[0] = None
 
+def p_checkLimits2(p):
+    '''
+    p_checkLimits2 : empty
+    '''
+    print(lastVar)
+    varSize = symb.GetSize(Scope[0], Scope[1], Scope[2], lastVar)
+    LS = symb.GetLS(Scope[0], Scope[1], Scope[2], lastVar,2)
+    CrearCuadruplo('VER',values.pop(),0,LS)
+    p[0]= None
 
 #-------------- expresiones---------------
 
@@ -713,6 +771,7 @@ def p_factor(p):
     factor : L_PARENTHESIS factor_aux expresion R_PARENTHESIS factor_aux2
     | variable
     | llamada
+    | arreglo
     | CTEI
     | CTEF
     | CTEC

@@ -6,13 +6,26 @@ Directory = {
 }
 Glovalvar = {}
 
-def addVariable(name, type, memoria):
+def addVariable(name, type, memoria,size):
     if Directory.get('Variables').get(name) == None:
         Directory['Variables'][name] = {
             'Id': name, 
             'DataType': type,
-            'EspacioMemoria': memoria
+            'EspacioMemoria': memoria,
+            'Size' : size
         }
+def addLimiteSuperior(name,LS,option):
+    if option == 1:
+        if Directory.get('Variables').get(name) != None:
+            Directory['Variables'][name].update({'LS1': LS})
+    else :
+        if Directory.get('Variables').get(name) != None:
+            Directory['Variables'][name].update({'LS2': LS})
+
+        
+def addSizeArray(name,size):
+    Directory['Variables'][name].update({'Size': size})
+    
 
 def addFuncion(name, type):
     print('addFuncion name: ' + name + ' type: ' + type)
@@ -78,4 +91,35 @@ def GetType(scope, clase, funcion, name):
         classObj = Directory.get('Clases').get(clase)
         functionObj = classObj.get('Funciones').get(funcion)
         return functionObj.get('Variables').get(name).get('DataType')
+def GetSize(scope, clase, funcion, name):
+    if scope == 'main':
+        return Directory.get('Variables').get(name).get('Size')
+    elif scope == 'function':
+        functionObj = Directory.get('Funciones').get(funcion)
+        return functionObj.get('Variables').get(name).get('Size')
+    elif scope == 'class':
+        classObj = Directory.get('Clases').get(clase)
+        functionObj = classObj.get('Funciones').get(funcion)
+        return functionObj.get('Variables').get(name).get('Size')
+
+def GetLS(scope, clase, funcion, name,option):
+    if scope == 'main':
+        if option == 1 :
+            return Directory.get('Variables').get(name).get('LS1')
+        else :
+            return Directory.get('Variables').get(name).get('LS2')
+    elif scope == 'function':
+        functionObj = Directory.get('Funciones').get(funcion)
+        if option == 1 :
+            return functionObj.get('Variables').get(name).get('LS1')
+        else :
+            return functionObj.get('Variables').get(name).get('LS2')
+    elif scope == 'class':
+        classObj = Directory.get('Clases').get(clase)
+        functionObj = classObj.get('Funciones').get(funcion)
+        if option == 1 :
+            return functionObj.get('Variables').get(name).get('LS1')
+        else :
+            return functionObj.get('Variables').get(name).get('LS2')
+        
            
