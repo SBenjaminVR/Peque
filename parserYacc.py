@@ -562,7 +562,7 @@ def p_save_size(p):
     save_size : CTEI
     '''
     global sizeVar
-    sizeVar *= p[1]
+    sizeVar *= p[1] + 1
     symb.addLimiteSuperior(DeclVar,p[1],1)
     p[0] = None
 def p_declaracion_var_aux7(p):
@@ -576,7 +576,7 @@ def p_last_size(p):
     last_size : CTEI
     '''
     global sizeVar
-    sizeVar *= p[1]
+    sizeVar *= p[1] + 1
     symb.addLimiteSuperior(DeclVar,p[1],2)
     p[0] = None
 #-------------- Variables---------------
