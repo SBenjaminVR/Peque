@@ -32,20 +32,43 @@ TemporalesFor = Stack()
 tokens = lexico.tokens
 lexer = lexico.lexer
 
-#--------------function dir symb table ---------
-import symbTableFunctions as symb
+#-------------- Directorio de Clases y Funciones, Tablas de Variables  ---------
+from directory import Directory
+tabla = Directory({}, {}, {})
 
 #-------------- principal---------------
 
 def p_programa(p):
     '''
-    programa : PROGRAMA  ID SEMICOLON mainInicio declaracion_clases declaracion_funciones principal
-    | PROGRAMA ID SEMICOLON mainInicio
+    programa : PROGRAMA ID SEMICOLON scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
+    | PROGRAMA ID SEMICOLON
     '''
     CrearCuadruplo('END','_','_','_')
 
     #addScope(p[2])
     p[0] = None
+
+def p_scopeClases(p):
+    '''
+    scopeClases : empty
+    '''
+    tabla.SetScope('class')
+    p[0] = None
+
+def p_scopeFunction(p):
+    '''
+    scopeFunction : empty
+    '''
+    tabla.SetScope('function')
+    p[0] = None
+
+def p_scopeMain(p):
+    '''
+    scopeMain : empty
+    '''
+    tabla.SetScope('main')
+    p[0] = None
+
 def p_principal(p):
     '''
     principal : MAIN mainFin L_PARENTHESIS R_PARENTHESIS L_BRACKET  principal_aux cuerpo R_BRACKET 
@@ -466,12 +489,11 @@ def p_declaracion_funciones_aux(p):
     declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
     |
     '''
-    if symb.CheckIfFunctionExists(Scope[0], Scope[1], p[3]):
+    if tabla.CheckIfFunctionExists(p[3]):
         raise ErrorMsg('La funcion ' + p[3] + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
-        symb.addFuncion(p[3], AuxList[1])
-    #addScope(p[3])
+        tabla.addFunction(p[3], AuxList[1])
     p[0] = None
 def p_declaracion_funciones_aux2(p):
     '''
@@ -505,10 +527,10 @@ def p_declaracion_var_aux2(p):
     | tipo_retorno ID declaracion_var_aux5
     | tipo_especial ID
     '''
-    if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[2]):
+    if tabla.CheckIfVariableExists(p[2]):
         raise ErrorMsg('La variable ' + p[2] + ' ya habia sido declarada previamente')
     else:
-        symb.addVariable(p[2], AuxList[1], len(Memoria))
+        tabla.addVariable(p[2], AuxList[1], 0, len(Memoria))
         Memoria.append(0)
     p[0] = None
 def p_declaracion_var_aux3(p):
@@ -517,7 +539,7 @@ def p_declaracion_var_aux3(p):
     |
     '''
     if (len(p) > 1):
-        symb.addVariable(p[2], AuxList[1], len(Memoria))
+        tabla.addVariable(p[2], AuxList[1], 0, len(Memoria))
         Memoria.append(0)
     p[0] = None
 def p_declaracion_var_aux5(p):
@@ -550,9 +572,9 @@ def p_variable_aux2(p):
     '''
     variable_aux2 : ID empty
     '''
-    if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[1]):
+    if tabla.CheckIfVariableExists(p[1]):
         values.push(p[1])
-        tipos.push(symb.GetType(Scope[0], Scope[1], Scope[2], p[1]))
+        tipos.push(tabla.GetAttribute(p[1], 'Type'))
     else:
         raise ErrorMsg('No existe la variable ' + p[1])
     

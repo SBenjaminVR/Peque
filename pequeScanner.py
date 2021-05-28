@@ -16,13 +16,13 @@ import parserYacc as py
 
 # lectura de archivo
 from pathlib import Path
-from parserYacc import tipos, popper, values, Cuartetos, Saltos , Temporales, symb
+from parserYacc import tipos, popper, values, Cuartetos, Temporales, tabla
 import virtualMachine as mv
 
 fileData = Path('prueba.pq').read_text()
 resultado = py.parser.parse(fileData)
 print(resultado)
-print(symb.Directory)
+print(tabla.Variables)
 popper.printStack()
 tipos.printStack()
 print(Cuartetos)
