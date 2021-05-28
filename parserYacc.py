@@ -10,6 +10,7 @@ Cuartetos = []
 Temporales = []
 Saltos = []
 Scope = ['main', '_', '_']
+parametros = 1
 
 global cont
 cont = 0
@@ -24,7 +25,8 @@ from stack import Stack
 popper = Stack()
 values = Stack()
 tipos = Stack()
-
+funct = Stack()
+TemporalesFor = Stack()
 #--------------------------------------- Variables ncesarias para usar yacc, lista de tokens y lexer---------------------------------------
 
 tokens = lexico.tokens
@@ -69,8 +71,24 @@ def p_scopeMain(p):
 
 def p_principal(p):
     '''
-    principal : MAIN L_PARENTHESIS R_PARENTHESIS L_BRACKET principal_aux cuerpo R_BRACKET
+    principal : MAIN mainFin L_PARENTHESIS R_PARENTHESIS L_BRACKET  principal_aux cuerpo R_BRACKET 
     '''
+    p[0] = None
+def p_mainInicio(p):
+    '''
+    mainInicio : empty
+    '''
+    CrearCuadruplo('Goto','_','_','_')
+
+    p[0] = None
+def p_mainFin(p):
+    '''
+    mainFin : empty
+    '''
+
+    Fill(0,cont)
+
+
     p[0] = None
 def p_principal_aux(p):
     '''
@@ -125,9 +143,59 @@ def p_estatutos_repeticion_aux2(p):
 #repeticion_no_condicional
 def p_repeticion_no_condicional(p):
     '''
-    repeticion_no_condicional : FOR L_PARENTHESIS m_exp TO m_exp R_PARENTHESIS L_BRACKET cuerpo R_BRACKET
+    repeticion_no_condicional : FOR L_PARENTHESIS for_inicio m_exp for_temp TO m_exp for_revision COMMA m_exp for_suma R_PARENTHESIS L_BRACKET cuerpo for_final R_BRACKET 
     '''
+
     p[0]= None
+def p_for_inicio(p):
+    '''
+    for_inicio : empty
+    '''
+    
+    Saltos.append(cont)
+    p[0]= None
+def p_for_temp(p):
+    '''
+    for_temp : empty
+    '''
+    TemporalesFor.push(values.pop())
+    
+    
+    p[0]= None
+def p_for_revision(p):
+    '''
+    for_revision : empty
+    '''
+    GenerarNuevoTemporal()
+    #chechar por las variables y expresiones
+    popper.push('>=')
+    GenerarCuadruploDeOperador(popper,values,tipos)
+    Saltos.append(cont)
+    CrearCuadruplo('GotoF',Temporales[-1],'_','_')
+
+    p[0]= None
+
+def p_for_suma (p):
+    '''
+    for_suma : empty
+    '''
+    popper.push('+')
+    values.push(TemporalesFor.pop())
+    #PENDIENTE REVISION DE TIPOS
+    GenerarCuadruploDeOperador(popper,values,tipos)
+    p[0]=None
+def p_for_final(p):
+    '''
+    for_final : empty
+    '''
+    global cont
+    falseJump = Saltos[-1]
+    Saltos.pop()
+    Ret = Saltos[-1]
+    Saltos.pop()
+    CrearCuadruplo('Goto','_','_',Ret)
+    Fill(falseJump,cont)
+    p[0] = None
 #--------------------------While--------------------
 def p_repeticion_condicional(p):
     '''
@@ -147,14 +215,17 @@ def p_checkCond(p):
     '''
     global cont
 
-    cond = Temporales[-1]
+    cond = values.pop()
     tCond = tipos.top()
-    if tCond != 'bool' :
-        print('Error')
-    else :
-        Saltos.append(cont)
-        CrearCuadruplo('GotoF',cond,'_','_')
-        
+
+    #if tCond != 'bool' :
+     #   print('Error')
+    #else :
+        #Saltos.append(cont)
+        #CrearCuadruplo('GotoF',cond,'_','_')
+    Saltos.append(cont)
+    CrearCuadruplo('GotoF',cond,'_','_')
+    
         
 
     p[0] = None
@@ -176,7 +247,6 @@ def p_input(p):
     '''
     input : INPUT L_PARENTHESIS variable input_aux
     '''
-    print(p[3])
     p[0] = None
 def p_lee_aux(p):
     '''
@@ -189,12 +259,36 @@ def p_regreso(p):
     '''
     regreso : REGRESO expresion
     '''
+
     p[0] = None
 def p_llamada(p):
     '''
-    llamada : ID llamada_aux L_PARENTHESIS llamada_aux2 R_PARENTHESIS
+    llamada : llamadaID startCall llamada_aux L_PARENTHESIS llamada_aux2 R_PARENTHESIS endCall
     '''
+    
     p[0]=None
+def p_llamadaID(p):
+    '''
+    llamadaID : ID
+    '''
+    funct.push(p[1])    
+    p[0] = None
+def p_startCall(p):
+    '''
+    startCall : empty
+    '''
+    global parametros
+    parametros = 1
+    CrearCuadruplo('ERA',funct.top(),'_','_')
+    
+    p[0]=None
+def p_endCall(p):
+    '''
+    endCall : empty
+    '''
+    CrearCuadruplo('GOSUB',funct.top(),'_','_')
+    funct.pop()
+    p[0]= None
 def p_llamada_aux(p):
     '''
     llamada_aux : PERIOD ID
@@ -203,9 +297,10 @@ def p_llamada_aux(p):
     p[0]=None
 def p_llamada_aux2(p):
     '''
-    llamada_aux2 : parametros llamada_aux3
+    llamada_aux2 :  parametros endParam  llamada_aux3
     |
     '''
+    
     p[0]=None
 def p_llamada_aux3(p):
     '''
@@ -213,32 +308,62 @@ def p_llamada_aux3(p):
     |
     '''
     p[0]=None
+#-------------- parametros---------------
+
+def p_parametros(p):
+    '''
+    parametros :  expresion 
+    | 
+    '''
+    
+    p[0] = None
+def p_endParam(p):
+    '''
+    endParam : empty
+
+    '''
+    global parametros
+
+    CrearCuadruplo('Parametro', values.pop(),'_','Param' + str(parametros))
+    parametros += 1
+    p[0] = None
+
+def p_parametros_aux(p):
+    '''
+    parametros_aux : PERIOD ID
+    |
+    '''
+    p[0] = None
+
 def p_print(p):
     '''
     escribe : PRINT L_PARENTHESIS print_var R_PARENTHESIS
     '''
     
     p[0] = None
+
 def p_print_var(p):
     '''
-    print_var : print_var_aux
-    '''
-    
-    p[0] = None
-def p_print_var_aux(p):
-    '''
-    print_var_aux : print_var_aux2 COMMA
-    | print_var_aux2
+    print_var : print_var_aux2 finalVar COMMA print_var
+    | print_var_aux2 finalVar
     '''
     p[0] = None
+def p_finalVar(p):
+    '''
+    finalVar : empty
+    '''
+    res = values.pop()
+    CrearCuadruplo('print',res,'_','_')
+    p[0] = None
+
 def p_print_var_aux2(p):
     '''
     print_var_aux2 : llamada 
     | expresion
     '''
-    res = Temporales[-1]
-    CrearCuadruplo('print',res,'_','_')
+    
     p[0] = None
+
 def p_asignacion(p):
     '''
     asignacion : ID EQUALS asignacion_aux
@@ -290,7 +415,7 @@ def p_rp_seen(p):
     p[0] = None
 def p_condicion_aux(p):
     '''
-    condicion_aux : ELSE else_seen L_BRACKET cuerpo R_BRACKET
+    condicion_aux : ELSE else_seen L_BRACKET cuerpo R_BRACKET elseEnd
     |
     '''
     #end = Saltos[-1]
@@ -310,6 +435,12 @@ def p_else_seen(p):
     Fill(result,cont)
     # se Fillea lo que este en result con el cont actual
 
+    p[0] = None
+def p_elseEnd(p):
+    '''
+    elseEnd : empty
+    '''
+    Saltos.pop()
     p[0] = None
 
 #-------------- declaraciones---------------
@@ -342,12 +473,17 @@ def p_declaracion_clases_aux(p):
     p[0] = None
 def p_declaracion_funciones(p):
     '''
-    declaracion_funciones : declaracion_funciones_aux declaracion_funciones
+    declaracion_funciones : declaracion_funciones_aux funciones_end  declaracion_funciones 
     |
     '''
 
     p[0] = None
-
+def p_funciones_end(p):
+    '''
+    funciones_end : empty
+    '''
+    CrearCuadruplo('END PROC','_','_','_')
+    p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
     declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
@@ -364,7 +500,8 @@ def p_declaracion_funciones_aux2(p):
     declaracion_funciones_aux2 : VOID
     | tipo_retorno
     '''
-    AuxList[1] = p[1]
+    if p[1] == 'void' :
+        AuxList[1] = p[1]
     p[0] = None
 def p_declaracion_funciones_aux3(p):
     '''
@@ -465,21 +602,7 @@ def p_tipo_retorno(p):
     '''
     AuxList[1] = p[1]
     p[0] = None
-#-------------- parametros---------------
 
-def p_parametros(p):
-    '''
-    parametros : ID parametros_aux
-    | expresion
-    |
-    '''
-    p[0] = None
-def p_parametros_aux(p):
-    '''
-    parametros_aux : PERIOD ID
-    |
-    '''
-    p[0] = None
 
 
 #-------------- arreglo---------------
@@ -610,11 +733,11 @@ def p_termino_aux2(p):
 def p_factor(p):
     '''
     factor : L_PARENTHESIS factor_aux expresion R_PARENTHESIS factor_aux2
+    | variable
+    | llamada
     | CTEI
     | CTEF
     | CTEC
-    | variable
-    | llamada
     '''
     if p[1] != '(':
         if isinstance(p[1],int) :
