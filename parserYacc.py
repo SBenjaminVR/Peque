@@ -14,7 +14,6 @@ Scope = ['GLOBAL']
 parametros = 1
 sizeVar = 1
 
-
 global lastVar
 global DeclVar
 global cont
@@ -42,7 +41,7 @@ lexer = lexico.lexer
 from directory import Directory
 tabla = Directory({}, {}, {})
 
-#---------direcciones----------#
+#--------- Memoria va asignando los espacios de memoria a las variables ----------#
 from asignadorMemoria import AsignadorMemoria
 memoria = AsignadorMemoria()
 
@@ -156,14 +155,22 @@ def p_for_inicio(p):
     '''
     for_inicio : empty
     '''
-    
     Saltos.append(cont)
     p[0]= None
 def p_for_temp(p):
     '''
     for_temp : empty
     '''
-    TemporalesFor.push(values.pop())
+    iz = values.pop()
+    GenerarNuevoTemporal('int')
+    values.push(Temporales[-1])
+    res = values.top()
+    TemporalesFor.push(res)
+    CrearCuadruplo('=', iz, '_', res)
+    
+   
+
+    
     
     
     p[0]= None
@@ -171,12 +178,15 @@ def p_for_revision(p):
     '''
     for_revision : empty
     '''
-    GenerarNuevoTemporal()
+    
     #chechar por las variables y expresiones
+    print('stack')
+    values.printStack()
     popper.push('>=')
     GenerarCuadruploDeOperador(popper,values,tipos)
     Saltos.append(cont)
-    CrearCuadruplo('GotoF',Temporales[-1],'_','_')
+    CrearCuadruplo('GotoF',values.pop(),'_','_')
+   
 
     p[0]= None
 
@@ -184,15 +194,21 @@ def p_for_suma (p):
     '''
     for_suma : empty
     '''
-    popper.push('+')
-    values.push(TemporalesFor.pop())
-    #PENDIENTE REVISION DE TIPOS
-    GenerarCuadruploDeOperador(popper,values,tipos)
+   
     p[0]=None
 def p_for_final(p):
     '''
     for_final : empty
     '''
+
+    print('generar for')
+    
+    
+    variableFor = TemporalesFor.pop()
+    tipo = tipos.pop()
+    #falta comprobar tipos del for
+    CrearCuadruplo('+',values.pop(),variableFor,variableFor)
+    
     global cont
     falseJump = Saltos[-1]
     Saltos.pop()
@@ -200,6 +216,8 @@ def p_for_final(p):
     Saltos.pop()
     CrearCuadruplo('Goto','_','_',Ret)
     Fill(falseJump,cont)
+
+    
     p[0] = None
 #--------------------------While--------------------
 def p_repeticion_condicional(p):
