@@ -14,7 +14,7 @@ def main(argv):
     fileData = Path(argv[1]).read_text()
     ParserLexer = py.parser.parse(fileData)
     print(ParserLexer)
-    vm = VirtualMachine(data)
+    vm = VirtualMachine(Data)
     vm.run()
     
 if __name__ == '__main__':
