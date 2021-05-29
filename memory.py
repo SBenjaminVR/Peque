@@ -7,17 +7,8 @@ class Memory:
     
     def __init__(self):
         self.memory = [None]*5000
-    def getValue(self, type, address):
-        if type == "Int":
-            return self.memory[self.INT + address]
-        elif type == "Float":
-            return self.memory[self.FLOAT + address]
-        elif type == "Bool":
-            return self.memory[self.BOOLEAN + address]
-        elif type == "Char":
-            return self.memory[self.CHAR + address]
-        elif type == "Arr":
-            return self.memory[self.ARR + address]
+    def getValue(self, address):
+        print(address)
             
     def addValueToMemory(self, value, type, address):
         if type == "Int":
