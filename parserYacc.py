@@ -593,6 +593,7 @@ def p_idChecker(p):
     idChecker : ID
     '''
     global sizeVar
+    sizeVar = 1
     if tabla.CheckIfVariableExists(p[1]):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
@@ -601,7 +602,6 @@ def p_idChecker(p):
         address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
         tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar)
         Memoria.append(0)
-    sizeVar = 1
 
     p[0] = None
 def p_declaracion_var_aux3(p):
@@ -621,10 +621,13 @@ def p_save_size(p):
     '''
     save_size : CTEI
     '''
-    global sizeVar
-    sizeVar *= p[1]
-    tabla.UpdateSize(DeclVar,sizeVar)
-    tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
+    if p[1] > 0:
+        global sizeVar
+        sizeVar *= p[1]
+        tabla.UpdateSize(DeclVar,sizeVar)
+        tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
+    else: 
+        raise ErrorMsg('No se puede declarar el tamaño de un array como menor que 1')
     
     p[0] = None
 def p_declaracion_var_aux7(p):
@@ -637,10 +640,13 @@ def p_last_size(p):
     '''
     last_size : CTEI
     '''
-    global sizeVar
-    currentSize = sizeVar
-    sizeVar *= p[1]
-    tabla.UpdateSize(DeclVar, sizeVar)
+    if p[1] > 0:
+        global sizeVar
+        currentSize = sizeVar
+        sizeVar *= p[1]
+        tabla.UpdateSize(DeclVar, sizeVar)
+    else: 
+        raise ErrorMsg('No se puede declarar el tamaño de una matriz como menor que 1')
 
     p[0] = None
 #-------------- Variables---------------
