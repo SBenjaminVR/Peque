@@ -5,14 +5,12 @@ import ply.lex as lex           # Scanner
 import ply.yacc as yacc  
 import math as math
 import lexico
-from memoriaCompi import MemoriaCompi
-
 
 AuxList = ['temp', 'tempo']
 Cuartetos = []
 Temporales = []
 Saltos = []
-Scope = ['main', '_', '_']
+Scope = ['GLOBAL']
 parametros = 1
 sizeVar = 1
 
@@ -23,8 +21,6 @@ global cont
 cont = 0
 
 Memoria = []
-#---------direcciones----------#
-dirMemory = MemoriaCompi()
 
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
@@ -46,6 +42,10 @@ lexer = lexico.lexer
 from directory import Directory
 tabla = Directory({}, {}, {})
 
+#---------direcciones----------#
+from asignadorMemoria import AsignadorMemoria
+memoria = AsignadorMemoria()
+
 #-------------- principal---------------
 
 def p_programa(p):
@@ -63,6 +63,7 @@ def p_scopeClases(p):
     scopeClases : empty
     '''
     tabla.SetScope('class')
+    Scope[0] = 'LOCAL'
     p[0] = None
 
 def p_scopeFunction(p):
@@ -70,6 +71,7 @@ def p_scopeFunction(p):
     scopeFunction : empty
     '''
     tabla.SetScope('function')
+    Scope[0] = 'LOCAL'
     p[0] = None
 
 def p_scopeMain(p):
@@ -77,11 +79,12 @@ def p_scopeMain(p):
     scopeMain : empty
     '''
     tabla.SetScope('main')
+    Scope[0] = 'GLOBAL'
     p[0] = None
 
 def p_principal(p):
     '''
-    principal : MAIN mainFin L_PARENTHESIS R_PARENTHESIS L_BRACKET  principal_aux cuerpo R_BRACKET 
+    principal : MAIN mainFin L_PARENTHESIS R_PARENTHESIS L_BRACKET cuerpo R_BRACKET 
     '''
     p[0] = None
 def p_mainInicio(p):
@@ -95,17 +98,9 @@ def p_mainFin(p):
     '''
     mainFin : empty
     '''
-
     Fill(0,cont)
-
-
     p[0] = None
-def p_principal_aux(p):
-    '''
-    principal_aux : empty
-    '''
-    Scope[0] = 'main'
-    p[0] = None
+
 #falta agregar estatutos repeticion
 def p_cuerpo(p) :
     '''
@@ -228,15 +223,8 @@ def p_checkCond(p):
     cond = values.pop()
     tCond = tipos.top()
 
-    #if tCond != 'bool' :
-     #   print('Error')
-    #else :
-        #Saltos.append(cont)
-        #CrearCuadruplo('GotoF',cond,'_','_')
     Saltos.append(cont)
-    CrearCuadruplo('GotoF',cond,'_','_')
-    
-        
+    CrearCuadruplo('GotoF',cond,'_','_')        
 
     p[0] = None
 def p_finalWhile(p):
@@ -560,10 +548,19 @@ def p_declaracion_var(p):
     p[0] = None
 def p_declaracion_var_aux(p):
     '''
-    declaracion_var_aux : VARIABLE declaracion_var_aux2 declaracion_var
+    declaracion_var_aux : VARIABLE declaracion_var_aux2 assignAddress declaracion_var
     |
     '''
-    
+def p_assignAddress(p):
+    # Funcion que asigna los espacios de memoria faltantes en caso de ser un array o matriz
+    '''
+    assignAddress : empty
+    '''
+    global sizeVar
+
+    # Se ignora el primer espacio ya que fue asignado al momento de guardar la variable por primera vez
+    for i in range(1, sizeVar):
+        memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
 
     p[0] = None
 def p_declaracion_var_aux2(p):
@@ -578,17 +575,15 @@ def p_idChecker(p):
     idChecker : ID
     '''
     global sizeVar
-    sizeVar = 1
     if tabla.CheckIfVariableExists(p[1]):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
         global DeclVar
         DeclVar = p[1]
-        print(DeclVar)
-        varDir = dirMemory.addMemory(AuxList[1],'G','N')
-        print(varDir)
-        tabla.AddVariable(p[1], AuxList[1], varDir, sizeVar)
+        address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
+        tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar)
         Memoria.append(0)
+    sizeVar = 1
 
     p[0] = None
 def p_declaracion_var_aux3(p):
@@ -599,29 +594,19 @@ def p_declaracion_var_aux3(p):
     p[0] = None
 def p_declaracion_var_aux5(p):
     '''
-    declaracion_var_aux5 : declaracion_var_aux6 
+    declaracion_var_aux5 : L_CORCHETE save_size R_CORCHETE declaracion_var_aux7
     |
     '''
     p[0] = None
-def p_declaracion_var_aux6(p):
-    '''
-    declaracion_var_aux6 : L_CORCHETE save_size R_CORCHETE declaracion_var_aux7
-    |
-    '''
-   
-    
-    p[0] = None
+
 def p_save_size(p):
     '''
     save_size : CTEI
     '''
     global sizeVar
     sizeVar *= p[1]
-    print(DeclVar,' ' ,sizeVar)
     tabla.UpdateSize(DeclVar,sizeVar)
     tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
-    for i in range(0,sizeVar):
-        dirMemory.addMemory(AuxList[1],'G','N')
     
     p[0] = None
 def p_declaracion_var_aux7(p):
@@ -635,11 +620,10 @@ def p_last_size(p):
     last_size : CTEI
     '''
     global sizeVar
-    beforeVal = sizeVar
+    currentSize = sizeVar
     sizeVar *= p[1]
     tabla.UpdateSize(DeclVar, sizeVar)
-    for i in range(0,sizeVar-beforeVal):
-        dirMemory.addMemory(AuxList[1],'G','N')
+
     p[0] = None
 #-------------- Variables---------------
 
@@ -705,17 +689,15 @@ def p_startArray(p):
     '''
     global lastVar
     lastVar = p[1]
-    print('start')
     p[0]= None
 def p_checkLimits(p):
     '''
     checkLimits : empty
     '''
-    print(lastVar)
     limit = tabla.GetAttribute( lastVar,'Limit')
     size =  tabla.GetAttribute( lastVar,'Size')
     tipo = tabla.GetAttribute( lastVar,'Type')
-    print(limit)
+
     CrearCuadruplo('VER',values.top(),0,limit)
     popper.push('*')
     values.push(math.ceil(size/(limit+1)))
@@ -737,7 +719,6 @@ def p_checkLimits2(p):
     '''
     p_checkLimits2 : empty
     '''
-    print(lastVar)
     arrSize = tabla.GetAttribute(lastVar,'Size')
     limit = tabla.GetAttribute(lastVar,'Limit')
     columnSize = arrSize / (limit + 1)
