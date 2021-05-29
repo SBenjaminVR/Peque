@@ -2,24 +2,43 @@ programa prueba;
 
 mini void uno(int a){
 
-    variable int b[8]
-    variable int f
-    variable int c[4][4]
-    variable int d
+    petite int b[8]
+    petite int f
+    petite int c[4][4]
+    petite int d
 
     a = c[2][3]
     a = b[5]
     for(2 to 4, 1){
         print(b[5])
     }
-    a = 2 + c[2][3]
+    a = c[2][3]
+    a = b[5]
     
+}
+
+mini void dos(int a){
+
+    petite float b[8]
+    petite float f
+    petite float c[4][4]
+    petite float d
+
+    a = c[2][3]
+    a = b[5]
+    for(2 to 4, 1){
+        print(b[5])
+    }
+    a = c[2][3]
+    a = b[5]
     
 }
 
 main()
 {
-   variable int c[4][4]
-   a = 7*14+9 + c[1][2] * 4
+    petite float b[8]
+    petite float f
+    petite float c[4][4]
+   
     
 }
