@@ -4,6 +4,8 @@ import re
 import ply.lex as lex           # Scanner
 import ply.yacc as yacc  
 import lexico
+from memoriaCompi import MemoriaCompi
+
 
 AuxList = ['temp', 'tempo']
 Cuartetos = []
@@ -12,12 +14,17 @@ Saltos = []
 Scope = ['main', '_', '_']
 parametros = 1
 sizeVar = 1
+
+
 global lastVar
 global DeclVar
 global cont
 cont = 0
 
 Memoria = []
+#---------direcciones----------#
+dirMemory = MemoriaCompi()
+
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
 #cuboSemantico tiene todas las consideraciones semanticas
@@ -559,7 +566,8 @@ def p_idChecker(p):
     else:
         global DeclVar
         DeclVar = p[1]
-        tabla.AddVariable(p[1], AuxList[1], 0, len(Memoria))
+        varDir = dirMemory.addMemory(tipos.top(),'G','N')
+        tabla.AddVariable(p[1], AuxList[1], varDir, sizeVar)
         Memoria.append(0)
 
     p[0] = None
@@ -590,6 +598,8 @@ def p_save_size(p):
     global sizeVar
     sizeVar *= p[1]
     tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
+    for i in range(0,sizeVar):
+        DeclVar ,': ' ,dirMemory.addMemory(tipos.top(),'G','N')
     p[0] = None
 def p_declaracion_var_aux7(p):
     '''
@@ -604,6 +614,10 @@ def p_last_size(p):
     global sizeVar
     sizeVar *= p[1]
     tabla.UpdateSize(DeclVar, sizeVar)
+    beforeVal = sizeVar
+    sizeVar *= p[1]
+    for i in range(0,sizeVar-beforeVal):
+        print(DeclVar ,': ' ,dirMemory.addMemory(tipos.top(),'G','N'))
     p[0] = None
 #-------------- Variables---------------
 
@@ -621,7 +635,6 @@ def p_variable_aux2(p):
         tipos.push(tabla.GetAttribute(p[1], 'Type'))
     else:
         raise ErrorMsg('No existe la variable ' + p[1])
-    
     p[0] = None
 def p_variable_aux(p):
     '''

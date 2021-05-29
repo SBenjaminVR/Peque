@@ -7,6 +7,7 @@ mini void uno(int a){
     variable int a , b
     variable float f
     variable int c[4][4]
+    variable int x
     while(a > 0)
     {
         a = dos(a)

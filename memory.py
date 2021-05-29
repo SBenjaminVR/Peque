@@ -4,6 +4,7 @@ class Memory:
     BOOLEAN = 1000
     CHAR = 1500
     ARR = 2000
+    
     def __init__(self):
         self.memory = [None]*5000
     def getValue(self, type, address):
