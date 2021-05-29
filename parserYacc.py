@@ -14,6 +14,8 @@ Scope = ['GLOBAL']
 parametros = 1
 sizeVar = 1
 
+contVarLocal = [0]*10
+
 global lastVar
 global DeclVar
 global FuncionDeclarada
@@ -185,7 +187,6 @@ def p_for_revision(p):
     '''
     
     #chechar por las variables y expresiones
-    values.printStack()
     popper.push('>=')
     GenerarCuadruploDeOperador(popper,values,tipos)
     Saltos.append(cont)
@@ -525,24 +526,39 @@ def p_declaracion_funciones(p):
     declaracion_funciones : declaracion_funciones_aux funciones_end  declaracion_funciones 
     |
     '''
+    
 
     p[0] = None
 def p_funciones_end(p):
     '''
     funciones_end : empty
     '''
+    #Guarda contador de variables
+    
+    
     CrearCuadruplo('END PROC','_','_','_')
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
-    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo regreso R_BRACKET
+    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo regreso R_BRACKET save_variables
     |
     '''
+    
     p[0] = None
+def p_save_variables(p):
+    '''
+    save_variables : empty
+    '''
+    copiaDeLista = contVarLocal.copy()
+    tabla.updateFunctionAttribute(FuncionDeclarada,'Space',copiaDeLista)
+    p[0]= None
 def p_guardar_nombre_funcion(p):
     '''
     guardar_nombre_funcion : ID
     '''
+    #se resetea el contador de variables para funciones
+    global contVarLocal
+    resetConVarFunciones()
     global FuncionDeclarada
     FuncionDeclarada = p[1]
     if tabla.CheckIfFunctionExists(FuncionDeclarada):
@@ -552,6 +568,9 @@ def p_guardar_nombre_funcion(p):
         address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
         tabla.AddFunction(FuncionDeclarada, AuxList[1], address)
         tabla.SetCurrentFunction(FuncionDeclarada)
+
+        
+
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
@@ -566,7 +585,6 @@ def p_regreso(p):
     |
     '''
     global FuncionDeclarada
-    print(FuncionDeclarada)
     tipo = tabla.GetFunctionAttribute(FuncionDeclarada, 'Type')
     if len(p) > 1:
         if tipo == 'void':
@@ -589,15 +607,16 @@ def p_declaracion_var_aux(p):
     declaracion_var_aux : PETITE declaracion_var_aux2 assignAddress declaracion_var
     |
     '''
+
 def p_assignAddress(p):
     # Funcion que asigna los espacios de memoria faltantes en caso de ser un array o matriz
     '''
     assignAddress : empty
     '''
     global sizeVar
-
     # Se ignora el primer espacio ya que fue asignado al momento de guardar la variable por primera vez
     for i in range(1, sizeVar):
+        agregarContVarFunciones(AuxList[1],'NORMAL')
         memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
 
     p[0] = None
@@ -621,6 +640,7 @@ def p_idChecker(p):
         DeclVar = p[1]
         address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
         tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar)
+        agregarContVarFunciones(AuxList[1],'NORMAL',sizeVar)
         Memoria.append(0)
 
     p[0] = None
@@ -644,6 +664,9 @@ def p_save_size(p):
     if p[1] > 0:
         global sizeVar
         sizeVar *= p[1]
+        #se bsuca el tipo para sumarla al contador de variables de funciones
+        
+         
         tabla.UpdateSize(DeclVar,sizeVar)
         tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
     else: 
@@ -662,6 +685,8 @@ def p_last_size(p):
     '''
     if p[1] > 0:
         global sizeVar
+        
+        tipo = tabla.GetAttribute(DeclVar,'Type')
         currentSize = sizeVar
         sizeVar *= p[1]
         tabla.UpdateSize(DeclVar, sizeVar)
@@ -732,8 +757,6 @@ def p_startArray(p):
     '''
     global lastVar
     lastVar = p[1]
-    popper.printStack()
-    values.printStack()
     popper.push('(')
     p[0]= None
 def p_checkLimits(p):
@@ -749,7 +772,6 @@ def p_checkLimits(p):
     values.push(math.ceil(size/(limit+1)))
     tipos.push('int')
     tipos.push('int')
-    values.printStack()
     GenerarCuadruploDeOperador(popper,values,tipos)
     p[0] = None
 def p_arreglo2(p):
@@ -770,7 +792,6 @@ def p_checkLimits2(p):
     columnSize = arrSize / (limit + 1)
     CrearCuadruplo('VER',values.top(),0, columnSize - 1)
     popper.push('+')  
-    values.printStack()
     GenerarCuadruploDeOperador(popper,values,tipos)
     popper.push('+')
     values.push(1)
@@ -970,7 +991,7 @@ def GenerarCuadruploDeOperador(operandos, valores, tipos):
         + iz + ' (' + tipoIzq + ') '
         + op + ' ' 
         + der + ' (' + tipoDer + ') ')
-    
+
 
 def CrearCuadruplo(op, iz, der, res):
     global cont
@@ -978,12 +999,67 @@ def CrearCuadruplo(op, iz, der, res):
     Cuartetos.append({'op': op, 'iz': iz, 'de': der, 'res':res})
 
 def GenerarNuevoTemporal(tipo):
+    agregarContVarFunciones(tipo,'Temporal')
     Temporales.append('t' + str(len(Temporales)))
     tipos.push(tipo)
 
 def Fill(cuarteto, llenado):
     global Cuartetos
     Cuartetos[cuarteto]['res'] = llenado
+def agregarContVarFunciones(type,location,size=1):
+    global contVarLocal
+    if location == 'NORMAL':
+        if(type == 'int'):
+            contVarLocal[0]  = contVarLocal[0] + size
+        elif(type == 'float'):
+            contVarLocal[1]  = contVarLocal[1] + size
+        elif(type == 'char'):
+            contVarLocal[2]  = contVarLocal[2] + size
+        elif(type == 'bool'):
+            contVarLocal[3]  = contVarLocal[3] + size
+        else:
+            contVarLocal[4]  = contVarLocal[4] + size
+    else:
+        if(type == 'int'):
+            contVarLocal[5]  = contVarLocal[5] + size 
+        elif(type == 'float'):
+            contVarLocal[6]  = contVarLocal[6] + size 
+        elif(type == 'char'):
+            contVarLocal[7]  = contVarLocal[7] + size
+        elif(type == 'bool'):
+             contVarLocal[8]  = contVarLocal[8] + size
+        else:
+            contVarLocal[9]  = contVarLocal[9] + size
+    
+def resetConVarFunciones():
+    global contVarLocal
+    contVarLocal.clear()
+    contVarLocal = [0]*10
+    
+def getContVarFunciones(type,location):
+    if location == 'NORMAL':
+        if(type == 'int'):
+            return contVarLocal[0] 
+        elif(type == 'float'):
+            return contVarLocal[1] 
+        elif(type == 'char'):
+            return contVarLocal[2]
+        elif(type == 'bool'):
+            return contVarLocal[3]
+        else:
+            return contVarLocal[4]
+    else:
+        if(type == 'int'):
+            return contVarLocal[5] 
+        elif(type == 'float'):
+            return contVarLocal[6] 
+        elif(type == 'char'):
+            return contVarLocal[7]
+        elif(type == 'bool'):
+            return contVarLocal[8]
+        else:
+            return contVarLocal[9]
+
 
 # crear el parser
 parser = yacc.yacc()
