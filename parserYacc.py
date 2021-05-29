@@ -34,20 +34,43 @@ TemporalesFor = Stack()
 tokens = lexico.tokens
 lexer = lexico.lexer
 
-#--------------function dir symb table ---------
-import symbTableFunctions as symb
+#-------------- Directorio de Clases y Funciones, Tablas de Variables  ---------
+from directory import Directory
+tabla = Directory({}, {}, {})
 
 #-------------- principal---------------
 
 def p_programa(p):
     '''
-    programa : PROGRAMA  ID SEMICOLON mainInicio declaracion_clases declaracion_funciones principal
-    | PROGRAMA ID SEMICOLON mainInicio
+    programa : PROGRAMA ID SEMICOLON scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
+    | PROGRAMA ID SEMICOLON
     '''
     CrearCuadruplo('END','_','_','_')
 
     #addScope(p[2])
     p[0] = None
+
+def p_scopeClases(p):
+    '''
+    scopeClases : empty
+    '''
+    tabla.SetScope('class')
+    p[0] = None
+
+def p_scopeFunction(p):
+    '''
+    scopeFunction : empty
+    '''
+    tabla.SetScope('function')
+    p[0] = None
+
+def p_scopeMain(p):
+    '''
+    scopeMain : empty
+    '''
+    tabla.SetScope('main')
+    p[0] = None
+
 def p_principal(p):
     '''
     principal : MAIN mainFin L_PARENTHESIS R_PARENTHESIS L_BRACKET  principal_aux cuerpo R_BRACKET 
@@ -478,16 +501,20 @@ def p_funciones_end(p):
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
-    declaracion_funciones_aux : MINI declaracion_funciones_aux2 ID L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
+    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
     |
     '''
-    if symb.CheckIfFunctionExists(Scope[0], Scope[1], p[3]):
-        raise ErrorMsg('La funcion ' + p[3] + ' ya habia sido declarada previamente')
+    p[0] = None
+def p_guardar_nombre_funcion(p):
+    '''
+    guardar_nombre_funcion : ID
+    '''
+    if tabla.CheckIfFunctionExists(p[1]):
+        raise ErrorMsg('La funcion ' + p[1] + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
-        symb.addFuncion(p[3], AuxList[1])
-    #addScope(p[3])
-    p[0] = None
+        tabla.AddFunction(p[1], AuxList[1])
+        tabla.SetCurrentFunction(p[1])
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
@@ -522,18 +549,17 @@ def p_declaracion_var_aux2(p):
     | tipo_retorno idChecker declaracion_var_aux5
     | tipo_especial idChecker
     '''
-    
     p[0] = None
 def p_idChecker(p):
     '''
     idChecker : ID
     '''
-    if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[1]):
+    if tabla.CheckIfVariableExists(p[1]):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
         global DeclVar
         DeclVar = p[1]
-        symb.addVariable(p[1], AuxList[1], len(Memoria),sizeVar)
+        tabla.AddVariable(p[1], AuxList[1], 0, len(Memoria))
         Memoria.append(0)
 
     p[0] = None
@@ -562,8 +588,8 @@ def p_save_size(p):
     save_size : CTEI
     '''
     global sizeVar
-    sizeVar *= p[1] + 1
-    symb.addLimiteSuperior(DeclVar,p[1],1)
+    sizeVar *= p[1]
+    tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
     p[0] = None
 def p_declaracion_var_aux7(p):
     '''
@@ -576,8 +602,8 @@ def p_last_size(p):
     last_size : CTEI
     '''
     global sizeVar
-    sizeVar *= p[1] + 1
-    symb.addLimiteSuperior(DeclVar,p[1],2)
+    sizeVar *= p[1]
+    tabla.UpdateSize(DeclVar, sizeVar)
     p[0] = None
 #-------------- Variables---------------
 
@@ -590,9 +616,9 @@ def p_variable_aux2(p):
     '''
     variable_aux2 : ID empty
     '''
-    if symb.CheckIfVariableExists(Scope[0], Scope[1], Scope[2], p[1]):
+    if tabla.CheckIfVariableExists(p[1]):
         values.push(p[1])
-        tipos.push(symb.GetType(Scope[0], Scope[1], Scope[2], p[1]))
+        tipos.push(tabla.GetAttribute(p[1], 'Type'))
     else:
         raise ErrorMsg('No existe la variable ' + p[1])
     
@@ -644,15 +670,10 @@ def p_checkLimits(p):
     checkLimits : empty
     '''
     print(lastVar)
+    limit = tabla.GetAttribute('Limit', lastVar)
+    print(limit)
+    CrearCuadruplo('VER',values.pop(),0,limit)
     
-    varSize = symb.GetSize(Scope[0], Scope[1], Scope[2], lastVar)
-    LS = symb.GetLS(Scope[0], Scope[1], Scope[2], lastVar,1)
-    LS2 = symb.GetLS(Scope[0], Scope[1], Scope[2], lastVar,2)
-    print(LS)
-    CrearCuadruplo('VER',values.pop(),0,LS)
-    
-    
-
     p[0] = None
 def p_arreglo2(p):
     '''
@@ -668,9 +689,11 @@ def p_checkLimits2(p):
     p_checkLimits2 : empty
     '''
     print(lastVar)
-    varSize = symb.GetSize(Scope[0], Scope[1], Scope[2], lastVar)
-    LS = symb.GetLS(Scope[0], Scope[1], Scope[2], lastVar,2)
-    CrearCuadruplo('VER',values.pop(),0,LS)
+    arrSize = tabla.GetAttribute('Size', lastVar)
+    limit = tabla.GetAttribute('Limit', lastVar)
+    columnSize = arrSize / (limit + 1)
+
+    CrearCuadruplo('VER',values.pop(),0, columnSize - 1)
     p[0]= None
 
 #-------------- expresiones---------------

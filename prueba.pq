@@ -15,6 +15,8 @@ mini void uno(int a){
     }
     a = a + b * a
     print(a,b,a+b)
+
+    c[2][2] = 4
    
     input(a)
     input(a,b,f)
