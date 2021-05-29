@@ -1,28 +1,15 @@
 from memory import Memory
 
-memoriaGlobal = Memory()
-cuadruplosTest = [{'op': '*', 'iz': 5, 'de': 3, 'res': '_t0'}, {'op': '+', 'iz': '_t0', 'de': 2, 'res': '_t1'}, {'op': 'print', 'iz': '_', 'de': '_', 'res': '_t0, _t1'}]
-directorioTest = {
-    'Clases': {}, 
-    'Funciones': {}, 
-    'Variables': {'hola': {'Id': 'hola', 'DataType': 'int', 'EspacioMemoria': 0}, 'hello': {'Id': 'hello', 'DataType': 'int', 'EspacioMemoria': 1}}, 
-    'Temporales': {'_t0': 10, '_t1': 12}
-}
-
 class VirtualMachine():
     directorio = {}
     cuadruplos = []
     def __init__(self, data):
         print('CREANDO LA VM')
-        self.cuadruplos = cuadruplosTest
-        self.directorio = directorioTest
+        self.memory = Memory(data)
+
     def run(self):
         print('Estoy adentro de la vm')
-        memoriaGlobal.addValueToMemory(5, 'int', 0)
-        print(memoriaGlobal.getValue('int', 0))
-
-        for item in self.cuadruplos:
-            self.procesarCuarteto(item)
+        
 
     def procesarCuarteto(self, cuadruplo):
         op = cuadruplo.get('op')

@@ -73,7 +73,7 @@ class Directory():
         newFunction = {
             'Type': type,
             'Address': address,
-            'Size': 0,
+            'Space': 0,
             'Variables': {},
             'Parametros': {}
         }
@@ -88,10 +88,8 @@ class Directory():
             self.Variables[name].update(newLimit)
         elif self.Scope == 'function':
             self.Funciones[self.CurrentFunction]['Variables'][name].update(newLimit)
-            print(self.Funciones)
         elif self.Scope == 'class':
             self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newLimit)
-    
     def UpdateSize(self, name, size):
         newSize = {'Size': size}
         if self.Scope == 'main':
@@ -100,3 +98,10 @@ class Directory():
             self.Funciones[self.CurrentFunction]['Variables'][name].update(newSize)
         elif self.Scope == 'class':
             self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newSize)
+
+    def updateFunctionAttribute(self,name,nameOfChange,change):
+        newVal = {nameOfChange: change}
+        if self.Scope == 'class':
+            self.Clases[self.CurrentClass]['Funciones'][name].update(newVal)
+        else:
+            self.Funciones[name].update(newVal)
