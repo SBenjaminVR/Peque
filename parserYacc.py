@@ -52,6 +52,9 @@ memoria = AsignadorMemoria()
 from tablaConstantes import TablaConstantes
 Constantes = TablaConstantes()
 
+from tablaOperaciones import TablaOperaciones
+Operadores = TablaOperaciones()
+
 #-------------- principal---------------
 
 def p_programa(p):
@@ -304,6 +307,7 @@ def p_startCall(p):
     '''
     global parametros
     parametros = 1
+
     CrearCuadruplo('ERA',funct.top(),'_','_')
     
     p[0]=None
@@ -439,59 +443,47 @@ def p_condicion(p):
     '''
     
     p[0] = None
-
-def p_else_after(p):
-    '''
-    else_after : empty
-    '''
-
-    end = Saltos[-1]
-    Saltos.pop()
-    Fill(end,cont)
-    
-
-    p[0] = None
 def p_rp_seen(p):
     '''
     rp_seen : empty
     '''
-    global cont
+    #guardamos direccion del primer salto
     result = Temporales[-1]
-    salto = cont
-    Saltos.append(salto)
     CrearCuadruplo('GOTOF',result,'_','_')
-    
-    
+    Saltos.append(cont-1)
+
     p[0] = None
+def p_else_after(p):
+    '''
+    else_after : empty
+    '''
+    
+    end = Saltos.pop()
+    Fill(end,cont)
+    
+
+    p[0] = None
+
 def p_condicion_aux(p):
     '''
-    condicion_aux : ELSE else_seen L_BRACKET cuerpo R_BRACKET elseEnd
+    condicion_aux : ELSE else_seen L_BRACKET cuerpo R_BRACKET
     |
     '''
-    #end = Saltos[-1]
-    #Cuartetos[end][res] = end
     p[0] = None
+
 def p_else_seen(p):
     '''
     else_seen : empty
     '''
-    global cont
-
-    result = Saltos[-1]
-    Saltos.pop()
-    Cuartetos.append({'op': 'GOTO', 'iz': '_', 'de': '_', 'res':'_'})
-    Saltos.append(cont)
-    cont += 1
-    Fill(result,cont)
+    CrearCuadruplo('GOTO','_','_','_')
+    falseJ = Saltos.pop()
+    Saltos.append(cont-1)
+    Fill(falseJ,cont)
+    
     # se Fillea lo que este en result con el cont actual
 
     p[0] = None
-def p_elseEnd(p):
-    '''
-    elseEnd : empty
-    '''
-    Saltos.pop()
-    p[0] = None
+
 
 #-------------- declaraciones---------------
 
@@ -700,7 +692,11 @@ def p_variable_aux2(p):
     variable_aux2 : ID empty
     '''
     if Tabla.CheckIfVariableExists(p[1]):
-        values.push(p[1])
+        print(p[1])
+        print(Tabla.Funciones)
+        address = Tabla.GetAttribute(p[1],'Address')
+        print(address)
+        values.push(address)
         tipos.push(Tabla.GetAttribute(p[1], 'Type'))
     else:
         raise ErrorMsg('No existe la variable ' + p[1])
@@ -763,7 +759,8 @@ def p_checkLimits(p):
 
     CrearCuadruplo('VER',values.top(),0,limit)
     popper.push('*')
-    values.push(math.ceil(size/(limit+1)))
+    address = Constantes.GetMemoryAddress(math.ceil(size/(limit+1)),'int')
+    values.push(address)
     tipos.push('int')
     tipos.push('int')
     GenerarCuadruploDeOperador(popper,values,tipos)
@@ -788,7 +785,8 @@ def p_checkLimits2(p):
     popper.push('+')  
     GenerarCuadruploDeOperador(popper,values,tipos)
     popper.push('+')
-    values.push(1)
+    address = Constantes.GetMemoryAddress(1,'int')
+    values.push(address)
     tipos.push('int')
     tipos.push('int')
     GenerarCuadruploDeOperador(popper,values,tipos)
@@ -919,17 +917,17 @@ def p_factor(p):
     if p[1] != '(':
         if isinstance(p[1],int) :
             tipos.push('int')
-            values.push(int(p[1]))
-            Constantes.GetMemoryAddress(int(p[1]), 'int')
+            address = Constantes.GetMemoryAddress(int(p[1]), 'int')
+            values.push(address)
         elif isinstance(p[1],float) :
             tipos.push('float')
-            values.push(float(p[1]))
-            Constantes.GetMemoryAddress(float(p[1]), 'float')
+            address = Constantes.GetMemoryAddress(float(p[1]), 'float')
+            values.push(address)
+
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
-            values.push(p[1][1])
-            Constantes.GetMemoryAddress(str(p[1]), 'char')
-
+            address = Constantes.GetMemoryAddress(str(p[1]), 'char')
+            values.push(address)
     p[0] = None
 def p_factor_aux(p):
     '''
@@ -990,11 +988,12 @@ def GenerarCuadruploDeOperador(operandos, valores, tipos):
 def CrearCuadruplo(op, iz, der, res):
     global cont
     cont += 1
-    Cuartetos.append({'op': op, 'iz': iz, 'de': der, 'res':res})
+    Cuartetos.append({'op': Operadores.GetNumber(op), 'iz': iz, 'de': der, 'res':res})
 
 def GenerarNuevoTemporal(tipo):
-    agregarContVarFunciones(tipo,'Temporal')
-    Temporales.append('t' + str(len(Temporales)))
+    agregarContVarFunciones(tipo,'TEMPORAL')
+    addressTemporal = memoria.AssignMemoryAddress(tipo,Scope[0],'TEMPORAL')
+    Temporales.append(addressTemporal)
     tipos.push(tipo)
 
 def Fill(cuarteto, llenado):

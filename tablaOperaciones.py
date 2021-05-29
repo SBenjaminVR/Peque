@@ -19,9 +19,9 @@ class TablaOperaciones:
             "ERA": 16,
             "GOSUB": 17,
             "PARAMETRO": 18,
-            "RETURN": 19
+            "RETURN": 19,
             "END PROC": 20,
-            "VER": 21
+            "VER": 21,
             "PRINT": 22,
             "INPUT": 23,
             "END": 24
