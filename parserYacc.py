@@ -16,6 +16,7 @@ sizeVar = 1
 
 global lastVar
 global DeclVar
+global FuncionDeclarada
 global cont
 cont = 0
 
@@ -44,6 +45,10 @@ tabla = Directory({}, {}, {})
 #--------- Memoria va asignando los espacios de memoria a las variables ----------#
 from asignadorMemoria import AsignadorMemoria
 memoria = AsignadorMemoria()
+
+#--------- Constantes lleva el control de la tabla de constantes  ----------#
+from tablaConstantes import TablaConstantes
+constantes = TablaConstantes()
 
 #-------------- principal---------------
 
@@ -113,7 +118,7 @@ def p_cuerpo_aux(p) :
     | estatutos_funciones
     | declaracion_var
     '''
-    popper.push('inicio')
+    
     p[0] = None
 #-------------- estatutos---------------
 #estatutos general
@@ -180,7 +185,6 @@ def p_for_revision(p):
     '''
     
     #chechar por las variables y expresiones
-    print('stack')
     values.printStack()
     popper.push('>=')
     GenerarCuadruploDeOperador(popper,values,tipos)
@@ -199,10 +203,7 @@ def p_for_suma (p):
 def p_for_final(p):
     '''
     for_final : empty
-    '''
-
-    print('generar for')
-    
+    '''    
     
     variableFor = TemporalesFor.pop()
     tipo = tipos.pop()
@@ -284,12 +285,6 @@ def p_input_aux2(p):
     '''
 
     p[0] = None
-def p_regreso(p):
-    '''
-    regreso : REGRESO expresion
-    '''
-
-    p[0] = None
 def p_llamada(p):
     '''
     llamada : llamadaID startCall llamada_aux L_PARENTHESIS llamada_aux2 R_PARENTHESIS endCall
@@ -315,8 +310,17 @@ def p_endCall(p):
     '''
     endCall : empty
     '''
-    CrearCuadruplo('GOSUB',funct.top(),'_','_')
-    funct.pop()
+    Funcion = funct.pop()
+    CrearCuadruplo('GOSUB',Funcion,'_','_')
+
+    Type = tabla.GetFunctionAttribute(Funcion, 'Type')
+    if Type != 'void':
+        Address = tabla.GetFunctionAttribute(Funcion, 'Address')
+        GenerarNuevoTemporal(Type)
+        Resultado = Temporales[-1]
+        values.push(Resultado)
+        CrearCuadruplo('=',Address,'_',Resultado)
+
     p[0]= None
 def p_llamada_aux(p):
     '''
@@ -531,7 +535,7 @@ def p_funciones_end(p):
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
-    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
+    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo regreso R_BRACKET
     |
     '''
     p[0] = None
@@ -539,12 +543,15 @@ def p_guardar_nombre_funcion(p):
     '''
     guardar_nombre_funcion : ID
     '''
-    if tabla.CheckIfFunctionExists(p[1]):
-        raise ErrorMsg('La funcion ' + p[1] + ' ya habia sido declarada previamente')
+    global FuncionDeclarada
+    FuncionDeclarada = p[1]
+    if tabla.CheckIfFunctionExists(FuncionDeclarada):
+        raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
-        tabla.AddFunction(p[1], AuxList[1])
-        tabla.SetCurrentFunction(p[1])
+        address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
+        tabla.AddFunction(FuncionDeclarada, AuxList[1], address)
+        tabla.SetCurrentFunction(FuncionDeclarada)
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
@@ -553,12 +560,25 @@ def p_declaracion_funciones_aux2(p):
     if p[1] == 'void' :
         AuxList[1] = p[1]
     p[0] = None
-def p_declaracion_funciones_aux3(p):
+def p_regreso(p):
     '''
-    declaracion_funciones_aux3 : regreso
-    | 
+    regreso : RETURN expresion
+    |
     '''
+    global FuncionDeclarada
+    print(FuncionDeclarada)
+    tipo = tabla.GetFunctionAttribute(FuncionDeclarada, 'Type')
+    if len(p) > 1:
+        if tipo == 'void':
+            raise ErrorMsg('Las funciones void (' + FuncionDeclarada + ') no deben tener un return')
+        else:
+            CrearCuadruplo('RETURN', '_', '_', values.pop())
+    else:
+        if tipo != 'void':
+            raise ErrorMsg('Las funciones de tipo ' + tipo + '(' + FuncionDeclarada + ') deben tener un return')
+        
     p[0] = None
+
 def p_declaracion_var(p):
     '''
     declaracion_var : declaracion_var_aux
@@ -566,7 +586,7 @@ def p_declaracion_var(p):
     p[0] = None
 def p_declaracion_var_aux(p):
     '''
-    declaracion_var_aux : VARIABLE declaracion_var_aux2 assignAddress declaracion_var
+    declaracion_var_aux : PETITE declaracion_var_aux2 assignAddress declaracion_var
     |
     '''
 def p_assignAddress(p):
@@ -593,6 +613,7 @@ def p_idChecker(p):
     idChecker : ID
     '''
     global sizeVar
+    sizeVar = 1
     if tabla.CheckIfVariableExists(p[1]):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
@@ -601,7 +622,6 @@ def p_idChecker(p):
         address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
         tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar)
         Memoria.append(0)
-    sizeVar = 1
 
     p[0] = None
 def p_declaracion_var_aux3(p):
@@ -621,10 +641,13 @@ def p_save_size(p):
     '''
     save_size : CTEI
     '''
-    global sizeVar
-    sizeVar *= p[1]
-    tabla.UpdateSize(DeclVar,sizeVar)
-    tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
+    if p[1] > 0:
+        global sizeVar
+        sizeVar *= p[1]
+        tabla.UpdateSize(DeclVar,sizeVar)
+        tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
+    else: 
+        raise ErrorMsg('No se puede declarar el tamaño de un array como menor que 1')
     
     p[0] = None
 def p_declaracion_var_aux7(p):
@@ -637,10 +660,13 @@ def p_last_size(p):
     '''
     last_size : CTEI
     '''
-    global sizeVar
-    currentSize = sizeVar
-    sizeVar *= p[1]
-    tabla.UpdateSize(DeclVar, sizeVar)
+    if p[1] > 0:
+        global sizeVar
+        currentSize = sizeVar
+        sizeVar *= p[1]
+        tabla.UpdateSize(DeclVar, sizeVar)
+    else: 
+        raise ErrorMsg('No se puede declarar el tamaño de una matriz como menor que 1')
 
     p[0] = None
 #-------------- Variables---------------
@@ -693,7 +719,6 @@ def p_arreglo(p):
     arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
     dirBase = tabla.GetAttribute( lastVar,'Address')
-    
     popper.push('+')
     values.push(dirBase)
     tipos.push('int')
@@ -707,6 +732,9 @@ def p_startArray(p):
     '''
     global lastVar
     lastVar = p[1]
+    popper.printStack()
+    values.printStack()
+    popper.push('(')
     p[0]= None
 def p_checkLimits(p):
     '''
@@ -729,8 +757,8 @@ def p_arreglo2(p):
     arreglo2 : L_CORCHETE expresion p_checkLimits2 R_CORCHETE
     |
     '''
-    
-
+    if(popper.top() == '('):
+        popper.pop()
     p[0] = None
 
 def p_checkLimits2(p):
@@ -877,12 +905,16 @@ def p_factor(p):
         if isinstance(p[1],int) :
             tipos.push('int')
             values.push(int(p[1]))
+            constantes.GetMemoryAddress(int(p[1]), 'int')
         elif isinstance(p[1],float) :
             tipos.push('float')
             values.push(float(p[1]))
+            constantes.GetMemoryAddress(float(p[1]), 'float')
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
             values.push(p[1][1])
+            constantes.GetMemoryAddress(str(p[1]), 'char')
+
     p[0] = None
 def p_factor_aux(p):
     '''

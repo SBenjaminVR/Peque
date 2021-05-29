@@ -16,7 +16,7 @@ import parserYacc as py
 
 # lectura de archivo
 from pathlib import Path
-from parserYacc import tipos, popper, values, Cuartetos, Temporales, tabla
+from parserYacc import tipos, popper, values, Cuartetos, Temporales, tabla, constantes
 import virtualMachine as mv
 
 fileData = Path('prueba.pq').read_text()

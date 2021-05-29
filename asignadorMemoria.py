@@ -12,7 +12,7 @@ class AsignadorMemoria:
     BOOL_GLOBAL_TEMPORAL =  7000
 
     INT_LOCAL =  8000
-    FLOAT_LOCAL = 90000
+    FLOAT_LOCAL = 9000
     CHAR_LOCAL =  10000
     BOOL_LOCAL = 11000
 
