@@ -49,7 +49,7 @@ tabla = Directory({}, {}, {})
 
 def p_programa(p):
     '''
-    programa : PROGRAMA ID SEMICOLON scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
+    programa : PROGRAMA ID SEMICOLON mainInicio scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
     | PROGRAMA ID SEMICOLON
     '''
     CrearCuadruplo('END','_','_','_')
@@ -388,11 +388,19 @@ def p_print_var_aux2(p):
 
 def p_asignacion(p):
     '''
-    asignacion : ID EQUALS asignacion_aux
+    asignacion : igualdadVar  
+    | arreglo EQUALS asignacion_aux
+    '''
+
+    p[0] = None
+def p_igualdadVar(p):
+    '''
+    igualdadVar : ID EQUALS asignacion_aux
     '''
     iz = values.pop()
     CrearCuadruplo(p[2], iz, '_', p[1])
-    p[0] = None
+
+    p[0]= None
 def p_asignacion_aux(p):
     '''
     asignacion_aux : expresion
@@ -546,8 +554,7 @@ def p_declaracion_var_aux(p):
     declaracion_var_aux : VARIABLE declaracion_var_aux2 declaracion_var
     |
     '''
-    global sizeVar
-    sizeVar = 1
+    
 
     p[0] = None
 def p_declaracion_var_aux2(p):
@@ -561,12 +568,16 @@ def p_idChecker(p):
     '''
     idChecker : ID
     '''
+    global sizeVar
+    sizeVar = 1
     if tabla.CheckIfVariableExists(p[1]):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
         global DeclVar
         DeclVar = p[1]
-        varDir = dirMemory.addMemory(tipos.top(),'G','N')
+        print(DeclVar)
+        varDir = dirMemory.addMemory(AuxList[1],'G','N')
+        print(varDir)
         tabla.AddVariable(p[1], AuxList[1], varDir, sizeVar)
         Memoria.append(0)
 
@@ -599,7 +610,7 @@ def p_save_size(p):
     sizeVar *= p[1]
     tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
     for i in range(0,sizeVar):
-        DeclVar ,': ' ,dirMemory.addMemory(tipos.top(),'G','N')
+        dirMemory.addMemory(AuxList[1],'G','N')
     p[0] = None
 def p_declaracion_var_aux7(p):
     '''
@@ -612,12 +623,11 @@ def p_last_size(p):
     last_size : CTEI
     '''
     global sizeVar
-    sizeVar *= p[1]
-    tabla.UpdateSize(DeclVar, sizeVar)
     beforeVal = sizeVar
     sizeVar *= p[1]
+    tabla.UpdateSize(DeclVar, sizeVar)
     for i in range(0,sizeVar-beforeVal):
-        print(DeclVar ,': ' ,dirMemory.addMemory(tipos.top(),'G','N'))
+        dirMemory.addMemory(AuxList[1],'G','N')
     p[0] = None
 #-------------- Variables---------------
 
@@ -668,6 +678,17 @@ def p_arreglo(p):
     '''
     arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
+    dirBase = tabla.GetAttribute( lastVar,'Address')
+    popper.push('+')
+    values.push(1)
+    tipos.push('int')
+    tipos.push('int')
+    GenerarCuadruploDeOperador(popper,values,tipos)
+    popper.push('+')
+    values.push(dirBase)
+    tipos.push('int')
+    GenerarCuadruploDeOperador(popper,values,tipos)
+
     
     p[0] = None
 def p_startArray(p):
@@ -683,10 +704,17 @@ def p_checkLimits(p):
     checkLimits : empty
     '''
     print(lastVar)
-    limit = tabla.GetAttribute('Limit', lastVar)
+    limit = tabla.GetAttribute( lastVar,'Limit')
+    size =  tabla.GetAttribute( lastVar,'Size')
+    tipo = tabla.GetAttribute( lastVar,'Type')
     print(limit)
-    CrearCuadruplo('VER',values.pop(),0,limit)
-    
+    CrearCuadruplo('VER',values.top(),0,limit)
+    popper.push('*')
+    values.push(size/(limit+1))
+    tipos.push('int')
+    tipos.push('int')
+    values.printStack()
+    GenerarCuadruploDeOperador(popper,values,tipos)
     p[0] = None
 def p_arreglo2(p):
     '''
@@ -702,11 +730,15 @@ def p_checkLimits2(p):
     p_checkLimits2 : empty
     '''
     print(lastVar)
-    arrSize = tabla.GetAttribute('Size', lastVar)
-    limit = tabla.GetAttribute('Limit', lastVar)
+    arrSize = tabla.GetAttribute(lastVar,'Size')
+    limit = tabla.GetAttribute(lastVar,'Limit')
     columnSize = arrSize / (limit + 1)
+    CrearCuadruplo('VER',values.top(),0, columnSize - 1)
+    popper.push('+')  
+    values.printStack()
+    GenerarCuadruploDeOperador(popper,values,tipos)
 
-    CrearCuadruplo('VER',values.pop(),0, columnSize - 1)
+
     p[0]= None
 
 #-------------- expresiones---------------
