@@ -45,6 +45,10 @@ tabla = Directory({}, {}, {})
 from asignadorMemoria import AsignadorMemoria
 memoria = AsignadorMemoria()
 
+#--------- Constantes lleva el control de la tabla de constantes  ----------#
+from tablaConstantes import TablaConstantes
+constantes = TablaConstantes()
+
 #-------------- principal---------------
 
 def p_programa(p):
@@ -883,9 +887,11 @@ def p_factor(p):
         if isinstance(p[1],int) :
             tipos.push('int')
             values.push(int(p[1]))
+            constantes.GetMemoryAddress(int(p[1]), 'int')
         elif isinstance(p[1],float) :
             tipos.push('float')
             values.push(float(p[1]))
+            constantes.GetMemoryAddress(float(p[1]), 'float')
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
             values.push(p[1][1])

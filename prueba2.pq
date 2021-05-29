@@ -1,28 +1,10 @@
-programa prueba; 
-mini void ejemploFuncion (int doce){
-    lee(kilo)
-    regreso 2+2
+programa prueba;
+
+mini void FuncionDePrueba() {
+    variable int a, b
 }
-variable float jose
-variable int variableint
-variable char letrita
-variable int momento
-variable int jose
-{
-    jose (4-1, jose, jose + 21 / 7)
-    variable jose = miguel [2] [2]
 
-    if(2+2*1 > 3) {
-            jose (2+3,jose,jose + 2)
-
-    } else {
-            jose (7/2,jose,jose + 2)
-
-    }
-    for(2 - 1 to 2 + 3){
-        print(2 + 3)
-    }
-    while(2 > 3){
-        print(3 + 4)
-    }
+main() {
+    variable int a
+    a = 2 + 3 * 4 - 5 + 2 * 4 - 7 + 3.5 / 6.666
 }
