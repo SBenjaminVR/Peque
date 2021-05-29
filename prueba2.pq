@@ -13,5 +13,5 @@ mini int FuncionIntDePrueba() {
 main() {
     FuncionDePrueba()
     petite int a
-    a = FuncionIntDePrueba() + FuncionIntDePrueba()
+    print(FuncionIntDePrueba() + FuncionIntDePrueba(), a)
 }

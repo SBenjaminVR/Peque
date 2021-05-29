@@ -1,13 +1,6 @@
 from memory import Memory
 
 memoriaGlobal = Memory()
-cuadruplosTest = [{'op': '*', 'iz': 5, 'de': 3, 'res': '_t0'}, {'op': '+', 'iz': '_t0', 'de': 2, 'res': '_t1'}, {'op': 'print', 'iz': '_', 'de': '_', 'res': '_t0, _t1'}]
-directorioTest = {
-    'Clases': {}, 
-    'Funciones': {}, 
-    'Variables': {'hola': {'Id': 'hola', 'DataType': 'int', 'EspacioMemoria': 0}, 'hello': {'Id': 'hello', 'DataType': 'int', 'EspacioMemoria': 1}}, 
-    'Temporales': {'_t0': 10, '_t1': 12}
-}
 
 class VirtualMachine():
     directorio = {}
