@@ -3,6 +3,7 @@
 import re
 import ply.lex as lex           # Scanner
 import ply.yacc as yacc  
+import math as math
 import lexico
 from memoriaCompi import MemoriaCompi
 
@@ -389,9 +390,17 @@ def p_print_var_aux2(p):
 def p_asignacion(p):
     '''
     asignacion : igualdadVar  
-    | arreglo EQUALS asignacion_aux
+    | igualdadArr
     '''
 
+    p[0] = None
+def p_igualdadArr(p):
+    '''
+    igualdadArr : arreglo EQUALS asignacion_aux
+    '''
+    iz = values.pop()
+    res = values.pop()
+    CrearCuadruplo(p[2], iz, '_', res)
     p[0] = None
 def p_igualdadVar(p):
     '''
@@ -608,9 +617,12 @@ def p_save_size(p):
     '''
     global sizeVar
     sizeVar *= p[1]
+    print(DeclVar,' ' ,sizeVar)
+    tabla.UpdateSize(DeclVar,sizeVar)
     tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
     for i in range(0,sizeVar):
         dirMemory.addMemory(AuxList[1],'G','N')
+    
     p[0] = None
 def p_declaracion_var_aux7(p):
     '''
@@ -679,11 +691,7 @@ def p_arreglo(p):
     arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
     dirBase = tabla.GetAttribute( lastVar,'Address')
-    popper.push('+')
-    values.push(1)
-    tipos.push('int')
-    tipos.push('int')
-    GenerarCuadruploDeOperador(popper,values,tipos)
+    
     popper.push('+')
     values.push(dirBase)
     tipos.push('int')
@@ -710,7 +718,7 @@ def p_checkLimits(p):
     print(limit)
     CrearCuadruplo('VER',values.top(),0,limit)
     popper.push('*')
-    values.push(size/(limit+1))
+    values.push(math.ceil(size/(limit+1)))
     tipos.push('int')
     tipos.push('int')
     values.printStack()
@@ -736,6 +744,11 @@ def p_checkLimits2(p):
     CrearCuadruplo('VER',values.top(),0, columnSize - 1)
     popper.push('+')  
     values.printStack()
+    GenerarCuadruploDeOperador(popper,values,tipos)
+    popper.push('+')
+    values.push(1)
+    tipos.push('int')
+    tipos.push('int')
     GenerarCuadruploDeOperador(popper,values,tipos)
 
 
