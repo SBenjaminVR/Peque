@@ -10,7 +10,12 @@ mini void uno(int a){
 
     a = c[2][3]
     a = b[5]
-    print(b[5])
+    for(2 to 4, 1){
+        print(b[5])
+    }
+    a = c[2][3]
+    a = b[5]
+    
     
     
  
