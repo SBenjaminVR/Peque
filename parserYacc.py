@@ -16,6 +16,7 @@ sizeVar = 1
 
 global lastVar
 global DeclVar
+global FuncionDeclarada
 global cont
 cont = 0
 
@@ -288,12 +289,6 @@ def p_input_aux2(p):
     '''
 
     p[0] = None
-def p_regreso(p):
-    '''
-    regreso : REGRESO expresion
-    '''
-
-    p[0] = None
 def p_llamada(p):
     '''
     llamada : llamadaID startCall llamada_aux L_PARENTHESIS llamada_aux2 R_PARENTHESIS endCall
@@ -319,8 +314,17 @@ def p_endCall(p):
     '''
     endCall : empty
     '''
-    CrearCuadruplo('GOSUB',funct.top(),'_','_')
-    funct.pop()
+    Funcion = funct.pop()
+    CrearCuadruplo('GOSUB',Funcion,'_','_')
+
+    Type = tabla.GetFunctionAttribute(Funcion, 'Type')
+    if Type != 'void':
+        Address = tabla.GetFunctionAttribute(Funcion, 'Address')
+        GenerarNuevoTemporal(Type)
+        Resultado = Temporales[-1]
+        values.push(Resultado)
+        CrearCuadruplo('=',Address,'_',Resultado)
+
     p[0]= None
 def p_llamada_aux(p):
     '''
@@ -535,7 +539,7 @@ def p_funciones_end(p):
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
-    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo declaracion_funciones_aux3 R_BRACKET
+    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo regreso R_BRACKET
     |
     '''
     p[0] = None
@@ -543,12 +547,15 @@ def p_guardar_nombre_funcion(p):
     '''
     guardar_nombre_funcion : ID
     '''
-    if tabla.CheckIfFunctionExists(p[1]):
-        raise ErrorMsg('La funcion ' + p[1] + ' ya habia sido declarada previamente')
+    global FuncionDeclarada
+    FuncionDeclarada = p[1]
+    if tabla.CheckIfFunctionExists(FuncionDeclarada):
+        raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
-        tabla.AddFunction(p[1], AuxList[1])
-        tabla.SetCurrentFunction(p[1])
+        address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
+        tabla.AddFunction(FuncionDeclarada, AuxList[1], address)
+        tabla.SetCurrentFunction(FuncionDeclarada)
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
@@ -557,12 +564,25 @@ def p_declaracion_funciones_aux2(p):
     if p[1] == 'void' :
         AuxList[1] = p[1]
     p[0] = None
-def p_declaracion_funciones_aux3(p):
+def p_regreso(p):
     '''
-    declaracion_funciones_aux3 : regreso
-    | 
+    regreso : RETURN expresion
+    |
     '''
+    global FuncionDeclarada
+    print(FuncionDeclarada)
+    tipo = tabla.GetFunctionAttribute(FuncionDeclarada, 'Type')
+    if len(p) > 1:
+        if tipo == 'void':
+            raise ErrorMsg('Las funciones void (' + FuncionDeclarada + ') no deben tener un return')
+        else:
+            CrearCuadruplo('RETURN', '_', '_', values.pop())
+    else:
+        if tipo != 'void':
+            raise ErrorMsg('Las funciones de tipo ' + tipo + '(' + FuncionDeclarada + ') deben tener un return')
+        
     p[0] = None
+
 def p_declaracion_var(p):
     '''
     declaracion_var : declaracion_var_aux
@@ -570,7 +590,7 @@ def p_declaracion_var(p):
     p[0] = None
 def p_declaracion_var_aux(p):
     '''
-    declaracion_var_aux : VARIABLE declaracion_var_aux2 assignAddress declaracion_var
+    declaracion_var_aux : PETITE declaracion_var_aux2 assignAddress declaracion_var
     |
     '''
 def p_assignAddress(p):
@@ -703,7 +723,6 @@ def p_arreglo(p):
     arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
     dirBase = tabla.GetAttribute( lastVar,'Address')
-    
     popper.push('+')
     values.push(dirBase)
     tipos.push('int')

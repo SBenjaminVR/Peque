@@ -47,6 +47,15 @@ class Directory():
             current = classObj.get('Funciones').get(self.CurrentFunction)
         return current.get('Variables').get(name).get(val)
 
+    def GetFunctionAttribute(self, name, val):
+        if self.Scope == 'class':
+            classObj = self.Clases.get(self.CurrentClass)
+            current = classObj.get('Funciones').get(name)
+        else:
+            current = self.Funciones.get(name)
+            
+        return current.get(val)
+
     def AddVariable(self, name, type, address, size):
         newVar = {
             'Type': type,
@@ -60,9 +69,10 @@ class Directory():
         elif self.Scope == 'class':
             self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name] = newVar
 
-    def AddFunction(self, name, type):
+    def AddFunction(self, name, type, address):
         newFunction = {
             'Type': type,
+            'Address': address,
             'Size': 0,
             'Variables': {},
             'Parametros': {}

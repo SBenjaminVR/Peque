@@ -1,10 +1,17 @@
 programa prueba;
 
 mini void FuncionDePrueba() {
-    variable int a, b
+    petite int a, b
+}
+
+mini int FuncionIntDePrueba() {
+    petite int c
+    c = 2
+    return c + 3
 }
 
 main() {
-    variable int a
-    a = 2 + 3 * 4 - 5 + 2 * 4 - 7 + 3.5 / 6.666
+    FuncionDePrueba()
+    petite int a
+    a = FuncionIntDePrueba() + FuncionIntDePrueba()
 }
