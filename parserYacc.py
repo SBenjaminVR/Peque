@@ -117,7 +117,7 @@ def p_cuerpo_aux(p) :
     | estatutos_funciones
     | declaracion_var
     '''
-    popper.push('inicio')
+    
     p[0] = None
 #-------------- estatutos---------------
 #estatutos general
@@ -184,7 +184,6 @@ def p_for_revision(p):
     '''
     
     #chechar por las variables y expresiones
-    print('stack')
     values.printStack()
     popper.push('>=')
     GenerarCuadruploDeOperador(popper,values,tipos)
@@ -203,10 +202,7 @@ def p_for_suma (p):
 def p_for_final(p):
     '''
     for_final : empty
-    '''
-
-    print('generar for')
-    
+    '''    
     
     variableFor = TemporalesFor.pop()
     tipo = tipos.pop()
@@ -717,6 +713,9 @@ def p_startArray(p):
     '''
     global lastVar
     lastVar = p[1]
+    popper.printStack()
+    values.printStack()
+    popper.push('(')
     p[0]= None
 def p_checkLimits(p):
     '''
@@ -739,8 +738,8 @@ def p_arreglo2(p):
     arreglo2 : L_CORCHETE expresion p_checkLimits2 R_CORCHETE
     |
     '''
-    
-
+    if(popper.top() == '('):
+        popper.pop()
     p[0] = None
 
 def p_checkLimits2(p):
@@ -895,6 +894,8 @@ def p_factor(p):
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
             values.push(p[1][1])
+            constantes.GetMemoryAddress(str(p[1]), 'char')
+
     p[0] = None
 def p_factor_aux(p):
     '''
