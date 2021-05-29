@@ -47,13 +47,12 @@ class Directory():
             current = classObj.get('Funciones').get(self.CurrentFunction)
         return current.get('Variables').get(name).get(val)
 
-    def addVariable(self, name, type, address, size):
+    def AddVariable(self, name, type, address, size):
         newVar = {
             'Type': type,
             'Address': address,
             'Size': size
         }
-        print (newVar)
         if self.Scope == 'main':
             self.Variables[name] = newVar
         elif self.Scope == 'function':
@@ -61,7 +60,7 @@ class Directory():
         elif self.Scope == 'class':
             self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name] = newVar
 
-    def addFunction(self, name, type):
+    def AddFunction(self, name, type):
         newFunction = {
             'Type': type,
             'Size': 0,
@@ -72,4 +71,22 @@ class Directory():
             self.Funciones[name] = newFunction
         else:
             self.Clases[self.CurrentClass]['Funciones'][name] = newFunction
-           
+    
+    def UpdateArrayLimit(self, name, limit):
+        newLimit = {'Limit': limit}
+        if self.Scope == 'main':
+            self.Variables[name].update(newLimit)
+        elif self.Scope == 'function':
+            self.Funciones[self.CurrentFunction]['Variables'][name].update(newLimit)
+            print(self.Funciones)
+        elif self.Scope == 'class':
+            self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newLimit)
+    
+    def UpdateSize(self, name, size):
+        newSize = {'Size': size}
+        if self.Scope == 'main':
+            self.Variables[name].update(newSize)
+        elif self.Scope == 'function':
+            self.Funciones[self.CurrentFunction]['Variables'][name].update(newSize)
+        elif self.Scope == 'class':
+            self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newSize)

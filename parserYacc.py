@@ -3,19 +3,24 @@
 import re
 import ply.lex as lex           # Scanner
 import ply.yacc as yacc  
+import math as math
 import lexico
 
 AuxList = ['temp', 'tempo']
 Cuartetos = []
 Temporales = []
 Saltos = []
-Scope = ['main', '_', '_']
+Scope = ['GLOBAL']
 parametros = 1
+sizeVar = 1
 
+global lastVar
+global DeclVar
 global cont
 cont = 0
 
 Memoria = []
+
 #--------------------------------------- importar cuboSemantico---------------------------------------
 from cuboSemantico import cuboSemantico
 #cuboSemantico tiene todas las consideraciones semanticas
@@ -36,11 +41,15 @@ lexer = lexico.lexer
 from directory import Directory
 tabla = Directory({}, {}, {})
 
+#--------- Memoria va asignando los espacios de memoria a las variables ----------#
+from asignadorMemoria import AsignadorMemoria
+memoria = AsignadorMemoria()
+
 #-------------- principal---------------
 
 def p_programa(p):
     '''
-    programa : PROGRAMA ID SEMICOLON scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
+    programa : PROGRAMA ID SEMICOLON mainInicio scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
     | PROGRAMA ID SEMICOLON
     '''
     CrearCuadruplo('END','_','_','_')
@@ -53,6 +62,7 @@ def p_scopeClases(p):
     scopeClases : empty
     '''
     tabla.SetScope('class')
+    Scope[0] = 'LOCAL'
     p[0] = None
 
 def p_scopeFunction(p):
@@ -60,6 +70,7 @@ def p_scopeFunction(p):
     scopeFunction : empty
     '''
     tabla.SetScope('function')
+    Scope[0] = 'LOCAL'
     p[0] = None
 
 def p_scopeMain(p):
@@ -67,11 +78,12 @@ def p_scopeMain(p):
     scopeMain : empty
     '''
     tabla.SetScope('main')
+    Scope[0] = 'GLOBAL'
     p[0] = None
 
 def p_principal(p):
     '''
-    principal : MAIN mainFin L_PARENTHESIS R_PARENTHESIS L_BRACKET  principal_aux cuerpo R_BRACKET 
+    principal : MAIN mainFin L_PARENTHESIS R_PARENTHESIS L_BRACKET cuerpo R_BRACKET 
     '''
     p[0] = None
 def p_mainInicio(p):
@@ -85,17 +97,9 @@ def p_mainFin(p):
     '''
     mainFin : empty
     '''
-
     Fill(0,cont)
-
-
     p[0] = None
-def p_principal_aux(p):
-    '''
-    principal_aux : empty
-    '''
-    Scope[0] = 'main'
-    p[0] = None
+
 #falta agregar estatutos repeticion
 def p_cuerpo(p) :
     '''
@@ -151,14 +155,22 @@ def p_for_inicio(p):
     '''
     for_inicio : empty
     '''
-    
     Saltos.append(cont)
     p[0]= None
 def p_for_temp(p):
     '''
     for_temp : empty
     '''
-    TemporalesFor.push(values.pop())
+    iz = values.pop()
+    GenerarNuevoTemporal('int')
+    values.push(Temporales[-1])
+    res = values.top()
+    TemporalesFor.push(res)
+    CrearCuadruplo('=', iz, '_', res)
+    
+   
+
+    
     
     
     p[0]= None
@@ -166,12 +178,15 @@ def p_for_revision(p):
     '''
     for_revision : empty
     '''
-    GenerarNuevoTemporal()
+    
     #chechar por las variables y expresiones
+    print('stack')
+    values.printStack()
     popper.push('>=')
     GenerarCuadruploDeOperador(popper,values,tipos)
     Saltos.append(cont)
-    CrearCuadruplo('GotoF',Temporales[-1],'_','_')
+    CrearCuadruplo('GotoF',values.pop(),'_','_')
+   
 
     p[0]= None
 
@@ -179,15 +194,21 @@ def p_for_suma (p):
     '''
     for_suma : empty
     '''
-    popper.push('+')
-    values.push(TemporalesFor.pop())
-    #PENDIENTE REVISION DE TIPOS
-    GenerarCuadruploDeOperador(popper,values,tipos)
+   
     p[0]=None
 def p_for_final(p):
     '''
     for_final : empty
     '''
+
+    print('generar for')
+    
+    
+    variableFor = TemporalesFor.pop()
+    tipo = tipos.pop()
+    #falta comprobar tipos del for
+    CrearCuadruplo('+',values.pop(),variableFor,variableFor)
+    
     global cont
     falseJump = Saltos[-1]
     Saltos.pop()
@@ -195,6 +216,8 @@ def p_for_final(p):
     Saltos.pop()
     CrearCuadruplo('Goto','_','_',Ret)
     Fill(falseJump,cont)
+
+    
     p[0] = None
 #--------------------------While--------------------
 def p_repeticion_condicional(p):
@@ -218,15 +241,8 @@ def p_checkCond(p):
     cond = values.pop()
     tCond = tipos.top()
 
-    #if tCond != 'bool' :
-     #   print('Error')
-    #else :
-        #Saltos.append(cont)
-        #CrearCuadruplo('GotoF',cond,'_','_')
     Saltos.append(cont)
-    CrearCuadruplo('GotoF',cond,'_','_')
-    
-        
+    CrearCuadruplo('GotoF',cond,'_','_')        
 
     p[0] = None
 def p_finalWhile(p):
@@ -245,13 +261,26 @@ def p_finalWhile(p):
 #estatutos funcionales
 def p_input(p):
     '''
-    input : INPUT L_PARENTHESIS variable input_aux
+    input : INPUT L_PARENTHESIS input_aux  R_PARENTHESIS
     '''
+    
     p[0] = None
-def p_lee_aux(p):
+def p_input_aux(p):
     '''
-    input_aux : R_PARENTHESIS
-    | COMMA  variable input_aux
+    input_aux : input_aux2 leeInput COMMA input_aux
+    | input_aux2 leeInput
+    '''
+def p_leeInput(p):
+    '''
+    leeInput : empty
+    '''
+    res = values.pop()
+    CrearCuadruplo('input',res,'_','_')
+    p[0] = None
+def p_input_aux2(p):
+    '''
+    input_aux2 : variable
+    | arreglo
     '''
 
     p[0] = None
@@ -366,11 +395,27 @@ def p_print_var_aux2(p):
 
 def p_asignacion(p):
     '''
-    asignacion : ID EQUALS asignacion_aux
+    asignacion : igualdadVar  
+    | igualdadArr
+    '''
+
+    p[0] = None
+def p_igualdadArr(p):
+    '''
+    igualdadArr : arreglo EQUALS asignacion_aux
+    '''
+    iz = values.pop()
+    res = values.pop()
+    CrearCuadruplo(p[2], iz, '_', res)
+    p[0] = None
+def p_igualdadVar(p):
+    '''
+    igualdadVar : ID EQUALS asignacion_aux
     '''
     iz = values.pop()
     CrearCuadruplo(p[2], iz, '_', p[1])
-    p[0] = None
+
+    p[0]= None
 def p_asignacion_aux(p):
     '''
     asignacion_aux : expresion
@@ -498,7 +543,7 @@ def p_guardar_nombre_funcion(p):
         raise ErrorMsg('La funcion ' + p[1] + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
-        tabla.addFunction(p[1], AuxList[1])
+        tabla.AddFunction(p[1], AuxList[1])
         tabla.SetCurrentFunction(p[1])
 def p_declaracion_funciones_aux2(p):
     '''
@@ -521,51 +566,83 @@ def p_declaracion_var(p):
     p[0] = None
 def p_declaracion_var_aux(p):
     '''
-    declaracion_var_aux : VARIABLE declaracion_var_aux2 declaracion_var
+    declaracion_var_aux : VARIABLE declaracion_var_aux2 assignAddress declaracion_var
     |
     '''
+def p_assignAddress(p):
+    # Funcion que asigna los espacios de memoria faltantes en caso de ser un array o matriz
+    '''
+    assignAddress : empty
+    '''
+    global sizeVar
+
+    # Se ignora el primer espacio ya que fue asignado al momento de guardar la variable por primera vez
+    for i in range(1, sizeVar):
+        memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
 
     p[0] = None
 def p_declaracion_var_aux2(p):
     '''
-    declaracion_var_aux2 : tipo_retorno ID declaracion_var_aux3
-    | tipo_retorno ID declaracion_var_aux5
-    | tipo_especial ID
+    declaracion_var_aux2 : tipo_retorno idChecker declaracion_var_aux3
+    | tipo_retorno idChecker declaracion_var_aux5
+    | tipo_especial idChecker
     '''
-    if tabla.CheckIfVariableExists(p[2]):
-        raise ErrorMsg('La variable ' + p[2] + ' ya habia sido declarada previamente')
+    p[0] = None
+def p_idChecker(p):
+    '''
+    idChecker : ID
+    '''
+    global sizeVar
+    if tabla.CheckIfVariableExists(p[1]):
+        raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
-        tabla.addVariable(p[2], AuxList[1], 0, len(Memoria))
+        global DeclVar
+        DeclVar = p[1]
+        address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
+        tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar)
         Memoria.append(0)
+    sizeVar = 1
+
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
-    declaracion_var_aux3 : COMMA ID declaracion_var_aux3
+    declaracion_var_aux3 : COMMA idChecker declaracion_var_aux3
     |
     '''
-    if (len(p) > 1):
-        tabla.addVariable(p[2], AuxList[1], 0, len(Memoria))
-        Memoria.append(0)
     p[0] = None
 def p_declaracion_var_aux5(p):
     '''
-    declaracion_var_aux5 : declaracion_var_aux6 
-    |
-    '''
-    p[0] = None
-def p_declaracion_var_aux6(p):
-    '''
-    declaracion_var_aux6 : L_CORCHETE CTEI R_CORCHETE declaracion_var_aux7
-    |
-    '''
-    p[0] = None
-def p_declaracion_var_aux7(p):
-    '''
-    declaracion_var_aux7 : L_CORCHETE CTEI R_CORCHETE
+    declaracion_var_aux5 : L_CORCHETE save_size R_CORCHETE declaracion_var_aux7
     |
     '''
     p[0] = None
 
+def p_save_size(p):
+    '''
+    save_size : CTEI
+    '''
+    global sizeVar
+    sizeVar *= p[1]
+    tabla.UpdateSize(DeclVar,sizeVar)
+    tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
+    
+    p[0] = None
+def p_declaracion_var_aux7(p):
+    '''
+    declaracion_var_aux7 : L_CORCHETE last_size R_CORCHETE
+    |
+    '''
+    p[0] = None
+def p_last_size(p):
+    '''
+    last_size : CTEI
+    '''
+    global sizeVar
+    currentSize = sizeVar
+    sizeVar *= p[1]
+    tabla.UpdateSize(DeclVar, sizeVar)
+
+    p[0] = None
 #-------------- Variables---------------
 
 def p_variable(p):
@@ -582,7 +659,6 @@ def p_variable_aux2(p):
         tipos.push(tabla.GetAttribute(p[1], 'Type'))
     else:
         raise ErrorMsg('No existe la variable ' + p[1])
-    
     p[0] = None
 def p_variable_aux(p):
     '''
@@ -614,16 +690,68 @@ def p_tipo_retorno(p):
 
 def p_arreglo(p):
     '''
-    arreglo : ID L_CORCHETE expresion R_CORCHETE arreglo2
+    arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
+    dirBase = tabla.GetAttribute( lastVar,'Address')
+    
+    popper.push('+')
+    values.push(dirBase)
+    tipos.push('int')
+    GenerarCuadruploDeOperador(popper,values,tipos)
+
+    
+    p[0] = None
+def p_startArray(p):
+    '''
+    startArray : ID
+    '''
+    global lastVar
+    lastVar = p[1]
+    p[0]= None
+def p_checkLimits(p):
+    '''
+    checkLimits : empty
+    '''
+    limit = tabla.GetAttribute( lastVar,'Limit')
+    size =  tabla.GetAttribute( lastVar,'Size')
+    tipo = tabla.GetAttribute( lastVar,'Type')
+
+    CrearCuadruplo('VER',values.top(),0,limit)
+    popper.push('*')
+    values.push(math.ceil(size/(limit+1)))
+    tipos.push('int')
+    tipos.push('int')
+    values.printStack()
+    GenerarCuadruploDeOperador(popper,values,tipos)
     p[0] = None
 def p_arreglo2(p):
     '''
-    arreglo2 : L_CORCHETE expresion R_CORCHETE
+    arreglo2 : L_CORCHETE expresion p_checkLimits2 R_CORCHETE
     |
     '''
+    
+
     p[0] = None
 
+def p_checkLimits2(p):
+    '''
+    p_checkLimits2 : empty
+    '''
+    arrSize = tabla.GetAttribute(lastVar,'Size')
+    limit = tabla.GetAttribute(lastVar,'Limit')
+    columnSize = arrSize / (limit + 1)
+    CrearCuadruplo('VER',values.top(),0, columnSize - 1)
+    popper.push('+')  
+    values.printStack()
+    GenerarCuadruploDeOperador(popper,values,tipos)
+    popper.push('+')
+    values.push(1)
+    tipos.push('int')
+    tipos.push('int')
+    GenerarCuadruploDeOperador(popper,values,tipos)
+
+
+    p[0]= None
 
 #-------------- expresiones---------------
 
@@ -740,6 +868,7 @@ def p_factor(p):
     factor : L_PARENTHESIS factor_aux expresion R_PARENTHESIS factor_aux2
     | variable
     | llamada
+    | arreglo
     | CTEI
     | CTEF
     | CTEC
