@@ -181,9 +181,6 @@ def p_for_temp(p):
     
    
 
-    
-    
-    
     p[0]= None
 def p_for_revision(p):
     '''
@@ -511,13 +508,20 @@ def p_declaracion_parametros_aux(p):
 
 def p_declaracion_clases(p):
     '''
-    declaracion_clases : PEQUE guardar_nombre_clase declaracion_clases_aux declaracion_clases
+    declaracion_clases : PEQUE guardar_nombre_clase declaracion_clases_aux end_class declaracion_clases
     |
 
     '''
 
 
     p[0] = None
+def p_end_class(p):
+    '''
+    end_class : empty
+    '''
+    CrearCuadruplo('END CLASS','_','_','_')
+    p[0]= None
+
 def p_guardar_nombre_clase(p):
     '''
     guardar_nombre_clase : ID
@@ -575,6 +579,7 @@ def p_guardar_nombre_funcion(p):
     resetConVarFunciones()
     global FuncionDeclarada
     FuncionDeclarada = p[1]
+    print(FuncionDeclarada)
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:

@@ -24,7 +24,8 @@ class TablaOperaciones:
             "VER": 21,
             "PRINT": 22,
             "INPUT": 23,
-            "END": 24
+            "END": 24,
+            "END CLASS" : 25
         }
 
     def GetNumber(self, Operation):

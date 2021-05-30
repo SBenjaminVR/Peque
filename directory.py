@@ -29,7 +29,7 @@ class Directory():
 
     def CheckIfFunctionExists(self, funcion):     
         if self.Scope == 'class':
-            current = self.Clases.get(self.CurrentClass).get('Funciones')
+            current = self.Clases.get(self.CurrentClass)
             return current.get('Funciones').get(funcion) != None
         else:
             return self.Funciones.get(funcion)
