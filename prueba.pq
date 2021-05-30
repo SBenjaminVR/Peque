@@ -29,7 +29,7 @@ peque micola agranda marmota{
     }
     
 }
-mini void dos(int a){
+mini void dos(int a, float b[5]){
 
         petite float b[8]
         petite float f
@@ -47,6 +47,6 @@ main()
     petite float b[8]
     petite float f
     petite int c[4][4]
-   
-    
+    dos(2,3.3)
+    dos(2,b)
 }

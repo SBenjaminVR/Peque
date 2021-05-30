@@ -45,7 +45,7 @@ lexer = lexico.lexer
 
 #-------------- Directorio de Clases y Funciones, Tablas de Variables  ---------
 from directory import Directory
-Tabla = Directory({}, {}, {})
+Tabla = Directory({}, {}, {},{})
 
 #--------- Memoria va asignando los espacios de memoria a las variables ----------#
 from asignadorMemoria import AsignadorMemoria
@@ -303,6 +303,7 @@ def p_llamadaID(p):
     '''
     llamadaID : ID
     '''
+    
     funct.push(p[1])    
     p[0] = None
 def p_startCall(p):
@@ -311,7 +312,7 @@ def p_startCall(p):
     '''
     global parametros
     parametros = 1
-
+    memoria.ResetLocalMemory()
     CrearCuadruplo('ERA',funct.top(),'_', Tabla.Scope) #Quiza se puede sustituir por numeros
     
     p[0]=None
@@ -357,7 +358,6 @@ def p_parametros(p):
     parametros :  expresion 
     | 
     '''
-    
     p[0] = None
 def p_endParam(p):
     '''
@@ -365,17 +365,11 @@ def p_endParam(p):
 
     '''
     global parametros
-
-    CrearCuadruplo('PARAMETRO', values.pop(),'_','Param' + str(parametros))
+    address = memoria.AssignMemoryAddress(tipos.pop(),'LOCAL',Location)
+    CrearCuadruplo('PARAMETRO', values.pop(),'_',address)
     parametros += 1
     p[0] = None
 
-def p_parametros_aux(p):
-    '''
-    parametros_aux : PERIOD ID
-    |
-    '''
-    p[0] = None
 
 def p_print(p):
     '''
@@ -518,9 +512,6 @@ def p_declaracion_clases(p):
     |
 
     '''
-
-
-
     p[0] = None
 def p_end_class(p):
     '''
@@ -582,6 +573,7 @@ def p_startF(p):
     '''
     global Location
     Location = 'function'
+    
 
 def p_funciones_end(p):
     '''
@@ -615,6 +607,8 @@ def p_guardar_nombre_funcion(p):
     #se resetea el contador de variables para funciones
     global contVarLocal
     resetConVarFunciones()
+    
+
     global FuncionDeclarada
     FuncionDeclarada = p[1]
     
@@ -1125,8 +1119,6 @@ def getContVarFunciones(type,location):
             return contVarLocal[0] 
         elif(type == 'float'):
             return contVarLocal[1] 
-        elif(type == 'char'):
-            return contVarLocal[2]
         elif(type == 'bool'):
             return contVarLocal[3]
         else:
@@ -1136,8 +1128,6 @@ def getContVarFunciones(type,location):
             return contVarLocal[5] 
         elif(type == 'float'):
             return contVarLocal[6] 
-        elif(type == 'char'):
-            return contVarLocal[7]
         elif(type == 'bool'):
             return contVarLocal[8]
         else:

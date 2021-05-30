@@ -3,22 +3,18 @@ class AsignadorMemoria:
     #----------------Direciones De Memoria -----------------#
     INT_GLOBAL = 0
     FLOAT_GLOBAL = 1000
-    CHAR_GLOBAL =  2000
     BOOL_GLOBAL = 3000
     
     INT_GLOBAL_TEMPORAL =  4000
     FLOAT_GLOBAL_TEMPORAL = 5000
-    CHAR_GLOBAL_TEMPORAL = 6000
     BOOL_GLOBAL_TEMPORAL =  7000
 
     INT_LOCAL =  8000
     FLOAT_LOCAL = 9000
-    CHAR_LOCAL =  10000
     BOOL_LOCAL = 11000
 
     INT_LOCAL_TEMPORAL = 12000
     FLOAT_LOCAL_TEMPORAL = 13000
-    CHAR_LOCAL_TEMPORAL = 14000
     BOOL_LOCAL_TEMPORAL = 15000
 
     OBJETOS = 27000
@@ -38,9 +34,6 @@ class AsignadorMemoria:
                 elif tipo == 'float':
                     address = self.FLOAT_GLOBAL + self.last[1]
                     self.last[1] = self.last[1] + 1
-                elif tipo == 'char':
-                    address = self.CHAR_GLOBAL + self.last[2]
-                    self.last[2] = self.last[2] + 1
                 elif tipo == 'bool':
                     address = self.BOOL_GLOBAL + self.last[3]
                     self.last[3] = self.last[3] + 1
@@ -51,9 +44,6 @@ class AsignadorMemoria:
                 elif tipo == 'float':
                     address = self.FLOAT_GLOBAL_TEMPORAL + self.last[5]
                     self.last[5] = self.last[5] + 1
-                elif tipo == 'char':
-                    address = self.CHAR_GLOBAL_TEMPORAL + self.last[6]
-                    self.last[6] = self.last[6] + 1
                 elif tipo == 'bool':
                     address = self.BOOL_GLOBAL_TEMPORAL + self.last[7]
                     self.last[7] = self.last[7] + 1
@@ -65,9 +55,6 @@ class AsignadorMemoria:
                 elif tipo == 'float':
                     address = self.FLOAT_LOCAL + self.last[9]
                     self.last[9] = self.last[9] + 1
-                elif tipo == 'char':
-                    address = self.CHAR_LOCAL + self.last[10]
-                    self.last[10] = self.last[10] + 1
                 elif tipo == 'bool':
                     address = self.BOOL_LOCAL + self.last[11]
                     self.last[11] = self.last[11] + 1
@@ -78,9 +65,6 @@ class AsignadorMemoria:
                 elif tipo == 'float':
                     address = self.FLOAT_LOCAL_TEMPORAL + self.last[13]
                     self.last[13] = self.last[5] + 1
-                elif tipo == 'char':
-                    address = self.CHAR_LOCAL_TEMPORAL + self.last[14]
-                    self.last[14] = self.last[6] + 1
                 elif tipo == 'bool':
                     address = self.BOOL_LOCAL_TEMPORAL + self.last[15]
                     self.last[15] = self.last[7] + 1                
