@@ -4,6 +4,19 @@ from stack import Stack
 def IsInLocalRange(address):
     return address >= 8000 and address <= 15000
         
+def GetTypeGivenTheBase(address, base):
+    
+
+def GetTypeOfValueGivenTheAddress(address):
+    if address < 4000:
+        return GetTypeGivenTheBase(address, 0)
+    elif address < 8000:
+        return GetTypeGivenTheBase(address, 4000)
+    elif address < 12000:
+        return GetTypeGivenTheBase(address, 8000)
+    elif address < 20000:
+        return GetTypeGivenTheBase(address, 12000)
+
 class Memory:
     def __init__(self, data):
         self.memory = [None]*30000

@@ -103,7 +103,7 @@ class VirtualMachine():
                 self.ProcessPRINT(iz)
 
             elif operation == 23:
-                print('Not yet implemented')
+                self.ProcessINPUT(iz)
 
             elif operation == 24:
                 print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time))
@@ -125,7 +125,6 @@ class VirtualMachine():
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz * de)
-        print(str(iz) + ' * ' + str(de))
 
     def ProcessDIVIDE(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
@@ -207,17 +206,27 @@ class VirtualMachine():
         iz = self.memory.GetValue(left)
         print(str(iz))
 
+    def ProcessINPUT(self, left):
+        userInput = input()
+        print('Asignando ' + str(userInput) + ' en direccion ' + str(left))
+        self.memory.SetValue(left, userInput)
+
     def ProcessEND(self):
         print('Programa se termino de ejecutar')
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):
-            return self.memory.GetValue(value)
+            current = self.memory.GetValue(value)
         else:
             #Se quitan los parentesis y se accede al primer valor
             value = value[1:-1]
             aux = self.memory.GetValue(int(value))
-            return self.memory.GetValue(aux)
+            current = self.memory.GetValue(aux)
+        #Se checa que no se este tratando de acceder a una casilla vacia
+        if current != None:
+            return current
+        else:
+            raise ErrorMsg('Se esta tratando de acceder a una casilla sin valor')
 
     def esIntOFloat(self, var):
         return isinstance(var, int) or isinstance(var, float)
