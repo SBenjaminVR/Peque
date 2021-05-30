@@ -313,6 +313,7 @@ def p_startCall(p):
     global parametros
     parametros = 1
     memoria.ResetLocalMemory()
+    
     CrearCuadruplo('ERA',funct.top(),'_', Tabla.Scope) #Quiza se puede sustituir por numeros
     
     p[0]=None

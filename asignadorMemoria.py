@@ -22,8 +22,14 @@ class AsignadorMemoria:
 
     last = []
     def __init__(self):
-        self.last = [0]*16
-   
+        self.last = [0]*17
+    
+    def AssignMemoryAddressObject(self):
+        address = -1
+        address = self.OBJETOS + self.last[16]
+        self.last[16] = self.last[16] + 1
+        return address
+    
     def AssignMemoryAddress(self, tipo, scope, location):
         address = -1
         if scope == 'GLOBAL':
@@ -64,10 +70,10 @@ class AsignadorMemoria:
                     self.last[12] = self.last[12] + 1
                 elif tipo == 'float':
                     address = self.FLOAT_LOCAL_TEMPORAL + self.last[13]
-                    self.last[13] = self.last[5] + 1
+                    self.last[13] = self.last[13] + 1
                 elif tipo == 'bool':
                     address = self.BOOL_LOCAL_TEMPORAL + self.last[15]
-                    self.last[15] = self.last[7] + 1                
+                    self.last[15] = self.last[15] + 1                
         return address
         
     def ResetLocalMemory(self):

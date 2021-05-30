@@ -21,15 +21,12 @@ peque micola agranda marmota{
         petite float f
         petite float c[4][4]
         petite float d
-        
-        for(d to 10, 2)
-        {
-            c[3][1] = d
-        }
+        f = c[2][1]
+       
     }
     
 }
-mini void dos(int a, float b[5]){
+mini void dos(int a, float b){
 
         petite float b[8]
         petite float f
@@ -38,7 +35,7 @@ mini void dos(int a, float b[5]){
         
         for(d to 10, 2)
         {
-            c[3][1] = d
+            d = c[2][1]
         }
     }
 
