@@ -528,6 +528,9 @@ def p_guardar_nombre_clase(p):
     '''
     global claseDeclarada
     claseDeclarada = p[1]
+    print(claseDeclarada)
+    print(Tabla.CheckIfClassExists(claseDeclarada))
+    print(Tabla.Clases)
     if Tabla.CheckIfClassExists(claseDeclarada):
         raise ErrorMsg('La clase ' + claseDeclarada + ' ya habia sido declarada previamente')
     else:
@@ -538,8 +541,19 @@ def p_guardar_nombre_clase(p):
 def p_declaracion_clases_aux(p):
     '''
     declaracion_clases_aux :  L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
-    | AGRANDA ID L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
+    | herencia L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
     '''
+    p[0] = None
+def p_herencia(p):
+    '''
+    herencia : AGRANDA ID
+    '''
+    if Tabla.CheckIfClassExists(p[2]):
+        Tabla.updateHerencia(claseDeclarada,p[2])
+    else:
+        raise ErrorMsg('La clase ' + p[2] + ' no existe')
+
+
     p[0] = None
 def p_declaracion_funciones(p):
     '''
