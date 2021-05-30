@@ -9,5 +9,6 @@ main() {
     A[6][1] = 6
     i = A[i+j][1] * 2
     print(i)
+    # print("HOLA")
 
 }
