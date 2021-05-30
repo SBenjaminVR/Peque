@@ -12,8 +12,7 @@ Data = {
 
 def main(argv):
     fileData = Path(argv[1]).read_text()
-    ParserLexer = py.parser.parse(fileData)
-    print(ParserLexer)
+    py.parser.parse(fileData)
     vm = VirtualMachine(Data)
     vm.run()
     

@@ -1,24 +1,29 @@
+from localMemory import LocalMemory
+from stack import Stack
+
+def IsInLocalRange(address):
+    return address >= 8000 and address <= 15000
+        
 class Memory:
     def __init__(self, data):
         self.memory = [None]*30000
-        self.memoryStack = []
-        self.isGlobal = True
+        self.memoryStack = Stack()
         self.quadruples = data.get('Cuadruplos')
         self.directory = data.get('Directorio')
 
         self.AssignConstants(data.get('Constantes'))
 
     def GetValue(self, address):
-        if self.isGlobal == True:
-            return self.memory[address]
+        if (IsInLocalRange(address)):
+            return self.memoryStack.top().GetValue(address)
         else:
-            print('FALTA IMPLIMENTAR STACKS')
+            return self.memory[address]
     
     def SetValue(self, address, value):
-        if self.isGlobal == True:
-            self.memory[address] = value
+        if (IsInLocalRange(address)):
+            self.memoryStack.top().SetValue(address, value)
         else:
-            print('FALTA IMPLIMENTAR STACKS')
+            self.memory[address] = value
 
     def AssignConstants(self, constantes):
         # Se invierte la tabla de constantes para poder tener las direcciones
@@ -26,5 +31,11 @@ class Memory:
         for constant in constantes.Tabla:
             self.memory[int(constant)] = constantes.GetConstant(constant) 
 
+    def CreateNewLocalMemory(self, space):
+        memory = LocalMemory(space)
+        self.memoryStack.push(memory)
+
+    def UnloadLastLocalMemory(self):
+        self.memoryStack.pop()
 
         
