@@ -15,17 +15,23 @@ class Directory():
 
     def SetClass(self, clase):
         self.CurrentClass = clase
-
-    def CheckIfVariableExists(self, name):
+ 
+    def CheckIfVariableExists(self, name,location):
+        
         if self.Scope == 'main':
             return self.Variables.get(name) != None
         elif self.Scope == 'function':
             current = self.Funciones.get(self.CurrentFunction)
+            return current.get('Variables').get(name) != None
         elif self.Scope == 'class':
-            classObj = self.Clases.get(self.CurrentClass)
-            current = classObj.get('Funciones').get(self.CurrentFunction)
-
-        return current.get('Variables').get(name) != None
+            if location == 'function':
+                classObj = self.Clases.get(self.CurrentClass)
+                current = classObj.get('Funciones').get(self.CurrentFunction)
+                return current.get('Variables').get(name) != None
+            elif location == 'class':
+                current = self.Clases.get(self.CurrentClass)
+                return current.get('Variables').get(name) != None
+        
 
     def CheckIfFunctionExists(self, funcion):     
         if self.Scope == 'class':
@@ -35,17 +41,21 @@ class Directory():
             return self.Funciones.get(funcion)
 
     def CheckIfClassExists(self, clase):
-        print(self.Clases)
         return self.Clases.get(clase) != None
-    
-    def GetAttribute(self, name, val):
+
+    def GetAttribute(self, name, val,Location):
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)
         elif self.Scope == 'function':
+            
             current = self.Funciones.get(self.CurrentFunction)
         elif self.Scope == 'class':
-            classObj = self.Clases.get(self.CurrentClass)
-            current = classObj.get('Funciones').get(self.CurrentFunction)
+            if Location == 'function' :
+                classObj = self.Clases.get(self.CurrentClass)
+                current = classObj.get('Funciones').get(self.CurrentFunction)
+            else:
+                classObj = self.Clases.get(self.CurrentClass)
+                current = classObj
         return current.get('Variables').get(name).get(val)
 
     def GetFunctionAttribute(self, name, val):
@@ -57,7 +67,7 @@ class Directory():
             
         return current.get(val)
 
-    def AddVariable(self, name, type, address, size):
+    def AddVariable(self, name, type, address, size, Location):
         newVar = {
             'Type': type,
             'Address': address,
@@ -68,7 +78,11 @@ class Directory():
         elif self.Scope == 'function':
             self.Funciones[self.CurrentFunction]['Variables'][name] = newVar
         elif self.Scope == 'class':
-            self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name] = newVar
+            if Location == 'function':
+                self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name] = newVar
+            elif Location == 'class':
+                self.Clases[self.CurrentClass]['Variables'][name] = newVar
+
 
     def AddFunction(self, name, type, address):
         newFunction = {
@@ -93,12 +107,16 @@ class Directory():
         }
         self.Clases[name] = newClase
 
-    def UpdateArrayLimit(self, name, limit):
+    def UpdateArrayLimit(self, name, limit,Location):
         newLimit = {'Limit': limit}
         if self.Scope == 'main':
             self.Variables[name].update(newLimit)
         elif self.Scope == 'function':
-            self.Funciones[self.CurrentFunction]['Variables'][name].update(newLimit)
+            if Location == 'function':
+                self.Funciones[self.CurrentFunction]['Variables'][name].update(newLimit)
+            else:
+                self.Funciones[self.CurrentFunction]['Variables'][name].update(newLimit)
+
         elif self.Scope == 'class':
             self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newLimit)
     def UpdateSize(self, name, size):

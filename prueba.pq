@@ -8,8 +8,10 @@ peque marmota{
 
 peque micola agranda marmota{
 
+    petite int a
+
     mini void uno(){
-        petite int a
+        petite int a[2][3]
         a = 2+3
     }
     mini void dos(int a){
