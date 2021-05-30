@@ -692,10 +692,7 @@ def p_variable_aux2(p):
     variable_aux2 : ID empty
     '''
     if Tabla.CheckIfVariableExists(p[1]):
-        print(p[1])
-        print(Tabla.Funciones)
         address = Tabla.GetAttribute(p[1],'Address')
-        print(address)
         values.push(address)
         tipos.push(Tabla.GetAttribute(p[1], 'Type'))
     else:

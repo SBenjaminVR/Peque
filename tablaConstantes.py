@@ -1,6 +1,3 @@
-def InvertDictionary(d):
-    return {value: key for key, value in d.items()}
-
 def ConstantAlreadyExists(d, constant):
     return d.get(constant) != None
 
@@ -21,8 +18,7 @@ class TablaConstantes:
         address = 0
 
         if self.IsInverted:
-            self.Tabla = InvertDictionary(self.Tabla)
-            self.IsInverted = False
+            self.InvertDictionary(self.Tabla)
 
         if ConstantAlreadyExists(self.Tabla, constant):
             return int(self.Tabla.get(constant)) 
@@ -45,8 +41,11 @@ class TablaConstantes:
     def GetConstant(self, address):
         address = str(address)
         if not self.IsInverted:
-            self.Tabla = InvertDictionary(self.Tabla)
-            self.IsInverted = True
+            self.InvertDictionary(self.Tabla)
         return int(self.Tabla.get(address))
+
+    def InvertDictionary(self, d):
+        self.IsInverted = not self.IsInverted
+        self.Tabla = { value: key for key, value in d.items() }
 
     
