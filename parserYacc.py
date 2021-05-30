@@ -21,6 +21,7 @@ global DeclVar
 global FuncionDeclarada
 global cont
 global claseDeclarada
+global atributos
 
 cont = 0
 
@@ -127,6 +128,7 @@ def p_cuerpo_aux(p) :
     cuerpo_aux : estatutos_repeticion
     | estatutos_funciones
     | declaracion_var
+    | instancear_objetos
     '''
     
     p[0] = None
@@ -428,10 +430,7 @@ def p_igualdadVar(p):
     if not Tabla.CheckIfVariableExists(p[1],Location) :
         raise ErrorMsg('La variable ' + p[1] + ' no existe')
     else:
-        print(Tabla.Variables)
-        print(Tabla.Clases)
-        print(Tabla.Funciones)
-        print(p[1] , ' ', Location, ' ',Tabla.Scope)
+        
         address = Tabla.GetAttribute(p[1],'Address',Location)
         CrearCuadruplo(p[2], iz, '_',address )
 
@@ -527,6 +526,7 @@ def p_end_class(p):
     '''
     end_class : empty
     '''
+    Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     CrearCuadruplo('END CLASS','_','_','_')
     p[0]= None
 
@@ -536,6 +536,8 @@ def p_guardar_nombre_clase(p):
     '''
     global claseDeclarada
     claseDeclarada = p[1]
+    global atributos
+    atributos = 0
     
     if Tabla.CheckIfClassExists(claseDeclarada):
         raise ErrorMsg('La clase ' + claseDeclarada + ' ya habia sido declarada previamente')
@@ -555,8 +557,11 @@ def p_herencia(p):
     '''
     herencia : AGRANDA ID
     '''
+    global atributos
     if Tabla.CheckIfClassExists(p[2]):
         Tabla.updateHerencia(claseDeclarada,p[2])
+        size = Tabla.ClassAtribute(p[2],'Space')
+        atributos = size
     else:
         raise ErrorMsg('La clase ' + p[2] + ' no existe')
 
@@ -663,11 +668,13 @@ def p_assignAddress(p):
     assignAddress : empty
     '''
     global sizeVar
+    
     # Se ignora el primer espacio ya que fue asignado al momento de guardar la variable por primera vez
-    for i in range(1, sizeVar):
-        agregarContVarFunciones(AuxList[1],'NORMAL')
-        memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
-
+    if Tabla.Scope != 'class':
+        for i in range(1, sizeVar):
+            agregarContVarFunciones(AuxList[1],'NORMAL')
+            address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
+    
     p[0] = None
 def p_declaracion_var_aux2(p):
     '''
@@ -680,23 +687,25 @@ def p_idChecker(p):
     '''
     idChecker : ID
     '''
+    global DeclVar
     global sizeVar
-    sizeVar = 1
-    
-    
+    global atributos
 
+    sizeVar = 1
     
     if Tabla.CheckIfVariableExists(p[1],Location):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
-        global DeclVar
-        DeclVar = p[1]
-        address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
-        agregarContVarFunciones(AuxList[1],'NORMAL',sizeVar)
-        Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
-        Memoria.append(0)
-    
-
+        if Tabla.Scope == 'class':
+            DeclVar = p[1]
+            atributos = atributos + 1
+            address = atributos
+            Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
+        else:
+            DeclVar = p[1]
+            address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
+            agregarContVarFunciones(AuxList[1],'NORMAL',sizeVar)
+            Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)    
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
@@ -718,7 +727,7 @@ def p_save_size(p):
     if p[1] > 0:
         global sizeVar
         sizeVar *= p[1]
-        Tabla.UpdateSize(DeclVar,sizeVar)
+        Tabla.UpdateSize(DeclVar,sizeVar,Location)
         Tabla.UpdateArrayLimit(DeclVar, p[1] - 1,Location)
     else: 
         raise ErrorMsg('No se puede declarar el tamaño de un array como menor que 1')
@@ -740,9 +749,20 @@ def p_last_size(p):
         tipo = Tabla.GetAttribute(DeclVar,'Type',Location)
         currentSize = sizeVar
         sizeVar *= p[1]
-        Tabla.UpdateSize(DeclVar, sizeVar)
+        Tabla.UpdateSize(DeclVar, sizeVar,Location)
     else: 
         raise ErrorMsg('No se puede declarar el tamaño de una matriz como menor que 1')
+
+    p[0] = None
+def p_instancear_objetos(p):
+    '''
+    instancear_objetos : NEW ID EQUALS ID
+
+    '''
+    
+
+    clase = p[4]
+    objeto = p[1]
 
     p[0] = None
 #-------------- Variables---------------

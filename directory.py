@@ -106,27 +106,37 @@ class Directory():
             
         }
         self.Clases[name] = newClase
+    def AddObeto(self, name,clase):
+        newObj = {
+            'Clase' : clase,
+            'Space' : 0
+            
+        }
+        self.Object[name] = newObj
 
     def UpdateArrayLimit(self, name, limit,Location):
         newLimit = {'Limit': limit}
         if self.Scope == 'main':
             self.Variables[name].update(newLimit)
         elif self.Scope == 'function':
-            if Location == 'function':
-                self.Funciones[self.CurrentFunction]['Variables'][name].update(newLimit)
-            else:
-                self.Funciones[self.CurrentFunction]['Variables'][name].update(newLimit)
-
+            self.Funciones[self.CurrentFunction]['Variables'][name].update(newLimit)
         elif self.Scope == 'class':
-            self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newLimit)
-    def UpdateSize(self, name, size):
+            if Location == 'function' :
+                self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newLimit)
+            else :
+                self.Clases[self.CurrentClass]['Variables'][name].update(newLimit)
+
+    def UpdateSize(self, name, size,Location):
         newSize = {'Size': size}
         if self.Scope == 'main':
             self.Variables[name].update(newSize)
         elif self.Scope == 'function':
             self.Funciones[self.CurrentFunction]['Variables'][name].update(newSize)
         elif self.Scope == 'class':
-            self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newSize)
+            if Location == 'function':
+                self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newSize)
+            else:
+                self.Clases[self.CurrentClass]['Variables'][name].update(newSize)
 
     def updateFunctionAttribute(self,name,nameOfChange,change):
         newVal = {nameOfChange: change}
@@ -135,6 +145,11 @@ class Directory():
         else:
             self.Funciones[name].update(newVal)
     def updateHerencia(self,clase,padre):
-       
         referencia = {'Padre' : padre}
         self.Clases.get(clase).update(referencia)
+
+    def updateClassAtribute(self,clase,name,val):
+        referencia = {name : val}
+        self.Clases[clase].update(referencia)
+    def ClassAtribute(self,clase,name):
+        return self.Clases[clase].get(name)
