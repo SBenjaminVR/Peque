@@ -306,7 +306,7 @@ def p_startCall(p):
     global parametros
     parametros = 1
 
-    CrearCuadruplo('ERA',funct.top(),'_','_')
+    CrearCuadruplo('ERA',funct.top(),'_', Tabla.Scope) #Quiza se puede sustituir por numeros
     
     p[0]=None
 def p_endCall(p):
@@ -413,7 +413,7 @@ def p_igualdadArr(p):
     '''
     iz = values.pop()
     res = values.pop()
-    
+
     CrearCuadruplo(p[2], iz, '_', res)
     p[0] = None
 def p_igualdadVar(p):
@@ -733,8 +733,6 @@ def p_variable_aux2(p):
     variable_aux2 : ID empty
     '''
     if Tabla.CheckIfVariableExists(p[1]):
-        
-        
         address = Tabla.GetAttribute(p[1],'Address')
         values.push(address)
         tipos.push(Tabla.GetAttribute(p[1], 'Type'))
@@ -773,11 +771,16 @@ def p_arreglo(p):
     '''
     arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
-    dirBase = Tabla.GetAttribute( lastVar,'Address')
+    dirBase = Tabla.GetAttribute( lastVar, 'Address')
     popper.push('+')
-    values.push(dirBase)
+
+    address = Constantes.GetMemoryAddress(dirBase,'int')
+    values.push(address)
     tipos.push('int')
+
     GenerarCuadruploDeOperador(popper,values,tipos)
+    fix = values.pop()
+    values.push('('+str(fix)+')')
 
     
     p[0] = None
@@ -793,13 +796,14 @@ def p_checkLimits(p):
     '''
     checkLimits : empty
     '''
-    limit = Tabla.GetAttribute( lastVar,'Limit')
-    size =  Tabla.GetAttribute( lastVar,'Size')
-    tipo = Tabla.GetAttribute( lastVar,'Type')
+    limit = Tabla.GetAttribute(lastVar, 'Limit')
+    size =  Tabla.GetAttribute(lastVar, 'Size')
+    tipo = Tabla.GetAttribute(lastVar, 'Type')
 
     CrearCuadruplo('VER',values.top(),0,limit)
     popper.push('*')
-    address = Constantes.GetMemoryAddress(math.ceil(size/(limit+1)),'int')
+    row = int(math.ceil(size/(limit+1)))
+    address = Constantes.GetMemoryAddress(row,'int')
     values.push(address)
     tipos.push('int')
     tipos.push('int')
@@ -820,7 +824,7 @@ def p_checkLimits2(p):
     '''
     arrSize = Tabla.GetAttribute(lastVar,'Size')
     limit = Tabla.GetAttribute(lastVar,'Limit')
-    columnSize = arrSize / (limit + 1)
+    columnSize = int(arrSize / (limit + 1))
     CrearCuadruplo('VER',values.top(),0, columnSize - 1)
     popper.push('+')  
     GenerarCuadruploDeOperador(popper,values,tipos)
@@ -955,15 +959,14 @@ def p_factor(p):
     | CTEC
     '''
     if p[1] != '(':
-        if isinstance(p[1],int) :
+        if isinstance(p[1],int):
             tipos.push('int')
             address = Constantes.GetMemoryAddress(int(p[1]), 'int')
             values.push(address)
-        elif isinstance(p[1],float) :
+        elif isinstance(p[1],float):
             tipos.push('float')
             address = Constantes.GetMemoryAddress(float(p[1]), 'float')
             values.push(address)
-
         elif isinstance(p[1],str) and len(p[1]) == 3 :
             tipos.push('char')
             address = Constantes.GetMemoryAddress(str(p[1]), 'char')
