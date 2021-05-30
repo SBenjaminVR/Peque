@@ -17,7 +17,7 @@ class Directory():
 
     def SetClass(self, clase):
         self.CurrentClass = clase
- 
+    
     def CheckIfVariableExists(self, name,location):
         
         if self.Scope == 'main':
@@ -45,6 +45,8 @@ class Directory():
     def CheckIfClassExists(self, clase):
         return self.Clases.get(clase) != None
 
+    def CheckIfObjectExists(self, object):
+        return self.Objetos.get(object) != None
     def GetAttribute(self, name, val,Location):
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)

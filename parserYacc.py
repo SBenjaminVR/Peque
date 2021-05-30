@@ -758,7 +758,16 @@ def p_instancear_objetos(p):
 
     clase = p[4]
     objeto = p[1]
-
+    
+    if Tabla.CheckIfClassExists(clase):
+        raise ErrorMsg('La clase ' + clase + ' no existe')
+    else:
+        address = memoria.AssignMemoryAddressObject()
+        if not Tabla.CheckIfObjectExists(objeto):
+            raise ErrorMsg('El Objeto ' + objeto + ' ya existe')
+        else:
+            Tabla.AddObject(objeto)
+            
 
 
     
