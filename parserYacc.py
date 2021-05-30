@@ -45,7 +45,7 @@ lexer = lexico.lexer
 
 #-------------- Directorio de Clases y Funciones, Tablas de Variables  ---------
 from directory import Directory
-Tabla = Directory({}, {}, {},{})
+Tabla = Directory({}, {}, {}, {})
 
 #--------- Memoria va asignando los espacios de memoria a las variables ----------#
 from asignadorMemoria import AsignadorMemoria
@@ -313,7 +313,7 @@ def p_startCall(p):
     global parametros
     parametros = 1
     memoria.ResetLocalMemory()
-    
+
     CrearCuadruplo('ERA',funct.top(),'_', Tabla.Scope) #Quiza se puede sustituir por numeros
     
     p[0]=None
@@ -758,6 +758,8 @@ def p_instancear_objetos(p):
 
     clase = p[4]
     objeto = p[1]
+
+
 
     
 

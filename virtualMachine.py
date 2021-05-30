@@ -106,7 +106,7 @@ class VirtualMachine():
                 self.ProcessINPUT(iz)
 
             elif operation == 24:
-                print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time))
+                print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
                 
                 
     def ProcessPLUS(self, left, right, result):
@@ -207,7 +207,7 @@ class VirtualMachine():
         print(str(iz))
 
     def ProcessINPUT(self, left):
-        userInput = input()
+        userInput = int(input())
         print('Asignando ' + str(userInput) + ' en direccion ' + str(left))
         self.memory.SetValue(left, userInput)
 
