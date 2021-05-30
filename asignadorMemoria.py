@@ -20,6 +20,8 @@ class AsignadorMemoria:
     FLOAT_LOCAL_TEMPORAL = 13000
     CHAR_LOCAL_TEMPORAL = 14000
     BOOL_LOCAL_TEMPORAL = 15000
+
+    OBJETOS = 27000
 #-------------------------------------------------------#
 
     last = []

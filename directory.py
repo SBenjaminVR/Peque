@@ -1,11 +1,13 @@
 class Directory():
-    def __init__(self, clases, funciones, variables):
+    def __init__(self, clases, funciones, variables,Objetos):
         self.Clases = clases
         self.Funciones = funciones
         self.Variables = variables
         self.Scope = ''
         self.CurrentFunction = ''
         self.CurrentClass = ''
+        self.Objetos = Objetos
+        self.currentObject = ''
 
     def SetScope(self, scope):
         self.Scope = scope
@@ -106,10 +108,12 @@ class Directory():
             
         }
         self.Clases[name] = newClase
-    def AddObeto(self, name,clase):
+    def AddObject(self, name,clase,space,address):
         newObj = {
             'Clase' : clase,
-            'Space' : 0
+            'Space' : space,
+            'Address' : address
+
             
         }
         self.Object[name] = newObj

@@ -764,6 +764,8 @@ def p_instancear_objetos(p):
     clase = p[4]
     objeto = p[1]
 
+    
+
     p[0] = None
 #-------------- Variables---------------
 
