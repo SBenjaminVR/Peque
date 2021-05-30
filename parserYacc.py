@@ -14,12 +14,14 @@ Scope = ['GLOBAL']
 parametros = 1
 sizeVar = 1
 contVarLocal = [0]*10
+Location = 'class'
 
 global lastVar
 global DeclVar
 global FuncionDeclarada
 global cont
 global claseDeclarada
+global atributos
 
 cont = 0
 
@@ -73,6 +75,7 @@ def p_scopeClases(p):
     scopeClases : empty
     '''
     Tabla.SetScope('class')
+    Location = 'class'
     Scope[0] = 'LOCAL'
     p[0] = None
 
@@ -81,6 +84,7 @@ def p_scopeFunction(p):
     scopeFunction : empty
     '''
     Tabla.SetScope('function')
+    Location = 'function'
     Scope[0] = 'LOCAL'
     p[0] = None
 
@@ -89,6 +93,7 @@ def p_scopeMain(p):
     scopeMain : empty
     '''
     Tabla.SetScope('main')
+    Location = 'main'
     Scope[0] = 'GLOBAL'
     p[0] = None
 
@@ -123,6 +128,7 @@ def p_cuerpo_aux(p) :
     cuerpo_aux : estatutos_repeticion
     | estatutos_funciones
     | declaracion_var
+    | instancear_objetos
     '''
     
     p[0] = None
@@ -421,12 +427,12 @@ def p_igualdadVar(p):
     igualdadVar : ID EQUALS asignacion_aux
     '''
     iz = values.pop()
-    if not Tabla.CheckIfVariableExists :
+    if not Tabla.CheckIfVariableExists(p[1],Location) :
         raise ErrorMsg('La variable ' + p[1] + ' no existe')
     else:
-        address = Tabla.GetAttribute(p[1],'Address')
+        
+        address = Tabla.GetAttribute(p[1],'Address',Location)
         CrearCuadruplo(p[2], iz, '_',address )
-
 
     
 
@@ -514,11 +520,13 @@ def p_declaracion_clases(p):
     '''
 
 
+
     p[0] = None
 def p_end_class(p):
     '''
     end_class : empty
     '''
+    Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     CrearCuadruplo('END CLASS','_','_','_')
     p[0]= None
 
@@ -528,9 +536,9 @@ def p_guardar_nombre_clase(p):
     '''
     global claseDeclarada
     claseDeclarada = p[1]
-    print(claseDeclarada)
-    print(Tabla.CheckIfClassExists(claseDeclarada))
-    print(Tabla.Clases)
+    global atributos
+    atributos = 0
+    
     if Tabla.CheckIfClassExists(claseDeclarada):
         raise ErrorMsg('La clase ' + claseDeclarada + ' ya habia sido declarada previamente')
     else:
@@ -543,13 +551,17 @@ def p_declaracion_clases_aux(p):
     declaracion_clases_aux :  L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
     | herencia L_BRACKET  declaracion_var declaracion_funciones R_BRACKET
     '''
+
     p[0] = None
 def p_herencia(p):
     '''
     herencia : AGRANDA ID
     '''
+    global atributos
     if Tabla.CheckIfClassExists(p[2]):
         Tabla.updateHerencia(claseDeclarada,p[2])
+        size = Tabla.ClassAtribute(p[2],'Space')
+        atributos = size
     else:
         raise ErrorMsg('La clase ' + p[2] + ' no existe')
 
@@ -557,25 +569,37 @@ def p_herencia(p):
     p[0] = None
 def p_declaracion_funciones(p):
     '''
-    declaracion_funciones : declaracion_funciones_aux funciones_end  declaracion_funciones 
+    declaracion_funciones :  declaracion_funciones_aux funciones_end  declaracion_funciones 
     |
     '''
+    
+
+
     p[0] = None
+def p_startF(p):
+    '''
+    startF : empty
+    '''
+    global Location
+    Location = 'function'
+
 def p_funciones_end(p):
     '''
     funciones_end : empty
     '''
     #Guarda contador de variables
     
-    
     CrearCuadruplo('END PROC','_','_','_')
+    global Location
+    Location = Tabla.Scope
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
-    declaracion_funciones_aux : MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo regreso R_BRACKET save_variables
+    declaracion_funciones_aux : startF MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo regreso R_BRACKET save_variables
     |
     '''
-    
+    global Location
+    Location = 'function'
     p[0] = None
 def p_save_variables(p):
     '''
@@ -593,7 +617,7 @@ def p_guardar_nombre_funcion(p):
     resetConVarFunciones()
     global FuncionDeclarada
     FuncionDeclarada = p[1]
-    print(FuncionDeclarada)
+    
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
@@ -644,11 +668,13 @@ def p_assignAddress(p):
     assignAddress : empty
     '''
     global sizeVar
+    
     # Se ignora el primer espacio ya que fue asignado al momento de guardar la variable por primera vez
-    for i in range(1, sizeVar):
-        agregarContVarFunciones(AuxList[1],'NORMAL')
-        memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
-
+    if Tabla.Scope != 'class':
+        for i in range(1, sizeVar):
+            agregarContVarFunciones(AuxList[1],'NORMAL')
+            address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
+    
     p[0] = None
 def p_declaracion_var_aux2(p):
     '''
@@ -661,18 +687,25 @@ def p_idChecker(p):
     '''
     idChecker : ID
     '''
+    global DeclVar
     global sizeVar
+    global atributos
+
     sizeVar = 1
-    if Tabla.CheckIfVariableExists(p[1]):
+    
+    if Tabla.CheckIfVariableExists(p[1],Location):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
-        global DeclVar
-        DeclVar = p[1]
-        address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
-        agregarContVarFunciones(AuxList[1],'NORMAL',sizeVar)
-        Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar)
-        Memoria.append(0)
-
+        if Tabla.Scope == 'class':
+            DeclVar = p[1]
+            atributos = atributos + 1
+            address = atributos
+            Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
+        else:
+            DeclVar = p[1]
+            address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
+            agregarContVarFunciones(AuxList[1],'NORMAL',sizeVar)
+            Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)    
     p[0] = None
 def p_declaracion_var_aux3(p):
     '''
@@ -694,8 +727,8 @@ def p_save_size(p):
     if p[1] > 0:
         global sizeVar
         sizeVar *= p[1]
-        Tabla.UpdateSize(DeclVar,sizeVar)
-        Tabla.UpdateArrayLimit(DeclVar, p[1] - 1)
+        Tabla.UpdateSize(DeclVar,sizeVar,Location)
+        Tabla.UpdateArrayLimit(DeclVar, p[1] - 1,Location)
     else: 
         raise ErrorMsg('No se puede declarar el tamaño de un array como menor que 1')
     
@@ -713,12 +746,25 @@ def p_last_size(p):
     if p[1] > 0:
         global sizeVar
         
-        tipo = Tabla.GetAttribute(DeclVar,'Type')
+        tipo = Tabla.GetAttribute(DeclVar,'Type',Location)
         currentSize = sizeVar
         sizeVar *= p[1]
-        Tabla.UpdateSize(DeclVar, sizeVar)
+        Tabla.UpdateSize(DeclVar, sizeVar,Location)
     else: 
         raise ErrorMsg('No se puede declarar el tamaño de una matriz como menor que 1')
+
+    p[0] = None
+def p_instancear_objetos(p):
+    '''
+    instancear_objetos : NEW ID EQUALS ID
+
+    '''
+    
+
+    clase = p[4]
+    objeto = p[1]
+
+    
 
     p[0] = None
 #-------------- Variables---------------
@@ -732,10 +778,10 @@ def p_variable_aux2(p):
     '''
     variable_aux2 : ID empty
     '''
-    if Tabla.CheckIfVariableExists(p[1]):
-        address = Tabla.GetAttribute(p[1],'Address')
+    if Tabla.CheckIfVariableExists(p[1],Location): 
+        address = Tabla.GetAttribute(p[1],'Address',Location)
         values.push(address)
-        tipos.push(Tabla.GetAttribute(p[1], 'Type'))
+        tipos.push(Tabla.GetAttribute(p[1], 'Type',Location))
     else:
         raise ErrorMsg('No existe la variable ' + p[1])
     p[0] = None
@@ -771,7 +817,7 @@ def p_arreglo(p):
     '''
     arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
-    dirBase = Tabla.GetAttribute( lastVar, 'Address')
+    dirBase = Tabla.GetAttribute( lastVar, 'Address', Location)
     popper.push('+')
 
     address = Constantes.GetMemoryAddress(dirBase,'int')
@@ -796,9 +842,9 @@ def p_checkLimits(p):
     '''
     checkLimits : empty
     '''
-    limit = Tabla.GetAttribute(lastVar, 'Limit')
-    size =  Tabla.GetAttribute(lastVar, 'Size')
-    tipo = Tabla.GetAttribute(lastVar, 'Type')
+    limit = Tabla.GetAttribute( lastVar,'Limit', Location)
+    size =  Tabla.GetAttribute( lastVar,'Size', Location)
+    tipo = Tabla.GetAttribute( lastVar,'Type', Location)
 
     CrearCuadruplo('VER',values.top(),0,limit)
     popper.push('*')
@@ -822,9 +868,10 @@ def p_checkLimits2(p):
     '''
     p_checkLimits2 : empty
     '''
-    arrSize = Tabla.GetAttribute(lastVar,'Size')
-    limit = Tabla.GetAttribute(lastVar,'Limit')
+    arrSize = Tabla.GetAttribute(lastVar,'Size', Location)
+    limit = Tabla.GetAttribute(lastVar,'Limit', Location)
     columnSize = int(arrSize / (limit + 1))
+    
     CrearCuadruplo('VER',values.top(),0, columnSize - 1)
     popper.push('+')  
     GenerarCuadruploDeOperador(popper,values,tipos)
