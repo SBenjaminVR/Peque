@@ -35,7 +35,8 @@ class Directory():
             return self.Funciones.get(funcion)
 
     def CheckIfClassExists(self, clase):
-        return self.Clases.get(self.CurrentClass) != None
+        print(self.Clases)
+        return self.Clases.get(clase) != None
     
     def GetAttribute(self, name, val):
         if self.Scope == 'main':
@@ -85,9 +86,10 @@ class Directory():
     def AddClase(self, name,padre = None):
         newClase = {
             'Space': 0,
+            'Padre' : padre,
             'Variables': {},
-            'Funciones' : {},
-            'Padre' : padre
+            'Funciones' : {}
+            
         }
         self.Clases[name] = newClase
 
@@ -114,3 +116,7 @@ class Directory():
             self.Clases[self.CurrentClass]['Funciones'][name].update(newVal)
         else:
             self.Funciones[name].update(newVal)
+    def updateHerencia(self,clase,padre):
+       
+        referencia = {'Padre' : padre}
+        self.Clases.get(clase).update(referencia)

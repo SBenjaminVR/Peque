@@ -1,7 +1,12 @@
 programa prueba;
 
 
-peque micola{
+peque marmota{
+
+
+}
+
+peque micola agranda marmota{
 
     mini void uno(){
         petite int a
