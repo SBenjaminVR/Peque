@@ -1,12 +1,10 @@
+from direcciones import DireccionesMemoria
+Dir = DireccionesMemoria()
+
 def ConstantAlreadyExists(d, constant):
     return d.get(constant) != None
 
 class TablaConstantes:
-    INT_CONSTANTE = 20000
-    FLOAT_CONSTANTE = 21000
-    CHAR_CONSTANTE =  22000
-    BOOL_CONSTANTE = 23000
-
     Last = []
     def __init__(self):
         self.Last = [0]*4
@@ -24,16 +22,16 @@ class TablaConstantes:
             return int(self.Tabla.get(constant)) 
         else:
             if type == 'int':
-                address = self.INT_CONSTANTE + self.Last[0]
+                address = Dir.INT_CONSTANTE + self.Last[0]
                 self.Last[0] = self.Last[0] + 1
             elif type == 'float':
-                address = self.FLOAT_CONSTANTE + self.Last[1]
+                address = Dir.FLOAT_CONSTANTE + self.Last[1]
                 self.Last[1] = self.Last[1] + 1
-            elif type == 'char':
-                address = self.CHAR_CONSTANTE + self.Last[2]
-                self.Last[2] = self.Last[2] + 1
             elif type == 'bool':
-                address = self.BOOL_CONSTANTE + self.Last[3]
+                address = Dir.BOOL_CONSTANTE + self.Last[2]
+                self.Last[2] = self.Last[2] + 1
+            elif type == 'string':
+                address = Dir.STRING_CONSTANTE + self.Last[3]
                 self.Last[3] = self.Last[3] + 1
         self.Tabla[constant] = str(address)
         return int(address)

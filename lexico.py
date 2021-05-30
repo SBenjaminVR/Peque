@@ -11,7 +11,6 @@ reserved = {
     'petite': 'PETITE',
     'int': 'INT',
     'float': 'FLOAT',
-    'char': 'CHAR',
     'void' : 'VOID',
     'bool': 'BOOL',
     'if': 'IF',
@@ -31,7 +30,7 @@ reserved = {
 
 tokens = [
     'ID',
-    'CTEI', 'CTEF', 'CTEC',
+    'CTEI', 'CTEF', 'CTES',
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
     'DOTS', 'EQUALS', 'SEMICOLON', 'PERIOD', 'COMMA',
     'LESS', 'BIGGER', 'DIFFERENT','EQUAL','BIGGER_EQUAL', 'LESS_EQUAL',
@@ -82,7 +81,7 @@ def t_ID(t):
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
-#float
+#Float
 def t_CTEF(t):
     r'\d+\.\d+'
     t.value = float(t.value)
@@ -92,8 +91,9 @@ def t_CTEI(t):
     r'\d+'
     t.value = int(t.value)
     return t
-def t_CTEC(t):
-    r'[a-z]'
+#String
+def t_CTES(t):
+    r'\"[a-zA-Z_ ][a-zA-Z0-9_ ]*\"'
     t.value = str(t.value)
     return t
 def t_COMMENT(t):

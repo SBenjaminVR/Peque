@@ -45,7 +45,7 @@ lexer = lexico.lexer
 
 #-------------- Directorio de Clases y Funciones, Tablas de Variables  ---------
 from directory import Directory
-Tabla = Directory({}, {}, {})
+Tabla = Directory({}, {}, {}, {})
 
 #--------- Memoria va asignando los espacios de memoria a las variables ----------#
 from asignadorMemoria import AsignadorMemoria
@@ -803,7 +803,6 @@ def p_tipo_retorno(p):
     '''
     tipo_retorno : INT
     | FLOAT
-    | CHAR
     | BOOL
     '''
     AuxList[1] = p[1]
@@ -1003,7 +1002,7 @@ def p_factor(p):
     | arreglo
     | CTEI
     | CTEF
-    | CTEC
+    | CTES
     '''
     if p[1] != '(':
         if isinstance(p[1],int):
@@ -1015,8 +1014,8 @@ def p_factor(p):
             address = Constantes.GetMemoryAddress(float(p[1]), 'float')
             values.push(address)
         elif isinstance(p[1],str) and len(p[1]) == 3 :
-            tipos.push('char')
-            address = Constantes.GetMemoryAddress(str(p[1]), 'char')
+            tipos.push('string')
+            address = Constantes.GetMemoryAddress(str(p[1]), 'string')
             values.push(address)
     p[0] = None
 def p_factor_aux(p):

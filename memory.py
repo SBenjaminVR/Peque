@@ -5,7 +5,7 @@ def IsInLocalRange(address):
     return address >= 8000 and address <= 15000
         
 def GetTypeGivenTheBase(address, base):
-    
+    print('NOT YET IMPLEMENTED')
 
 def GetTypeOfValueGivenTheAddress(address):
     if address < 4000:
