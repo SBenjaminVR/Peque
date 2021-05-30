@@ -41,9 +41,17 @@ mini void dos(int a, float b){
 
 main()
 {
+    
+    
     petite float b[8]
     petite float f
     petite int c[4][4]
-    dos(2,3.3)
-    dos(2,b)
+
+    jose = new micola
+    pito = new micola
+
+    jose.a = 2 + 3
+    pito.a = 2+ 4
+    f =  jose.a
+    
 }

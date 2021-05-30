@@ -12,6 +12,7 @@ class AsignadorMemoria:
         return address
     def AssignMemoryAddress(self, tipo, scope, location):
         address = -1
+        i = 0
         N = 1
         if scope == 'GLOBAL':
             if location != 'TEMPORAL':
@@ -84,13 +85,13 @@ class AsignadorMemoria:
             else:
                 if tipo == 'int':
                     i = 18
-                    address = self.INT_LOCAL_TEMPORAL + self.last[i]
+                    address = Dir.INT_LOCAL_TEMPORAL + self.last[i]
                 elif tipo == 'float':
                     i = 19
-                    address = self.FLOAT_LOCAL_TEMPORAL + self.last[i]
+                    address = Dir.FLOAT_LOCAL_TEMPORAL + self.last[i]
                 elif tipo == 'bool':
                     i = 20
-                    address = self.BOOL_LOCAL_TEMPORAL + self.last[i]
+                    address = Dir.BOOL_LOCAL_TEMPORAL + self.last[i]
                 elif tipo == 'list_int':
                     i = 21
                     address = Dir.LIST_INT_LOCAL_TEMPORAL + self.last[i]

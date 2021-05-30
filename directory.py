@@ -47,6 +47,8 @@ class Directory():
 
     def CheckIfObjectExists(self, object):
         return self.Objetos.get(object) != None
+    def checkIfObjectAtrExist(self,object,atr):
+        return self.Objetos.get('Variables').get(atr) != None
     def GetAttribute(self, name, val,Location):
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)
@@ -61,7 +63,11 @@ class Directory():
                 classObj = self.Clases.get(self.CurrentClass)
                 current = classObj
         return current.get('Variables').get(name).get(val)
+    def GetObjectAtr(self, name,val):  
+        return self.Objetos.get(name)['Variables'].get(val)
 
+    def GetObjectAtr(self, name,val):  
+        return self.Objetos.get(name).get(val)
     def GetFunctionAttribute(self, name, val):
         if self.Scope == 'class':
             classObj = self.Clases.get(self.CurrentClass)
@@ -70,7 +76,7 @@ class Directory():
             current = self.Funciones.get(name)
             
         return current.get(val)
-
+#adds---------------------------------------------------------------
     def AddVariable(self, name, type, address, size, Location):
         newVar = {
             'Type': type,
@@ -118,8 +124,10 @@ class Directory():
 
             
         }
-        self.Object[name] = newObj
+        self.Objetos[name] = newObj
 
+
+#updates------------------------------
     def UpdateArrayLimit(self, name, limit,Location):
         newLimit = {'Limit': limit}
         if self.Scope == 'main':
@@ -157,5 +165,6 @@ class Directory():
     def updateClassAtribute(self,clase,name,val):
         referencia = {name : val}
         self.Clases[clase].update(referencia)
+
     def ClassAtribute(self,clase,name):
         return self.Clases[clase].get(name)

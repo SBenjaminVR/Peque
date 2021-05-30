@@ -405,7 +405,51 @@ def p_asignacion(p):
     '''
     asignacion : igualdadVar  
     | igualdadArr
+    | igualdadAtr
     '''
+
+    p[0] = None
+def p_igualdadAtr(p):
+    '''
+    igualdadAtr : atributo EQUALS asignacion_aux
+    '''
+    values.printStack()
+    iz = values.pop()
+    res = values.pop()
+    
+    CrearCuadruplo('=', iz, '_', res)
+    p[0] = None
+def p_atributo(p):
+    '''
+    atributo : ID PERIOD ID 
+    '''
+    objeto = p[1]
+    atributo = p[3]
+    if not Tabla.CheckIfObjectExists(objeto):
+        raise ErrorMsg('El objeto ' + p[1] + ' no existe')
+    else:
+        addressA = Tabla.GetObjectAtr(objeto,'Address')
+        clase = Tabla.GetObjectAtr(objeto,'Clase')
+        TempScope = Tabla.Scope
+        Tabla.SetScope('class')
+        Tabla.SetClass(clase)
+        if not Tabla.CheckIfVariableExists(atributo,'class'):
+            raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
+        else:
+            addressB = Tabla.GetAttribute(atributo,'Address','class')
+            addressFinal = str(addressA)+'.' + str(addressB)
+            tipo = Tabla.GetAttribute(atributo,'Type','class')
+            values.push(addressFinal)
+            tipos.push(tipo)
+        Tabla.SetScope(TempScope)
+
+
+
+
+
+        
+        
+
 
     p[0] = None
 def p_igualdadArr(p):
@@ -437,7 +481,7 @@ def p_asignacion_aux(p):
     asignacion_aux : expresion
     | arreglo
     | estatutos_funciones
-    | ID PERIOD ID
+    | atributo
     '''
     p[0] = None
 def p_empty(p):
@@ -751,7 +795,7 @@ def p_last_size(p):
     p[0] = None
 def p_instancear_objetos(p):
     '''
-    instancear_objetos : NEW ID EQUALS ID
+    instancear_objetos :  ID EQUALS NEW ID
 
     '''
     
@@ -759,14 +803,16 @@ def p_instancear_objetos(p):
     clase = p[4]
     objeto = p[1]
     
-    if Tabla.CheckIfClassExists(clase):
+    if not Tabla.CheckIfClassExists(clase):
         raise ErrorMsg('La clase ' + clase + ' no existe')
     else:
-        address = memoria.AssignMemoryAddressObject()
-        if not Tabla.CheckIfObjectExists(objeto):
+        
+        if Tabla.CheckIfObjectExists(objeto):
             raise ErrorMsg('El Objeto ' + objeto + ' ya existe')
         else:
-            Tabla.AddObject(objeto)
+            address = memoria.AssignMemoryAddressObject()
+            size = Tabla.ClassAtribute(clase,'Space')
+            Tabla.AddObject(objeto,clase,size,address)
             
 
 
