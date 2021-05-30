@@ -1,17 +1,13 @@
 programa prueba;
 
-mini void FuncionDePrueba() {
-    petite int a, b
-}
-
-mini int FuncionIntDePrueba() {
-    petite int c
-    c = 2
-    return c + 3
-}
-
 main() {
-    FuncionDePrueba()
-    petite int a
-    print(FuncionIntDePrueba() + FuncionIntDePrueba(), a)
+    petite int i, j
+    petite int A[10][2]
+    i = 4
+    input(j)
+    A[9][1] = 3
+    A[6][1] = 6
+    i = A[i+j][1] * 2
+    print(i)
+
 }
