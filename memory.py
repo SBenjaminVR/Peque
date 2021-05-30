@@ -1,8 +1,11 @@
 from localMemory import LocalMemory
 from stack import Stack
+from direcciones import DireccionesMemoria
+
+Dir = DireccionesMemoria()
 
 def IsInLocalRange(address):
-    return address >= 8000 and address <= 15000
+    return address >= Dir.INT_LOCAL and address <= Dir.LIST_BOOL_LOCAL_TEMPORAL
         
 def GetTypeGivenTheBase(address, base):
     print('NOT YET IMPLEMENTED')
@@ -19,7 +22,7 @@ def GetTypeOfValueGivenTheAddress(address):
 
 class Memory:
     def __init__(self, data):
-        self.memory = [None]*30000
+        self.memory = [None]*35000
         self.memoryStack = Stack()
         self.quadruples = data.get('Cuadruplos')
         self.directory = data.get('Directorio')
