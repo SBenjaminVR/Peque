@@ -29,7 +29,7 @@ class Directory():
 
     def CheckIfFunctionExists(self, funcion):     
         if self.Scope == 'class':
-            current = self.Clases.get(self.CurrentClass).get('Funciones')
+            current = self.Clases.get(self.CurrentClass)
             return current.get('Funciones').get(funcion) != None
         else:
             return self.Funciones.get(funcion)
@@ -81,7 +81,16 @@ class Directory():
             self.Funciones[name] = newFunction
         else:
             self.Clases[self.CurrentClass]['Funciones'][name] = newFunction
-    
+
+    def AddClase(self, name,padre = None):
+        newClase = {
+            'Space': 0,
+            'Variables': {},
+            'Funciones' : {},
+            'Padre' : padre
+        }
+        self.Clases[name] = newClase
+
     def UpdateArrayLimit(self, name, limit):
         newLimit = {'Limit': limit}
         if self.Scope == 'main':

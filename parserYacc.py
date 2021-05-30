@@ -13,13 +13,14 @@ Saltos = []
 Scope = ['GLOBAL']
 parametros = 1
 sizeVar = 1
-
 contVarLocal = [0]*10
 
 global lastVar
 global DeclVar
 global FuncionDeclarada
 global cont
+global claseDeclarada
+
 cont = 0
 
 Memoria = []
@@ -180,9 +181,6 @@ def p_for_temp(p):
     
    
 
-    
-    
-    
     p[0]= None
 def p_for_revision(p):
     '''
@@ -415,6 +413,7 @@ def p_igualdadArr(p):
     '''
     iz = values.pop()
     res = values.pop()
+    
     CrearCuadruplo(p[2], iz, '_', res)
     p[0] = None
 def p_igualdadVar(p):
@@ -422,7 +421,14 @@ def p_igualdadVar(p):
     igualdadVar : ID EQUALS asignacion_aux
     '''
     iz = values.pop()
-    CrearCuadruplo(p[2], iz, '_', p[1])
+    if not Tabla.CheckIfVariableExists :
+        raise ErrorMsg('La variable ' + p[1] + ' no existe')
+    else:
+        address = Tabla.GetAttribute(p[1],'Address')
+        CrearCuadruplo(p[2], iz, '_',address )
+
+
+    
 
     p[0]= None
 def p_asignacion_aux(p):
@@ -502,10 +508,32 @@ def p_declaracion_parametros_aux(p):
 
 def p_declaracion_clases(p):
     '''
-    declaracion_clases : PEQUE ID declaracion_clases_aux declaracion_clases
+    declaracion_clases : PEQUE guardar_nombre_clase declaracion_clases_aux end_class declaracion_clases
     |
 
     '''
+
+
+    p[0] = None
+def p_end_class(p):
+    '''
+    end_class : empty
+    '''
+    CrearCuadruplo('END CLASS','_','_','_')
+    p[0]= None
+
+def p_guardar_nombre_clase(p):
+    '''
+    guardar_nombre_clase : ID
+    '''
+    global claseDeclarada
+    claseDeclarada = p[1]
+    if Tabla.CheckIfClassExists(claseDeclarada):
+        raise ErrorMsg('La clase ' + claseDeclarada + ' ya habia sido declarada previamente')
+    else:
+        Tabla.AddClase(claseDeclarada) 
+        Tabla.SetClass(claseDeclarada)
+
     p[0] = None
 def p_declaracion_clases_aux(p):
     '''
@@ -518,8 +546,6 @@ def p_declaracion_funciones(p):
     declaracion_funciones : declaracion_funciones_aux funciones_end  declaracion_funciones 
     |
     '''
-    
-
     p[0] = None
 def p_funciones_end(p):
     '''
@@ -553,6 +579,7 @@ def p_guardar_nombre_funcion(p):
     resetConVarFunciones()
     global FuncionDeclarada
     FuncionDeclarada = p[1]
+    print(FuncionDeclarada)
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
