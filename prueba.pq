@@ -1,6 +1,9 @@
 programa prueba;
 
 
+peque micola{
+    
+}
 mini void dos(int a){
 
     petite float b[8]

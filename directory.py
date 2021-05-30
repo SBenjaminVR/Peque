@@ -81,7 +81,16 @@ class Directory():
             self.Funciones[name] = newFunction
         else:
             self.Clases[self.CurrentClass]['Funciones'][name] = newFunction
-    
+
+    def AddClase(self, name,padre = None):
+        newClase = {
+            'Space': 0,
+            'Variables': {},
+            'Funciones' : {},
+            'Padre' : padre
+        }
+        self.Clases[name] = newClase
+
     def UpdateArrayLimit(self, name, limit):
         newLimit = {'Limit': limit}
         if self.Scope == 'main':
