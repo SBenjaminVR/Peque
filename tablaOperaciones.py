@@ -25,7 +25,7 @@ class TablaOperaciones:
             "PRINT": 22,
             "INPUT": 23,
             "END": 24,
-            "END CLASS" : 25
+            "START PROC" : 26
         }
 
     def GetNumber(self, Operation):

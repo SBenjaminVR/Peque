@@ -47,8 +47,8 @@ class Directory():
 
     def CheckIfObjectExists(self, object):
         return self.Objetos.get(object) != None
-    def checkIfObjectAtrExist(self,object,atr):
-        return self.Objetos.get('Variables').get(atr) != None
+ 
+
     def GetAttribute(self, name, val,Location):
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)
@@ -63,11 +63,12 @@ class Directory():
                 classObj = self.Clases.get(self.CurrentClass)
                 current = classObj
         return current.get('Variables').get(name).get(val)
-    def GetObjectAtr(self, name,val):  
-        return self.Objetos.get(name)['Variables'].get(val)
+    
+    
 
     def GetObjectAtr(self, name,val):  
         return self.Objetos.get(name).get(val)
+        
     def GetFunctionAttribute(self, name, val):
         if self.Scope == 'class':
             classObj = self.Clases.get(self.CurrentClass)
@@ -94,11 +95,12 @@ class Directory():
                 self.Clases[self.CurrentClass]['Variables'][name] = newVar
 
 
-    def AddFunction(self, name, type, address):
+    def AddFunction(self, name, type, address,start):
         newFunction = {
             'Type': type,
             'Address': address,
-            'Space': 0,
+            'Start' : 0,
+            'Space': start,
             'Variables': {},
             'Parametros': {}
         }

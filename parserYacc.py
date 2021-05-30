@@ -295,16 +295,17 @@ def p_input_aux2(p):
     p[0] = None
 def p_llamada(p):
     '''
-    llamada : llamadaID startCall llamada_aux L_PARENTHESIS llamada_aux2 R_PARENTHESIS endCall
+    llamada : llamadaID startCall L_PARENTHESIS llamada_aux2 R_PARENTHESIS endCall
     '''
     
     p[0]=None
 def p_llamadaID(p):
     '''
-    llamadaID : ID
+    llamadaID : ID 
+    | ID llamada_aux
     '''
-    
-    funct.push(p[1])    
+    funct.push(p[1])
+
     p[0] = None
 def p_startCall(p):
     '''
@@ -314,30 +315,78 @@ def p_startCall(p):
     parametros = 1
     memoria.ResetLocalMemory()
 
-    CrearCuadruplo('ERA',funct.top(),'_', Tabla.Scope) #Quiza se puede sustituir por numeros
-    
+    Funcion = funct.pop()
+
+    if funct.top() == '.':
+        funct.pop()
+        objeto = funct.pop()
+        temp = objeto
+        objeto = Funcion
+        Funcion = temp
+        funct.push(objeto)
+        funct.push('.')
+        
+        CrearCuadruplo('ERA',Funcion,'_', objeto) #Quiza se puede sustituir por numeros
+
+    else:
+        CrearCuadruplo('ERA',Funcion,'_', '_') #Quiza se puede sustituir por numeros
+    funct.push(Funcion)
     p[0]=None
 def p_endCall(p):
     '''
     endCall : empty
     '''
     Funcion = funct.pop()
-    CrearCuadruplo('GOSUB',Funcion,'_','_')
+    objeto = None
 
-    Type = Tabla.GetFunctionAttribute(Funcion, 'Type')
-    if Type != 'void':
-        Address = Tabla.GetFunctionAttribute(Funcion, 'Address')
-        GenerarNuevoTemporal(Type)
-        Resultado = Temporales[-1]
-        values.push(Resultado)
-        CrearCuadruplo('=',Address,'_',Resultado)
+    if funct.top() == '.':
+        funct.pop()
+        objeto = funct.pop()
+        
+        tempScope = Tabla.Scope
+        Tabla.SetScope('class')
+        clase = Tabla.GetObjectAtr(objeto,'Clase')
+        Tabla.SetClass(clase)
+        Type = Tabla.GetFunctionAttribute(Funcion, 'Type')
+        start = Tabla.GetFunctionAttribute(Funcion, 'Start')
+        CrearCuadruplo('GOSUB',Funcion,objeto,start)
+        if Type != 'void':
+            
+            AddressA = Tabla.GetFunctionAttribute(Funcion, 'Address')
+            GenerarNuevoTemporal(Type)
+            Resultado = Temporales[-1]
+            values.push(Resultado)
+            AddressB = Tabla.GetObjectAtr(objeto,'Address')
+
+            Address = str(AddressB) + '.'+ str(AddressA)
+            print(Address)
+            
+            CrearCuadruplo('=',Address,'_',Resultado)
+            Tabla.SetScope(tempScope)
+
+    else:
+        start = Tabla.GetFunctionAttribute(Funcion, 'Start')
+        CrearCuadruplo('GOSUB',Funcion,'_',start)
+        Type = Tabla.GetFunctionAttribute(Funcion, 'Type')
+        if Type != 'void':
+            Address = Tabla.GetFunctionAttribute(Funcion, 'Address')
+            GenerarNuevoTemporal(Type)
+            Resultado = Temporales[-1]
+            values.push(Resultado)
+
+            CrearCuadruplo('=',Address,start,Resultado)
+
 
     p[0]= None
 def p_llamada_aux(p):
     '''
     llamada_aux : PERIOD ID
-    |
     '''
+        #temp = funct.pop()
+    funct.push(p[2])
+    funct.push(p[1])
+    
+        #funct.push(temp)
     p[0]=None
 def p_llamada_aux2(p):
     '''
@@ -413,7 +462,6 @@ def p_igualdadAtr(p):
     '''
     igualdadAtr : atributo EQUALS asignacion_aux
     '''
-    values.printStack()
     iz = values.pop()
     res = values.pop()
     
@@ -469,7 +517,6 @@ def p_igualdadVar(p):
     if not Tabla.CheckIfVariableExists(p[1],Location) :
         raise ErrorMsg('La variable ' + p[1] + ' no existe')
     else:
-        
         address = Tabla.GetAttribute(p[1],'Address',Location)
         CrearCuadruplo(p[2], iz, '_',address )
 
@@ -563,7 +610,6 @@ def p_end_class(p):
     end_class : empty
     '''
     Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
-    CrearCuadruplo('END CLASS','_','_','_')
     p[0]= None
 
 def p_guardar_nombre_clase(p):
@@ -656,13 +702,15 @@ def p_guardar_nombre_funcion(p):
 
     global FuncionDeclarada
     FuncionDeclarada = p[1]
+    CrearCuadruplo('START PROC','_','_',FuncionDeclarada)
+    print(cont)
     
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
         address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
-        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address)
+        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,5)
         Tabla.SetCurrentFunction(FuncionDeclarada)
 def p_declaracion_funciones_aux2(p):
     '''
@@ -679,6 +727,8 @@ def p_regreso(p):
     '''
     global FuncionDeclarada
     tipo = Tabla.GetFunctionAttribute(FuncionDeclarada, 'Type')
+    
+
     if len(p) > 1:
         if tipo == 'void':
             raise ErrorMsg('Las funciones void (' + FuncionDeclarada + ') no deben tener un return')

@@ -11,9 +11,10 @@ peque micola agranda marmota{
     petite int a
     petite int b[2][3]
 
-    mini void uno(){
-        petite int a[2][3]
-        a = 2+3
+    mini int uno(int f){
+        petite int a
+        a = 2 + 3
+        return a
     }
     mini void dos(int a){
 
@@ -26,7 +27,7 @@ peque micola agranda marmota{
     }
     
 }
-mini void dos(int a, float b){
+mini int dos(int a, float b){
 
         petite float b[8]
         petite float f
@@ -37,6 +38,7 @@ mini void dos(int a, float b){
         {
             d = c[2][1]
         }
+        return d
     }
 
 main()
@@ -50,8 +52,9 @@ main()
     jose = new micola
     pito = new micola
 
-    jose.a = 2 + 3
-    pito.a = 2+ 4
-    f =  jose.a
+    f = dos(2,3)
+
+    
+    
     
 }
