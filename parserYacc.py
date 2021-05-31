@@ -13,7 +13,7 @@ Saltos = []
 Scope = ['GLOBAL']
 parametros = {}
 sizeVar = 1
-contVarLocal = [0]*10
+contVarLocal = [0]*11
 Location = 'class'
 
 paramChecktype = []
@@ -651,9 +651,11 @@ def p_declaracion_parametros_aux(p):
     |
     '''
     if len(p ) > 1:
+        
         tipo = AuxList[1]
+        agregarContVarFunciones(tipo,'NORMALES')
         name = p[2]
-        address = memoria.AssignMemoryAddress(tipo,Scope[0],'Normal')
+        address = memoria.AssignMemoryAddress(tipo,Scope[0],'NORMAL')
         parametros[name] = { 'Type' :tipo,'Address':address}
     p[0] = None
 def p_declaracion_parametros_aux2(p):
@@ -1274,44 +1276,49 @@ def agregarContVarFunciones(type,location,size=1):
             contVarLocal[2]  = contVarLocal[2] + size
         elif(type == 'bool'):
             contVarLocal[3]  = contVarLocal[3] + size
-        else:
+        elif(type == 'ListInt'):
             contVarLocal[4]  = contVarLocal[4] + size
+        elif(type == 'ListBool'):
+            contVarLocal[5]  = contVarLocal[6] + size
+        elif(type == 'ListFloat'):
+            contVarLocal[6]  = contVarLocal[6] + size
     else:
         if(type == 'int'):
-            contVarLocal[5]  = contVarLocal[5] + size 
+            contVarLocal[7]  = contVarLocal[7] + size 
         elif(type == 'float'):
-            contVarLocal[6]  = contVarLocal[6] + size 
-        elif(type == 'char'):
-            contVarLocal[7]  = contVarLocal[7] + size
+            contVarLocal[8]  = contVarLocal[8] + size 
         elif(type == 'bool'):
-             contVarLocal[8]  = contVarLocal[8] + size
-        else:
-            contVarLocal[9]  = contVarLocal[9] + size
+             contVarLocal[9]  = contVarLocal[9] + size
+        
     
 def resetConVarFunciones():
     global contVarLocal
     contVarLocal.clear()
-    contVarLocal = [0]*10
+    contVarLocal = [0]*11
     
 def getContVarFunciones(type,location):
     if location == 'NORMAL':
         if(type == 'int'):
-            return contVarLocal[0] 
+                return contVarLocal[0] 
         elif(type == 'float'):
-            return contVarLocal[1] 
+                return contVarLocal[1]  
+        elif(type == 'char'):
+                return contVarLocal[2] 
         elif(type == 'bool'):
-            return contVarLocal[3]
-        else:
-            return contVarLocal[4]
+                return contVarLocal[3] 
+        elif(type == 'ListInt'):
+                return contVarLocal[4]  
+        elif(type == 'ListBool'):
+                return  contVarLocal[5]  
+        elif(type == 'ListFloat'):
+                return contVarLocal[6] 
     else:
         if(type == 'int'):
-            return contVarLocal[5] 
+            return contVarLocal[7]  
         elif(type == 'float'):
-            return contVarLocal[6] 
+            return contVarLocal[8]   
         elif(type == 'bool'):
-            return contVarLocal[8]
-        else:
-            return contVarLocal[9]
+            return contVarLocal[9]  
 
 
 # crear el parser
