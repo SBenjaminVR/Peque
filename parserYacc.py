@@ -11,7 +11,7 @@ Cuartetos = []
 Temporales = []
 Saltos = []
 Scope = ['GLOBAL']
-parametros = []
+parametros = {}
 sizeVar = 1
 contVarLocal = [0]*10
 Location = 'class'
@@ -184,7 +184,6 @@ def p_for_temp(p):
     
     GenerarNuevoTemporal(tipos.pop())
     values.push(Temporales[-1])
-    tipos.printStack()
     if tipos.top() != 'int':
         raise ErrorMsg('se esperaba un tipo int or float en la expresion del for')
     res = values.top()
@@ -365,12 +364,12 @@ def p_endCall(p):
         parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
         if len(paramChecktype) != len(parametrosFunct):
             raise ErrorMsg('Incorrecto numero de parametros')
-        listaTipos = []
-        for elements in parametrosFunct:
-            listaTipos.append(elements.get('Type'))
-        for elements in zip(listaTipos,paramChecktype):
-            if elements[0] != elements[1]:
-                raise ErrorMsg('parametros no son del mismo tipo que el instanceado en ' + objeto+ '.' + Funcion + ' se dio un ' + elements[1] + ' se esperaba un ' + elements[0])
+        for k in parametrosFunct.values() :
+            tipo = k.get('Type')
+            for i in paramChecktype:
+                if k.get('Type') != i:
+                    raise ErrorMsg('parametros no son del mismo tipo que el instanceado en ' + Funcion + ' se dio un ' + i + ' se esperaba un ' + tipo)
+        
         Type = Tabla.GetFunctionAttribute(Funcion, 'Type')
         start = Tabla.GetFunctionAttribute(Funcion, 'Start')
         CrearCuadruplo('GOSUB',Funcion,objeto,start)
@@ -391,11 +390,11 @@ def p_endCall(p):
         if len(paramChecktype) != len(parametrosFunct):
             raise ErrorMsg('Incorrecto numero de parametros')
         listaTipos = []
-        for elements in parametrosFunct:
-            listaTipos.append(elements.get('Type'))
-        for elements in zip(listaTipos,paramChecktype):
-            if elements[0] != elements[1]:
-                raise ErrorMsg('parametros no son del mismo tipo que el instanceado en ' + Funcion + ' se dio un ' + elements[1] + ' se esperaba un ' + elements[0])
+        for k in parametrosFunct.values() :
+            tipo = k.get('Type')
+            for i in paramChecktype:
+                if k.get('Type') != i:
+                    raise ErrorMsg('parametros no son del mismo tipo que el instanceado en ' + Funcion + ' se dio un ' + i + ' se esperaba un ' + tipo)
         
         start = Tabla.GetFunctionAttribute(Funcion, 'Start')
         CrearCuadruplo('GOSUB',Funcion,'_',start)
@@ -508,6 +507,7 @@ def p_atributo(p):
     '''
     objeto = p[1]
     atributo = p[3]
+    
     if not Tabla.CheckIfObjectExists(objeto):
         raise ErrorMsg('El objeto ' + p[1] + ' no existe')
     else:
@@ -517,6 +517,7 @@ def p_atributo(p):
         Tabla.SetScope('class')
         Tabla.SetClass(clase)
         if not Tabla.CheckIfVariableExists(atributo,'class'):
+            
             raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
         else:
             addressB = Tabla.GetAttribute(atributo,'Address','class')
@@ -548,12 +549,18 @@ def p_igualdadVar(p):
     '''
     igualdadVar : ID EQUALS asignacion_aux
     '''
-    iz = values.pop()
-    if not Tabla.CheckIfVariableExists(p[1],Location) :
-        raise ErrorMsg('La variable ' + p[1] + ' no existe')
-    else:
+    if Tabla.CheckIfVariableExists(p[1],Location) :
+        iz = values.pop()
         address = Tabla.GetAttribute(p[1],'Address',Location)
         CrearCuadruplo(p[2], iz, '_',address )
+
+    else:
+        if Tabla.CheckIfFunctExistInAtribute(p[1],Location):
+            iz = values.pop()
+            address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
+            CrearCuadruplo(p[2], iz, '_',address )
+        else:
+            raise ErrorMsg('La variable ' + p[1] + ' no existe')
 
     
 
@@ -636,7 +643,7 @@ def p_startDParam(p):
     startDParam : empty
     '''
     global parametros
-    parametros = []
+    parametros.clear()
     p[0]= None
 def p_declaracion_parametros_aux(p):
     '''
@@ -647,7 +654,7 @@ def p_declaracion_parametros_aux(p):
         tipo = AuxList[1]
         name = p[2]
         address = memoria.AssignMemoryAddress(tipo,Scope[0],'Normal')
-        parametros.append({'Name' : name, 'Type' :tipo,'Address':address})
+        parametros[name] = { 'Type' :tipo,'Address':address}
     p[0] = None
 def p_declaracion_parametros_aux2(p):
     '''
@@ -940,12 +947,18 @@ def p_variable_aux2(p):
     '''
     variable_aux2 : ID empty
     '''
-    if Tabla.CheckIfVariableExists(p[1],Location): 
+    
+    if  Tabla.CheckIfVariableExists(p[1],Location):
         address = Tabla.GetAttribute(p[1],'Address',Location)
         values.push(address)
         tipos.push(Tabla.GetAttribute(p[1], 'Type',Location))
     else:
-        raise ErrorMsg('No existe la variable ' + p[1])
+        if Tabla.CheckIfFunctExistInAtribute(p[1],Location):
+            address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
+            values.push(address)
+            tipos.push(Tabla.GetAttributeForParameters(p[1], 'Type',Location))
+        else :
+            raise ErrorMsg('No existe la variable ' + p[1])
     p[0] = None
 def p_variable_aux(p):
     '''
