@@ -16,18 +16,18 @@ peque micola agranda marmota{
         a = 2 + 3
         return a
     }
-    mini void dos(int a){
+    mini int dos(int a){
 
         petite float b[8]
         petite float f
         petite float c[4][4]
         petite float d
         f = c[2][1]
-       
+       return f
     }
     
 }
-mini int dos(int a, float b){
+mini int tres(float c, float d){
 
         petite float b[8]
         petite float f
@@ -48,8 +48,12 @@ main()
 
     jose = new micola
     pito = new micola
+    for(2 to 3, 1)
+    {
+        f = jose.dos(2)
+    }
 
-    f = dos(2,3)
+    
 
     
     
