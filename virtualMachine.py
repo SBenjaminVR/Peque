@@ -217,7 +217,7 @@ class VirtualMachine():
         self.memory.UnloadLastLocalMemory()
     
     def ProcessVER(self, left, right, res):
-        val = self.memory.GetValue(left)
+        val = self.GetValueInsideValueIfParenthesis(left)
         print (str(val) + ' debe estar entre ' + str(right)  + ' y ' + str(res))
         if right <= val and val <= res:
             return
@@ -225,7 +225,7 @@ class VirtualMachine():
             raise ErrorMsg('Se esta tratando de acceder a un espacio fuera del limite de un arreglo')
 
     def ProcessPRINT(self, left):
-        iz = self.memory.GetValue(left)
+        iz = self.GetValueInsideValueIfParenthesis(left)
         print(str(iz))
 
     def ProcessINPUT(self, left):

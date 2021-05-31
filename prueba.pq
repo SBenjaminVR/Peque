@@ -48,6 +48,7 @@ main()
 
     jose = new micola
     pito = new micola
+    c[2][3] = 2 + 4
     for(2 to 3, 1)
     {
         f = jose.dos(2)
