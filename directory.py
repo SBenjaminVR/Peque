@@ -95,14 +95,14 @@ class Directory():
                 self.Clases[self.CurrentClass]['Variables'][name] = newVar
 
 
-    def AddFunction(self, name, type, address,start):
+    def AddFunction(self, name, type, address,param,start):
         newFunction = {
             'Type': type,
             'Address': address,
             'Start' : start,
             'Space': 0,
             'Variables': {},
-            'Parametros': {}
+            'Parametros': param
         }
         if self.Scope == 'function':
             self.Funciones[name] = newFunction

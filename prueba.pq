@@ -27,7 +27,7 @@ peque micola agranda marmota{
     }
     
 }
-mini int dos(int a, float b){
+mini int tres(int c, float d){
 
         petite float b[8]
         petite float f
@@ -48,8 +48,9 @@ main()
 
     jose = new micola
     pito = new micola
+    
 
-    f = dos(2,3)
+    f = tres(2,3)
 
     
     

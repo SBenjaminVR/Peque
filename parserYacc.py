@@ -11,7 +11,7 @@ Cuartetos = []
 Temporales = []
 Saltos = []
 Scope = ['GLOBAL']
-parametros = 1
+parametros = []
 sizeVar = 1
 contVarLocal = [0]*10
 Location = 'class'
@@ -304,6 +304,8 @@ def p_llamadaID(p):
     llamadaID : ID 
     | ID llamada_aux
     '''
+    
+    
     funct.push(p[1])
 
     p[0] = None
@@ -311,8 +313,7 @@ def p_startCall(p):
     '''
     startCall : empty
     '''
-    global parametros
-    parametros = 1
+    
     memoria.ResetLocalMemory()
 
     Funcion = funct.pop()
@@ -336,6 +337,7 @@ def p_endCall(p):
     '''
     endCall : empty
     '''
+    global DeclVar
     Funcion = funct.pop()
     objeto = None
 
@@ -393,6 +395,8 @@ def p_llamada_aux2(p):
     llamada_aux2 :  parametros endParam  llamada_aux3
     |
     '''
+
+    
     
     p[0]=None
 def p_llamada_aux3(p):
@@ -414,10 +418,11 @@ def p_endParam(p):
     endParam : empty
 
     '''
-    global parametros
+    
     address = memoria.AssignMemoryAddress(tipos.pop(),'LOCAL',Location)
     CrearCuadruplo('PARAMETRO', values.pop(),'_',address)
-    parametros += 1
+    
+    
     p[0] = None
 
 
@@ -587,17 +592,36 @@ def p_else_seen(p):
 
 def p_declaracion_parametros(p):
     '''
-    declaracion_parametros : tipo_retorno ID declaracion_parametros_aux
+    declaracion_parametros : startDParam declaracion_parametros_aux
 	|
     '''
+    
+    
     p[0] = None
+
+def p_startDParam(p):
+    '''
+    startDParam : empty
+    '''
+    global parametros
+    parametros = []
+    p[0]= None
 def p_declaracion_parametros_aux(p):
     '''
-    declaracion_parametros_aux : COMMA declaracion_parametros
+    declaracion_parametros_aux : tipo_retorno ID declaracion_parametros_aux2
+    |
+    '''
+    tipo = AuxList[1]
+    name = p[2]
+    address = memoria.AssignMemoryAddress(tipo,Scope[0],'Normal')
+    parametros.append({'Name' : name, 'Type' :tipo,'Address':address})
+    p[0] = None
+def p_declaracion_parametros_aux2(p):
+    '''
+    declaracion_parametros_aux2 : COMMA declaracion_parametros_aux
     |
     '''
     p[0] = None
-
 def p_declaracion_clases(p):
     '''
     declaracion_clases : PEQUE guardar_nombre_clase declaracion_clases_aux end_class declaracion_clases
@@ -690,6 +714,9 @@ def p_save_variables(p):
     '''
     copiaDeLista = contVarLocal.copy()
     Tabla.updateFunctionAttribute(FuncionDeclarada,'Space',copiaDeLista)
+    print(parametros)
+    Tabla.updateFunctionAttribute(FuncionDeclarada,'Parametros',parametros)
+
     p[0]= None
 def p_guardar_nombre_funcion(p):
     '''
@@ -709,9 +736,9 @@ def p_guardar_nombre_funcion(p):
     else:
         AuxList[0] = 'Funcion'
         address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
-        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,cont-1)
-        print(Tabla.Clases)
-        print()
+        
+        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,parametros,cont-1)
+
         Tabla.SetCurrentFunction(FuncionDeclarada)
 def p_declaracion_funciones_aux2(p):
     '''
