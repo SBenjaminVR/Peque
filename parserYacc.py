@@ -13,7 +13,7 @@ Saltos = []
 Scope = ['GLOBAL']
 parametros = {}
 sizeVar = 1
-contVarLocal = [0]*11
+contVarLocal = [0]*9
 Location = 'class'
 
 paramChecktype = []
@@ -143,7 +143,94 @@ def p_estatutos_funciones(p):
     | llamada
     | asignacion
     | condicion
+    | listas
     '''
+def p_listas(p):
+    '''
+    listas : ID METOD ID L_PARENTHESIS expresion R_PARENTHESIS
+    | ID METOD ID L_PARENTHESIS  R_PARENTHESIS
+
+
+    '''
+    address = -1
+    tipo = ''
+    #checar que exista el ID
+    if  Tabla.CheckIfVariableExists(p[1],Location):
+        address = Tabla.GetAttribute(p[1],'Address',Location)
+        tipo = Tabla.GetAttribute(p[1],'Type',Location)
+        
+    else:
+        if Tabla.CheckIfFunctExistInAtribute(p[1],Location):
+            address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
+            tipo = Tabla.GetAttribute(p[1],'Type',Location)
+        else :
+            raise ErrorMsg('No existe la variable ' + p[1])
+    #checar el id 2 este entre los metodos
+    
+    #------------------Append---------------------#
+    if p[3] == 'append':
+        if(len(p) <= 6):
+            raise ErrorMsg(p[3] + 'debe tener 1 argumento')
+        typeCheckTemp = tipos.pop()
+        typeCheckAns = 'list_' + typeCheckTemp
+        if typeCheckAns != tipo :
+            raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
+        CrearCuadruplo('APPEND',address,'_',values.pop())
+    #------------------POP---------------------#
+    elif p[3] == 'pop':
+        if(len(p) > 6):
+            raise ErrorMsg(p[3] + ' no debe tener argumetos')
+        CrearCuadruplo('POP',address,'_','_')
+    #------------------Sort---------------------#
+    elif p[3] == 'sort':
+        if(len(p) > 6):
+            raise ErrorMsg(p[3] + ' no debe tener argumetos')
+        CrearCuadruplo('SORT',address,'_','_')
+   #------------------find---------------------#
+    elif p[3] == 'find':
+        if(len(p) <= 6):
+            raise ErrorMsg(p[3] + 'debe tener 1 argumento')
+        typeCheckTemp = tipos.pop()
+        typeCheckAns = 'list_' + typeCheckTemp
+        if typeCheckAns != tipo :
+            raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
+        
+        val = values.pop()
+        addressTemp = GenerarNuevoTemporal(tipo)
+        CrearCuadruplo('FIND',address,val,addressTemp)
+    #------------------Head---------------------#
+    elif p[3] == 'head':
+        if(len(p) > 6):
+            raise ErrorMsg(p[3] + ' no debe tener argumetos')
+        
+        val = values.pop()
+        addressTemp = GenerarNuevoTemporal(tipo)
+        CrearCuadruplo('HEAD',address,'_',addressTemp)
+    #------------------Tail---------------------#
+    elif p[3] == 'tail':
+        if(len(p) > 6):
+            raise ErrorMsg(p[3] + ' no debe tener argumetos')
+       
+        val = values.pop()
+        addressTemp = GenerarNuevoTemporal(tipo)
+        CrearCuadruplo('TAIL',address,val,addressTemp)
+    #------------------Key---------------------#
+    elif p[3] == 'key':
+        if(len(p) <= 6):
+            raise ErrorMsg(p[3] + 'debe tener 1 argumento')
+        typeCheckTemp = tipos.pop()
+        typeCheckAns = typeCheckTemp
+        if typeCheckAns != 'int' :
+            raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + 'int' + ' se dio un tipo: ' + typeCheckAns)
+        
+        val = values.pop()
+        addressTemp = GenerarNuevoTemporal(tipo)
+        CrearCuadruplo('KEY',address,val,addressTemp)
+    else:
+        raise ErrorMsg('No existe el metodo para lista ' + p[3])
+
+   
+    print('entro al metodo')
     p[0] = None
 #estatutos repeticion
 def p_estatutos_repeticion(p):
@@ -823,10 +910,12 @@ def p_declaracion_var(p):
     p[0] = None
 def p_declaracion_var_aux(p):
     '''
-    declaracion_var_aux : PETITE declaracion_var_aux2 assignAddress declaracion_var
+    declaracion_var_aux : PETITE declaracion_var_aux2 assignAddress declaracion_var 
     |
     '''
 
+
+    p[0] = None
 def p_assignAddress(p):
     # Funcion que asigna los espacios de memoria faltantes en caso de ser un array o matriz
     '''
@@ -839,7 +928,7 @@ def p_assignAddress(p):
         for i in range(1, sizeVar):
             agregarContVarFunciones(AuxList[1],'NORMAL')
             address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
-    
+        
     p[0] = None
 def p_declaracion_var_aux2(p):
     '''
@@ -979,9 +1068,17 @@ def p_variable_aux(p):
 
 def p_tipo_especial(p):
     '''
-    tipo_especial : FILA
+    tipo_especial : LISTA INT
+    | LISTA FLOAT
+    | LISTA BOOL
     '''
-    AuxList[1] = p[1]
+    if(p[2] == 'int'):
+        AuxList[1] = 'list_int'
+    elif(p[2] == 'float'):
+        AuxList[1] = 'list_float'
+    else:
+        AuxList[1] = 'list_bool'
+
     p[0] = None
 def p_tipo_retorno(p):
     '''
@@ -1268,6 +1365,7 @@ def GenerarNuevoTemporal(tipo):
     addressTemporal = memoria.AssignMemoryAddress(tipo,Scope[0],'TEMPORAL')
     Temporales.append(addressTemporal)
     tipos.push(tipo)
+    return addressTemporal
 
 def Fill(cuarteto, llenado):
     global Cuartetos
@@ -1279,29 +1377,29 @@ def agregarContVarFunciones(type,location,size=1):
             contVarLocal[0]  = contVarLocal[0] + size
         elif(type == 'float'):
             contVarLocal[1]  = contVarLocal[1] + size
-        elif(type == 'char'):
-            contVarLocal[2]  = contVarLocal[2] + size
         elif(type == 'bool'):
+            contVarLocal[2]  = contVarLocal[2] + size
+        elif(type == 'list_int'):
             contVarLocal[3]  = contVarLocal[3] + size
-        elif(type == 'ListInt'):
+        elif(type == 'list_float'):
             contVarLocal[4]  = contVarLocal[4] + size
-        elif(type == 'ListBool'):
-            contVarLocal[5]  = contVarLocal[6] + size
-        elif(type == 'ListFloat'):
-            contVarLocal[6]  = contVarLocal[6] + size
+        elif(type == 'list_bool'):
+            contVarLocal[5]  = contVarLocal[5] + size
     else:
         if(type == 'int'):
-            contVarLocal[7]  = contVarLocal[7] + size 
+            contVarLocal[6]  = contVarLocal[6] + size 
         elif(type == 'float'):
-            contVarLocal[8]  = contVarLocal[8] + size 
+            contVarLocal[7]  = contVarLocal[7] + size 
         elif(type == 'bool'):
-             contVarLocal[9]  = contVarLocal[9] + size
+             contVarLocal[8]  = contVarLocal[8] + size
         
     
 def resetConVarFunciones():
     global contVarLocal
+    global Temporales
     contVarLocal.clear()
-    contVarLocal = [0]*11
+    contVarLocal = [0]*9
+
     
 def getContVarFunciones(type,location):
     if location == 'NORMAL':
@@ -1309,23 +1407,21 @@ def getContVarFunciones(type,location):
                 return contVarLocal[0] 
         elif(type == 'float'):
                 return contVarLocal[1]  
-        elif(type == 'char'):
-                return contVarLocal[2] 
         elif(type == 'bool'):
-                return contVarLocal[3] 
-        elif(type == 'ListInt'):
-                return contVarLocal[4]  
-        elif(type == 'ListBool'):
-                return  contVarLocal[5]  
-        elif(type == 'ListFloat'):
-                return contVarLocal[6] 
+                return contVarLocal[2] 
+        elif(type == 'list_int'):
+                return contVarLocal[3]  
+        elif(type == 'list_float'):
+                return  contVarLocal[4]  
+        elif(type == 'list_bool'):
+                return contVarLocal[5] 
     else:
         if(type == 'int'):
-            return contVarLocal[7]  
+            return contVarLocal[6]  
         elif(type == 'float'):
-            return contVarLocal[8]   
+            return contVarLocal[7]   
         elif(type == 'bool'):
-            return contVarLocal[9]  
+            return contVarLocal[8]  
 
 
 # crear el parser

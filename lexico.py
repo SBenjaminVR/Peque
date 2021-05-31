@@ -24,7 +24,8 @@ reserved = {
     'while' : 'WHILE',
     'to' : 'TO',
     'main': 'MAIN',
-    'new' : 'NEW'
+    'new' : 'NEW',
+    'lista' : 'LISTA'
 }
 #--------------------------------------- Tokens---------------------------------------
 
@@ -35,13 +36,14 @@ tokens = [
     'DOTS', 'EQUALS', 'SEMICOLON', 'PERIOD', 'COMMA',
     'LESS', 'BIGGER', 'DIFFERENT','EQUAL','BIGGER_EQUAL', 'LESS_EQUAL',
     'L_PARENTHESIS', 'R_PARENTHESIS', 'L_BRACKET', 'R_BRACKET', 'L_CORCHETE', 'R_CORCHETE',
-    'OR', 'AND',
+    'OR', 'AND','METOD',
     'COMMENT',
 ] + list(reserved.values())
 #--------------------------------------- Simple regular expresion---------------------------------------
 
 # Expresiones regulares para tokens simples
 t_L_CORCHETE = r'\['
+t_METOD = r'\-\>'
 t_R_CORCHETE = r'\]'
 t_PLUS = r'\+'
 t_MINUS = r'\-'
