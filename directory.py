@@ -17,7 +17,21 @@ class Directory():
 
     def SetClass(self, clase):
         self.CurrentClass = clase
- 
+    def CheckIfFunctExistInAtribute(self,name,location):
+        if self.Scope == 'class':
+            current = self.Clases.get(self.CurrentClass).get('Funciones').get(self.CurrentFunction)
+            parametros = current.get('Parametros').get(name) != None
+            atributos = self.Clases.get(self.CurrentClass).get('Variables').get(name) != None
+            return parametros or atributos
+        elif self.Scope == 'function':
+
+            current = self.Funciones.get(self.CurrentFunction)
+            
+            parametros = current.get('Parametros').get(name) != None
+            return parametros
+           
+
+        
     def CheckIfVariableExists(self, name,location):
         
         if self.Scope == 'main':
@@ -45,7 +59,25 @@ class Directory():
     def CheckIfClassExists(self, clase):
         return self.Clases.get(clase) != None
 
-    def GetAttribute(self, name, val,Location):
+    def CheckIfObjectExists(self, object):
+        return self.Objetos.get(object) != None
+ 
+    def CheckIAributeExists(self, name,location):
+        
+        if self.Scope == 'main':
+            return self.Variables.get(name) != None
+        elif self.Scope == 'function':
+            current = self.Funciones.get(self.CurrentFunction)
+            return current.get('Variables').get(name) != None
+        elif self.Scope == 'class':
+            if location == 'function':
+                classObj = self.Clases.get(self.CurrentClass)
+                current = classObj.get('Funciones').get(self.CurrentFunction)
+                return current.get('Variables').get(name) != None
+            elif location == 'class':
+                current = self.Clases.get(self.CurrentClass)
+                return current.get('Variables').get(name) != None
+    def GetAttribute(self, name, val, Location):
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)
         elif self.Scope == 'function':
@@ -60,6 +92,24 @@ class Directory():
                 current = classObj
         return current.get('Variables').get(name).get(val)
 
+    def GetAttributeForParameters(self, name, val, Location):
+        if self.Scope == 'function':
+            current = self.Funciones.get(self.CurrentFunction)
+            return current.get('Parametros').get(name).get(val)
+        elif self.Scope == 'class':
+            current = self.Clases.get(self.CurrentClass).get('Funciones').get(self.CurrentFunction)
+            state = current.get('Parametros').get(name) != None
+            if state :
+                current = current.get('Parametros').get(name).get(val)
+                return current
+            else:
+                return  self.Clases.get(self.CurrentClass).get('Variables').get(name).get(val)
+
+    
+
+    def GetObjectAtr(self, name,val):  
+        return self.Objetos.get(name).get(val)
+        
     def GetFunctionAttribute(self, name, val):
         if self.Scope == 'class':
             classObj = self.Clases.get(self.CurrentClass)
@@ -68,7 +118,7 @@ class Directory():
             current = self.Funciones.get(name)
             
         return current.get(val)
-
+#adds---------------------------------------------------------------
     def AddVariable(self, name, type, address, size, Location):
         newVar = {
             'Type': type,
@@ -86,13 +136,14 @@ class Directory():
                 self.Clases[self.CurrentClass]['Variables'][name] = newVar
 
 
-    def AddFunction(self, name, type, address):
+    def AddFunction(self, name, type, address,param,start):
         newFunction = {
             'Type': type,
             'Address': address,
+            'Start' : start,
             'Space': 0,
             'Variables': {},
-            'Parametros': {}
+            'Parametros': param
         }
         if self.Scope == 'function':
             self.Funciones[name] = newFunction
@@ -116,8 +167,10 @@ class Directory():
 
             
         }
-        self.Object[name] = newObj
+        self.Objetos[name] = newObj
 
+
+#updates------------------------------
     def UpdateArrayLimit(self, name, limit,Location):
         newLimit = {'Limit': limit}
         if self.Scope == 'main':
@@ -155,5 +208,19 @@ class Directory():
     def updateClassAtribute(self,clase,name,val):
         referencia = {name : val}
         self.Clases[clase].update(referencia)
+
     def ClassAtribute(self,clase,name):
         return self.Clases[clase].get(name)
+
+    def GetObjectAddress(self, name, function):
+        currentClass = self.Objetos.get(name).get('Clase')
+        foundFunction = False
+        while not foundFunction:
+            if self.Clases[currentClass]['Funciones'].get(function) != None:
+                foundFunction = True
+            else:
+                currentClass = self.Clases[currentClass].get('Padre')
+        return self.Clases[currentClass]['Funciones'][function].get('Address')
+    
+    def GetFunctionAddress(self, name):
+        return self.Funciones.get(name).get('Address')

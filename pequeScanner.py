@@ -19,7 +19,7 @@ from pathlib import Path
 from parserYacc import Cuartetos, Temporales, Tabla, Constantes, popper, tipos
 import virtualMachine as mv
 
-fileData = Path('prueba.pq').read_text()
+fileData = Path('prueba2.pq').read_text()
 resultado = py.parser.parse(fileData)
 print(resultado)
 print('----------------Variables--------------')
@@ -30,6 +30,8 @@ print('----------------Funciones--------------')
 print(Tabla.Funciones)
 print('-----------------Clases--------------')
 print(Tabla.Clases)
+print('-----------------Objetos--------------')
+print(Tabla.Objetos)
 print('----------------Popper--------------')
 popper.printStack()
 print('----------------Tipos--------------')

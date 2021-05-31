@@ -1,8 +1,11 @@
 from memory import Memory
 from stack import Stack
+from localMemory import LocalMemory
 import time
 
 returnDirection = Stack()
+functions = Stack() 
+NewLocalMemory = Stack()
 
 def GetQuadrupleValue(quadruple):
     iz = quadruple.get('iz')
@@ -23,12 +26,11 @@ class VirtualMachine():
         current = 0
         quadruples = len(self.memory.quadruples)
         while current < quadruples:
+            print('A continuación el cuarteto #' +str(current))
             quadruple = self.memory.quadruples[current]
             print(quadruple)
             operation = quadruple.get('op')
 
-            if operation != 14 or operation != 15:
-                current = current + 1
             iz, de, res = GetQuadrupleValue(quadruple)
 
             if operation == 1:
@@ -72,29 +74,33 @@ class VirtualMachine():
                 
             elif operation == 14:
                 current = res
+                continue
 
             elif operation == 15:
                 if self.IsGOTOF(iz):
                     current = res
-                else:
-                    current = current + 1
+                    continue
 
             elif operation == 16:
                 self.ProcessERA(iz, res)
+                functions
 
             elif operation == 17:
-                # DEBE IR AL CUARTETO DONDE EMPIEZE LA FUNCION
+                self.ProcessGOSUB(iz, de)
                 returnDirection.push(current + 1)
+                current = res
+                continue
 
             elif operation == 18:
-                print('Not yet implemented')
+                self.ProcessPARAMETRO(iz, res)
 
             elif operation == 19:
-                print('Not yet implemented')
+                self.ProcessReturn(res)
 
             elif operation == 20:
                 self.ProcessENDPROC()
                 current = returnDirection.pop()
+                continue
 
             elif operation == 21:
                 self.ProcessVER(iz, de, res)
@@ -106,7 +112,9 @@ class VirtualMachine():
                 self.ProcessINPUT(iz)
 
             elif operation == 24:
-                print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
+                self.ProcessEND()
+
+            current = current + 1
                 
                 
     def ProcessPLUS(self, left, right, result):
@@ -129,7 +137,10 @@ class VirtualMachine():
     def ProcessDIVIDE(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz / de)
+        if self.IsInt(iz) and self.IsInt(de):
+            self.memory.SetValue(result, iz // de)
+        else:
+            self.memory.SetValue(result, iz / de)
 
     def ProcessASSIGN(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
@@ -141,61 +152,84 @@ class VirtualMachine():
         
 
     def ProcessBIGGER(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz > de)
     
     def ProcessLESS(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz < de)
 
     def ProcessBIGGER_EQUAL(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz >= de)
 
     def ProcessLESS_EQUAL(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz <= de)
 
     def ProcessEQUAL(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz == de)
 
     def ProcessDIFFERENT(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz != de)
 
     def ProcessAND(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz and de)
 
     def ProcessOR(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz or de)
 
     def IsGOTOF(self, left):
-        value = self.memory.GetValue(left)
+        value = self.GetValueInsideValueIfParenthesis(left)
+        print('ADENTRO DEL GOTOF')
+        print(value)
         if not value:
-            return False
-        return True
+            return True
+        return False
 
     def ProcessERA(self, left, res):
         self.memory.directory.Scope = res
         space = self.memory.directory.GetFunctionAttribute(left, 'Space')
-        self.memory.CreateNewLocalMemory(space)
+        NewLocalMemory.push(self.memory.CreateNewLocalMemory(space))
+
+    def ProcessGOSUB(self, left, right):
+        if right != '_':
+            address = self.memory.directory.GetObjectAddress(right, left)
+        else:
+            address = self.memory.directory.GetFunctionAddress(left)
+        functions.push({'Name': left, 'Address': address})
+        self.memory.MountNewLocalMemory(NewLocalMemory.pop())
+
+    def ProcessPARAMETRO(self, left, result):
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        print("PARAM " + str(iz) + ' --->' + str(result))
+        currentMemory = NewLocalMemory.top()
+        currentMemory.SetValue(result, iz)
+
+    def ProcessReturn(self, res):
+        value = self.GetValueInsideValueIfParenthesis(res)
+        currentFunction = functions.top()
+        address = currentFunction.get('Address')
+        self.memory.SetValue(address, value)
 
     def ProcessENDPROC(self):
+        functions.pop()
         self.memory.UnloadLastLocalMemory()
     
     def ProcessVER(self, left, right, res):
-        val = self.memory.GetValue(left)
+        val = self.GetValueInsideValueIfParenthesis(left)
         print (str(val) + ' debe estar entre ' + str(right)  + ' y ' + str(res))
         if right <= val and val <= res:
             return
@@ -203,7 +237,7 @@ class VirtualMachine():
             raise ErrorMsg('Se esta tratando de acceder a un espacio fuera del limite de un arreglo')
 
     def ProcessPRINT(self, left):
-        iz = self.memory.GetValue(left)
+        iz = self.GetValueInsideValueIfParenthesis(left)
         print(str(iz))
 
     def ProcessINPUT(self, left):
@@ -212,7 +246,7 @@ class VirtualMachine():
         self.memory.SetValue(left, userInput)
 
     def ProcessEND(self):
-        print('Programa se termino de ejecutar')
+        print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):
@@ -222,30 +256,17 @@ class VirtualMachine():
             value = value[1:-1]
             aux = self.memory.GetValue(int(value))
             current = self.memory.GetValue(aux)
-        #Se checa que no se este tratando de acceder a una casilla vacia
+        # Se checa que no se este tratando de acceder a una casilla vacia
         if current != None:
             return current
         else:
             raise ErrorMsg('Se esta tratando de acceder a una casilla sin valor')
 
-    def esIntOFloat(self, var):
-        return isinstance(var, int) or isinstance(var, float)
+    def IsFloat(self, var):
+        return isinstance(var, float)
 
-    def esUnDigito(self, var):
-        return var.isdigit()
-
-    def esUnTemporal(self, var):
-        return var.startswith('_t')
-
-    def procesarPrint(self, valores):
-        Imprimir = []
-        listaDeValores = valores.split(", ")
-        for val in listaDeValores:
-            Imprimir.append(self.traerValorNumerico(val))
-        print(*Imprimir, sep = ", ")
-    
-        
-
+    def IsInt(self, var):
+        return isinstance(var, int)
 
 class ErrorMsg(Exception):
     def __init__(self, message):

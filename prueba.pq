@@ -9,44 +9,53 @@ petite int a
 peque micola agranda marmota{
 
     petite int a
-    petite int b[2][3]
+    petite int x
+    petite int f
 
-    mini void uno(){
-        petite int a[2][3]
-        a = 2+3
+    mini int uno(){
+        a = 2 + 3
+        return a
     }
-    mini void dos(int a){
+    mini int dos(){
 
         petite float b[8]
-        petite float f
         petite float c[4][4]
         petite float d
-        
-        for(d to 10, 2)
-        {
-            c[3][1] = d
-        }
+        a = c[2][1]
+       return x
     }
     
 }
-mini void dos(int a){
+mini int tres(float c, float d){
 
         petite float b[8]
         petite float f
         petite float c[4][4]
-        petite float d
         
-        for(d to 10, 2)
-        {
-            c[3][1] = d
-        }
+        
+        
+        return d
     }
 
 main()
 {
+    
+    
     petite float b[8]
-    petite float f
+    
     petite int c[4][4]
-   
+
+    jose = new micola
+    pito = new micola
+    c[2][3] = 2 + 4
+    for(2 to 3, 1)
+    {
+        jose.a = tres(2.0,3.4)
+    }
+
+    
+
+    
+    
     
 }

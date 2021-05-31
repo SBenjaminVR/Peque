@@ -11,11 +11,12 @@ Cuartetos = []
 Temporales = []
 Saltos = []
 Scope = ['GLOBAL']
-parametros = 1
+parametros = {}
 sizeVar = 1
-contVarLocal = [0]*10
+contVarLocal = [0]*11
 Location = 'class'
 
+paramChecktype = []
 global lastVar
 global DeclVar
 global FuncionDeclarada
@@ -129,6 +130,7 @@ def p_cuerpo_aux(p) :
     | estatutos_funciones
     | declaracion_var
     | instancear_objetos
+    | regreso
     '''
     
     p[0] = None
@@ -178,9 +180,13 @@ def p_for_temp(p):
     '''
     for_temp : empty
     '''
+    
     iz = values.pop()
-    GenerarNuevoTemporal('int')
+    
+    GenerarNuevoTemporal(tipos.pop())
     values.push(Temporales[-1])
+    if tipos.top() != 'int':
+        raise ErrorMsg('se esperaba un tipo int or float en la expresion del for')
     res = values.top()
     TemporalesFor.push(res)
     CrearCuadruplo('=', iz, '_', res)
@@ -194,6 +200,8 @@ def p_for_revision(p):
     '''
     
     #chechar por las variables y expresiones
+    if tipos.top() != 'int':
+        raise ErrorMsg('se esperaba un tipo int or float en la expresion del for')
     popper.push('>=')
     GenerarCuadruploDeOperador(popper,values,tipos)
     Saltos.append(cont)
@@ -206,7 +214,8 @@ def p_for_suma (p):
     '''
     for_suma : empty
     '''
-   
+    if tipos.top() != 'int':
+        raise ErrorMsg('se esperaba un tipo int or float en la expresion del for')
     p[0]=None
 def p_for_final(p):
     '''
@@ -249,7 +258,8 @@ def p_checkCond(p):
 
     cond = values.pop()
     tCond = tipos.top()
-
+    if tCond != 'bool':
+        raise ErrorMsg('Se esperaba un tipo bool en el while')
     Saltos.append(cont)
     CrearCuadruplo('GOTOF',cond,'_','_')        
 
@@ -295,53 +305,130 @@ def p_input_aux2(p):
     p[0] = None
 def p_llamada(p):
     '''
-    llamada : llamadaID startCall llamada_aux L_PARENTHESIS llamada_aux2 R_PARENTHESIS endCall
+    llamada : llamadaID  L_PARENTHESIS llamada_aux2 R_PARENTHESIS  endCall
     '''
     
     p[0]=None
 def p_llamadaID(p):
     '''
-    llamadaID : ID
+    llamadaID : ID 
+    | ID llamada_aux
     '''
-    funct.push(p[1])    
+    popper.push('(')
+    
+    funct.push(p[1])
+
+    global paramChecktype
+    paramChecktype = []
+    memoria.ResetLocalMemory()
+
     p[0] = None
 def p_startCall(p):
     '''
     startCall : empty
     '''
-    global parametros
-    parametros = 1
+    
+    Funcion = funct.pop()
 
-    CrearCuadruplo('ERA',funct.top(),'_', Tabla.Scope) #Quiza se puede sustituir por numeros
+    if funct.top() == '.':
+        funct.pop()
+        objeto = funct.pop()
+        temp = objeto
+        objeto = Funcion
+        Funcion = temp
+        funct.push(objeto)
+        funct.push('.')
+        
+        CrearCuadruplo('ERA',Funcion,'_', objeto) #Quiza se puede sustituir por numeros
+
+    else:
+        CrearCuadruplo('ERA',Funcion,'_', '_') #Quiza se puede sustituir por numeros
+    funct.push(Funcion)
     
     p[0]=None
 def p_endCall(p):
     '''
     endCall : empty
     '''
+    global DeclVar
     Funcion = funct.pop()
-    CrearCuadruplo('GOSUB',Funcion,'_','_')
+    objeto = None
+    popper.pop()
 
-    Type = Tabla.GetFunctionAttribute(Funcion, 'Type')
-    if Type != 'void':
-        Address = Tabla.GetFunctionAttribute(Funcion, 'Address')
-        GenerarNuevoTemporal(Type)
-        Resultado = Temporales[-1]
-        values.push(Resultado)
-        CrearCuadruplo('=',Address,'_',Resultado)
+
+    
+    if funct.top() == '.':
+        funct.pop()
+        objeto = funct.pop()
+        
+        tempScope = Tabla.Scope
+        Tabla.SetScope('class')
+        clase = Tabla.GetObjectAtr(objeto,'Clase')
+        Tabla.SetClass(clase)
+        parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
+        if len(paramChecktype) != len(parametrosFunct):
+            raise ErrorMsg('Incorrecto numero de parametros')
+        for k in parametrosFunct.values() :
+            tipo = k.get('Type')
+            for i in paramChecktype:
+                if k.get('Type') != i:
+                    raise ErrorMsg('parametros no son del mismo tipo que el instanceado en ' + Funcion + ' se dio un ' + i + ' se esperaba un ' + tipo)
+        
+        Type = Tabla.GetFunctionAttribute(Funcion, 'Type')
+        start = Tabla.GetFunctionAttribute(Funcion, 'Start')
+        CrearCuadruplo('GOSUB',Funcion,objeto,start)
+        
+        if Type != 'void':
+            
+            AddressA = Tabla.GetFunctionAttribute(Funcion, 'Address')
+            GenerarNuevoTemporal(Type)
+            Resultado = Temporales[-1]
+            values.push(Resultado)
+            AddressB = Tabla.GetObjectAtr(objeto,'Address')
+            Address = str(AddressB) + '.'+ str(AddressA)
+            CrearCuadruplo('=',Address,'_',Resultado)
+            Tabla.SetScope(tempScope)
+
+    else:
+        parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
+        if len(paramChecktype) != len(parametrosFunct):
+            raise ErrorMsg('Incorrecto numero de parametros')
+        listaTipos = []
+        for k in parametrosFunct.values() :
+            tipo = k.get('Type')
+            for i in paramChecktype:
+                if k.get('Type') != i:
+                    raise ErrorMsg('parametros no son del mismo tipo que el instanceado en ' + Funcion + ' se dio un ' + i + ' se esperaba un ' + tipo)
+        
+        start = Tabla.GetFunctionAttribute(Funcion, 'Start')
+        CrearCuadruplo('GOSUB',Funcion,'_',start)
+        Type = Tabla.GetFunctionAttribute(Funcion, 'Type')
+        if Type != 'void':
+            Address = Tabla.GetFunctionAttribute(Funcion, 'Address')
+            GenerarNuevoTemporal(Type)
+            Resultado = Temporales[-1]
+            values.push(Resultado)
+
+            CrearCuadruplo('=', Address, '_' ,Resultado)
+
 
     p[0]= None
 def p_llamada_aux(p):
     '''
     llamada_aux : PERIOD ID
-    |
     '''
+        #temp = funct.pop()
+    funct.push(p[2])
+    funct.push(p[1])
+    
+        #funct.push(temp)
     p[0]=None
 def p_llamada_aux2(p):
     '''
     llamada_aux2 :  parametros endParam  llamada_aux3
     |
     '''
+   
     
     p[0]=None
 def p_llamada_aux3(p):
@@ -354,9 +441,13 @@ def p_llamada_aux3(p):
 
 def p_parametros(p):
     '''
-    parametros :  expresion 
+    parametros :  expresion startCall
     | 
     '''
+    global paramChecktype
+    paramChecktype.append(tipos.top())
+    address = memoria.AssignMemoryAddress(tipos.pop(),'LOCAL',Location)
+    CrearCuadruplo('PARAMETRO', values.pop(),'_',address)
     
     p[0] = None
 def p_endParam(p):
@@ -364,18 +455,11 @@ def p_endParam(p):
     endParam : empty
 
     '''
-    global parametros
-
-    CrearCuadruplo('PARAMETRO', values.pop(),'_','Param' + str(parametros))
-    parametros += 1
+    
+    
+    
     p[0] = None
 
-def p_parametros_aux(p):
-    '''
-    parametros_aux : PERIOD ID
-    |
-    '''
-    p[0] = None
 
 def p_print(p):
     '''
@@ -410,7 +494,52 @@ def p_asignacion(p):
     '''
     asignacion : igualdadVar  
     | igualdadArr
+    | igualdadAtr
     '''
+
+    p[0] = None
+def p_igualdadAtr(p):
+    '''
+    igualdadAtr : atributo EQUALS asignacion_aux
+    '''
+    iz = values.pop()
+    res = values.pop()
+    
+    CrearCuadruplo('=', iz, '_', res)
+    p[0] = None
+def p_atributo(p):
+    '''
+    atributo : ID PERIOD ID 
+    '''
+    objeto = p[1]
+    atributo = p[3]
+    
+    if not Tabla.CheckIfObjectExists(objeto):
+        raise ErrorMsg('El objeto ' + p[1] + ' no existe')
+    else:
+        addressA = Tabla.GetObjectAtr(objeto,'Address')
+        clase = Tabla.GetObjectAtr(objeto,'Clase')
+        TempScope = Tabla.Scope
+        Tabla.SetScope('class')
+        Tabla.SetClass(clase)
+        if not Tabla.CheckIfVariableExists(atributo,'class'):
+            
+            raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
+        else:
+            addressB = Tabla.GetAttribute(atributo,'Address','class')
+            addressFinal = str(addressA)+'.' + str(addressB)
+            tipo = Tabla.GetAttribute(atributo,'Type','class')
+            values.push(addressFinal)
+            tipos.push(tipo)
+        Tabla.SetScope(TempScope)
+
+
+
+
+
+        
+        
+
 
     p[0] = None
 def p_igualdadArr(p):
@@ -426,13 +555,18 @@ def p_igualdadVar(p):
     '''
     igualdadVar : ID EQUALS asignacion_aux
     '''
-    iz = values.pop()
-    if not Tabla.CheckIfVariableExists(p[1],Location) :
-        raise ErrorMsg('La variable ' + p[1] + ' no existe')
-    else:
-        
+    if Tabla.CheckIfVariableExists(p[1],Location) :
+        iz = values.pop()
         address = Tabla.GetAttribute(p[1],'Address',Location)
         CrearCuadruplo(p[2], iz, '_',address )
+
+    else:
+        if Tabla.CheckIfFunctExistInAtribute(p[1],Location):
+            iz = values.pop()
+            address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
+            CrearCuadruplo(p[2], iz, '_',address )
+        else:
+            raise ErrorMsg('La variable ' + p[1] + ' no existe')
 
     
 
@@ -442,7 +576,7 @@ def p_asignacion_aux(p):
     asignacion_aux : expresion
     | arreglo
     | estatutos_funciones
-    | ID PERIOD ID
+    | atributo
     '''
     p[0] = None
 def p_empty(p):
@@ -461,6 +595,9 @@ def p_rp_seen(p):
     '''
     #guardamos direccion del primer salto
     result = Temporales[-1]
+    print(tipos)
+    if tipos.top() != 'bool':
+        raise ErrorMsg('Se esperaba un tipo bool en el if')
     CrearCuadruplo('GOTOF',result,'_','_')
     Saltos.append(cont-1)
 
@@ -501,33 +638,51 @@ def p_else_seen(p):
 
 def p_declaracion_parametros(p):
     '''
-    declaracion_parametros : tipo_retorno ID declaracion_parametros_aux
+    declaracion_parametros : startDParam declaracion_parametros_aux
 	|
     '''
+    
+    
     p[0] = None
+
+def p_startDParam(p):
+    '''
+    startDParam : empty
+    '''
+    global parametros
+    parametros.clear()
+    p[0]= None
 def p_declaracion_parametros_aux(p):
     '''
-    declaracion_parametros_aux : COMMA declaracion_parametros
+    declaracion_parametros_aux : tipo_retorno ID declaracion_parametros_aux2
+    |
+    '''
+    if len(p ) > 1:
+        
+        tipo = AuxList[1]
+        agregarContVarFunciones(tipo,'NORMAL')
+        name = p[2]
+        address = memoria.AssignMemoryAddress(tipo,Scope[0],'NORMAL')
+        parametros[name] = { 'Type' :tipo,'Address':address}
+    p[0] = None
+def p_declaracion_parametros_aux2(p):
+    '''
+    declaracion_parametros_aux2 : COMMA declaracion_parametros_aux
     |
     '''
     p[0] = None
-
 def p_declaracion_clases(p):
     '''
     declaracion_clases : PEQUE guardar_nombre_clase declaracion_clases_aux end_class declaracion_clases
     |
 
     '''
-
-
-
     p[0] = None
 def p_end_class(p):
     '''
     end_class : empty
     '''
     Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
-    CrearCuadruplo('END CLASS','_','_','_')
     p[0]= None
 
 def p_guardar_nombre_clase(p):
@@ -582,6 +737,7 @@ def p_startF(p):
     '''
     global Location
     Location = 'function'
+    
 
 def p_funciones_end(p):
     '''
@@ -595,7 +751,7 @@ def p_funciones_end(p):
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
-    declaracion_funciones_aux : startF MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo regreso R_BRACKET save_variables
+    declaracion_funciones_aux : startF MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo  R_BRACKET save_variables
     |
     '''
     global Location
@@ -607,6 +763,8 @@ def p_save_variables(p):
     '''
     copiaDeLista = contVarLocal.copy()
     Tabla.updateFunctionAttribute(FuncionDeclarada,'Space',copiaDeLista)
+    Tabla.updateFunctionAttribute(FuncionDeclarada,'Parametros',parametros)
+
     p[0]= None
 def p_guardar_nombre_funcion(p):
     '''
@@ -615,15 +773,20 @@ def p_guardar_nombre_funcion(p):
     #se resetea el contador de variables para funciones
     global contVarLocal
     resetConVarFunciones()
+    
+
     global FuncionDeclarada
     FuncionDeclarada = p[1]
+    CrearCuadruplo('START PROC','_','_',FuncionDeclarada)
     
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
         address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
-        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address)
+        
+        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,parametros,cont-1)
+
         Tabla.SetCurrentFunction(FuncionDeclarada)
 def p_declaracion_funciones_aux2(p):
     '''
@@ -640,6 +803,8 @@ def p_regreso(p):
     '''
     global FuncionDeclarada
     tipo = Tabla.GetFunctionAttribute(FuncionDeclarada, 'Type')
+    
+
     if len(p) > 1:
         if tipo == 'void':
             raise ErrorMsg('Las funciones void (' + FuncionDeclarada + ') no deben tener un return')
@@ -756,13 +921,26 @@ def p_last_size(p):
     p[0] = None
 def p_instancear_objetos(p):
     '''
-    instancear_objetos : NEW ID EQUALS ID
+    instancear_objetos :  ID EQUALS NEW ID
 
     '''
     
 
     clase = p[4]
     objeto = p[1]
+    
+    if not Tabla.CheckIfClassExists(clase):
+        raise ErrorMsg('La clase ' + clase + ' no existe')
+    else:
+        
+        if Tabla.CheckIfObjectExists(objeto):
+            raise ErrorMsg('El Objeto ' + objeto + ' ya existe')
+        else:
+            address = memoria.AssignMemoryAddressObject()
+            size = Tabla.ClassAtribute(clase,'Space')
+            Tabla.AddObject(objeto,clase,size,address)
+            
+
 
     
 
@@ -778,12 +956,18 @@ def p_variable_aux2(p):
     '''
     variable_aux2 : ID empty
     '''
-    if Tabla.CheckIfVariableExists(p[1],Location): 
+    
+    if  Tabla.CheckIfVariableExists(p[1],Location):
         address = Tabla.GetAttribute(p[1],'Address',Location)
         values.push(address)
         tipos.push(Tabla.GetAttribute(p[1], 'Type',Location))
     else:
-        raise ErrorMsg('No existe la variable ' + p[1])
+        if Tabla.CheckIfFunctExistInAtribute(p[1],Location):
+            address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
+            values.push(address)
+            tipos.push(Tabla.GetAttributeForParameters(p[1], 'Type',Location))
+        else :
+            raise ErrorMsg('No existe la variable ' + p[1])
     p[0] = None
 def p_variable_aux(p):
     '''
@@ -1099,48 +1283,49 @@ def agregarContVarFunciones(type,location,size=1):
             contVarLocal[2]  = contVarLocal[2] + size
         elif(type == 'bool'):
             contVarLocal[3]  = contVarLocal[3] + size
-        else:
+        elif(type == 'ListInt'):
             contVarLocal[4]  = contVarLocal[4] + size
+        elif(type == 'ListBool'):
+            contVarLocal[5]  = contVarLocal[6] + size
+        elif(type == 'ListFloat'):
+            contVarLocal[6]  = contVarLocal[6] + size
     else:
         if(type == 'int'):
-            contVarLocal[5]  = contVarLocal[5] + size 
+            contVarLocal[7]  = contVarLocal[7] + size 
         elif(type == 'float'):
-            contVarLocal[6]  = contVarLocal[6] + size 
-        elif(type == 'char'):
-            contVarLocal[7]  = contVarLocal[7] + size
+            contVarLocal[8]  = contVarLocal[8] + size 
         elif(type == 'bool'):
-             contVarLocal[8]  = contVarLocal[8] + size
-        else:
-            contVarLocal[9]  = contVarLocal[9] + size
+             contVarLocal[9]  = contVarLocal[9] + size
+        
     
 def resetConVarFunciones():
     global contVarLocal
     contVarLocal.clear()
-    contVarLocal = [0]*10
+    contVarLocal = [0]*11
     
 def getContVarFunciones(type,location):
     if location == 'NORMAL':
         if(type == 'int'):
-            return contVarLocal[0] 
+                return contVarLocal[0] 
         elif(type == 'float'):
-            return contVarLocal[1] 
+                return contVarLocal[1]  
         elif(type == 'char'):
-            return contVarLocal[2]
+                return contVarLocal[2] 
         elif(type == 'bool'):
-            return contVarLocal[3]
-        else:
-            return contVarLocal[4]
+                return contVarLocal[3] 
+        elif(type == 'ListInt'):
+                return contVarLocal[4]  
+        elif(type == 'ListBool'):
+                return  contVarLocal[5]  
+        elif(type == 'ListFloat'):
+                return contVarLocal[6] 
     else:
         if(type == 'int'):
-            return contVarLocal[5] 
+            return contVarLocal[7]  
         elif(type == 'float'):
-            return contVarLocal[6] 
-        elif(type == 'char'):
-            return contVarLocal[7]
+            return contVarLocal[8]   
         elif(type == 'bool'):
-            return contVarLocal[8]
-        else:
-            return contVarLocal[9]
+            return contVarLocal[9]  
 
 
 # crear el parser
