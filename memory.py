@@ -41,6 +41,7 @@ class Memory:
     def AssignConstants(self, constantes):
         # Se invierte la tabla de constantes para poder tener las direcciones
         constantes.InvertDictionary(constantes.Tabla)
+        print(constantes.Tabla)
         for constant in constantes.Tabla:
             self.memory[int(constant)] = constantes.GetConstant(constant) 
 

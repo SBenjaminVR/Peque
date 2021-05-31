@@ -20,6 +20,8 @@ main(){
     petite lista int jose
     petite int miguel
     
-    jose->find(4)
+    print("Hola soy un string")
+
+    # jose->find(4)
     
 }
