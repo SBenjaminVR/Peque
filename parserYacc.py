@@ -449,8 +449,8 @@ def p_endParam(p):
     '''
     global paramChecktype
     paramChecktype.append(tipos.top())
-    address = memoria.AssignMemoryAddress(tipos.pop(),'LOCAL',Location)
-    CrearCuadruplo('PARAMETRO', values.pop(),'_',address)
+    address = memoria.AssignMemoryAddress(tipos.pop(),'LOCAL', Location)
+    CrearCuadruplo('PARAMETRO', values.pop(), '_', address)
     
     
     p[0] = None

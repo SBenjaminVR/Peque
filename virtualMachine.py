@@ -90,7 +90,7 @@ class VirtualMachine():
                 continue
 
             elif operation == 18:
-                print('Not yet implemented')
+                ProcessPARAMETRO(left, res)
 
             elif operation == 19:
                 self.ProcessReturn(res)
@@ -111,6 +111,7 @@ class VirtualMachine():
 
             elif operation == 24:
                 self.ProcessEND()
+
             current = current + 1
                 
                 
@@ -149,47 +150,47 @@ class VirtualMachine():
         
 
     def ProcessBIGGER(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz > de)
     
     def ProcessLESS(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz < de)
 
     def ProcessBIGGER_EQUAL(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz >= de)
 
     def ProcessLESS_EQUAL(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz <= de)
 
     def ProcessEQUAL(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz == de)
 
     def ProcessDIFFERENT(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz != de)
 
     def ProcessAND(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz and de)
 
     def ProcessOR(self, left, right, result):
-        iz = self.memory.GetValue(left)
-        de = self.memory.GetValue(right)
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        de = self.GetValueInsideValueIfParenthesis(right)
         self.memory.SetValue(result, iz or de)
 
     def IsGOTOF(self, left):
-        value = self.memory.GetValue(left)
+        value = self.GetValueInsideValueIfParenthesis(left)
         if not value:
             return False
         return True
@@ -206,8 +207,13 @@ class VirtualMachine():
             address = self.memory.directory.GetFunctionAddress(left)
         functions.push({'Name': left, 'Address': address})
 
+    def ProcessPARAMETRO(self, left, result):
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        res = self.GetValueInsideValueIfParenthesis(result)
+        print("PARAM " + str(iz) + ' --->' + str(res))
+
     def ProcessReturn(self, res):
-        value = self.memory.GetValue(res)
+        value = self.GetValueInsideValueIfParenthesis(res)
         currentFunction = functions.top()
         address = currentFunction.get('Address')
         self.memory.SetValue(address, value)
@@ -255,16 +261,6 @@ class VirtualMachine():
 
     def IsInt(self, var):
         return isinstance(var, int)
-
-    def procesarPrint(self, valores):
-        Imprimir = []
-        listaDeValores = valores.split(", ")
-        for val in listaDeValores:
-            Imprimir.append(self.traerValorNumerico(val))
-        print(*Imprimir, sep = ", ")
-    
-        
-
 
 class ErrorMsg(Exception):
     def __init__(self, message):
