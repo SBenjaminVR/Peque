@@ -643,10 +643,11 @@ def p_declaracion_parametros_aux(p):
     declaracion_parametros_aux : tipo_retorno ID declaracion_parametros_aux2
     |
     '''
-    tipo = AuxList[1]
-    name = p[2]
-    address = memoria.AssignMemoryAddress(tipo,Scope[0],'Normal')
-    parametros.append({'Name' : name, 'Type' :tipo,'Address':address})
+    if len(p ) > 1:
+        tipo = AuxList[1]
+        name = p[2]
+        address = memoria.AssignMemoryAddress(tipo,Scope[0],'Normal')
+        parametros.append({'Name' : name, 'Type' :tipo,'Address':address})
     p[0] = None
 def p_declaracion_parametros_aux2(p):
     '''

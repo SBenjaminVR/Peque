@@ -6,6 +6,6 @@ mini int testing() {
 }
 
 main() {
-    petite int a
-    a = testing()
+    petite int a[3][3]
+    a[1][1] = 2 + 3
 }
