@@ -90,7 +90,7 @@ class VirtualMachine():
                 continue
 
             elif operation == 18:
-                ProcessPARAMETRO(left, res)
+                self.ProcessPARAMETRO(iz, res)
 
             elif operation == 19:
                 self.ProcessReturn(res)
@@ -209,8 +209,8 @@ class VirtualMachine():
 
     def ProcessPARAMETRO(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
-        res = self.GetValueInsideValueIfParenthesis(result)
-        print("PARAM " + str(iz) + ' --->' + str(res))
+        print("PARAM " + str(iz) + ' --->' + str(result))
+        self.memory.SetValue(result, iz)
 
     def ProcessReturn(self, res):
         value = self.GetValueInsideValueIfParenthesis(res)

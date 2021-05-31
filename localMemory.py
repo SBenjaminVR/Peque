@@ -36,6 +36,8 @@ def AssignLocalStorage(local, number, option):
 class LocalMemory():
     def __init__(self, space):
         self.local = {}
+        print('--------------------------')
+        print(space)
         spaceSize = len(space)
         for i in range(spaceSize): 
             self.local = AssignLocalStorage(self.local, space[i], i)
@@ -43,7 +45,8 @@ class LocalMemory():
 
     def GetValue(self, address):
         address = str(address)
-        return self.local[address]
+        print(self.local)
+        return self.local.get(address)
 
     def SetValue(self, address, value):
         address = str(address)
