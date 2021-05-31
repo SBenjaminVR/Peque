@@ -17,7 +17,21 @@ class Directory():
 
     def SetClass(self, clase):
         self.CurrentClass = clase
-    
+    def CheckIfFunctExistInAtribute(self,name,location):
+        if self.Scope == 'class':
+            current = self.Clases.get(self.CurrentClass).get('Funciones').get(self.CurrentFunction)
+            parametros = current.get('Parametros').get(name) != None
+            atributos = self.Clases.get(self.CurrentClass).get('Variables').get(name) != None
+            return parametros or atributos
+        elif self.Scope == 'function':
+
+            current = self.Funciones.get(self.CurrentFunction)
+            
+            parametros = current.get('Parametros').get(name) != None
+            return parametros
+           
+
+        
     def CheckIfVariableExists(self, name,location):
         
         if self.Scope == 'main':
@@ -48,7 +62,21 @@ class Directory():
     def CheckIfObjectExists(self, object):
         return self.Objetos.get(object) != None
  
-
+    def CheckIAributeExists(self, name,location):
+        
+        if self.Scope == 'main':
+            return self.Variables.get(name) != None
+        elif self.Scope == 'function':
+            current = self.Funciones.get(self.CurrentFunction)
+            return current.get('Variables').get(name) != None
+        elif self.Scope == 'class':
+            if location == 'function':
+                classObj = self.Clases.get(self.CurrentClass)
+                current = classObj.get('Funciones').get(self.CurrentFunction)
+                return current.get('Variables').get(name) != None
+            elif location == 'class':
+                current = self.Clases.get(self.CurrentClass)
+                return current.get('Variables').get(name) != None
     def GetAttribute(self, name, val, Location):
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)
@@ -63,7 +91,20 @@ class Directory():
                 classObj = self.Clases.get(self.CurrentClass)
                 current = classObj
         return current.get('Variables').get(name).get(val)
-    
+
+    def GetAttributeForParameters(self, name, val, Location):
+        if self.Scope == 'function':
+            current = self.Funciones.get(self.CurrentFunction)
+            return current.get('Parametros').get(name).get(val)
+        elif self.Scope == 'class':
+            current = self.Clases.get(self.CurrentClass).get('Funciones').get(self.CurrentFunction)
+            state = current.get('Parametros').get(name) != None
+            if state :
+                current = current.get('Parametros').get(name).get(val)
+                return current
+            else:
+                return  self.Clases.get(self.CurrentClass).get('Variables').get(name).get(val)
+
     
 
     def GetObjectAtr(self, name,val):  
