@@ -1,9 +1,11 @@
 from memory import Memory
 from stack import Stack
+from localMemory import LocalMemory
 import time
 
 returnDirection = Stack()
 functions = Stack() 
+NewLocalMemory = Stack()
 
 def GetQuadrupleValue(quadruple):
     iz = quadruple.get('iz')
@@ -200,7 +202,7 @@ class VirtualMachine():
     def ProcessERA(self, left, res):
         self.memory.directory.Scope = res
         space = self.memory.directory.GetFunctionAttribute(left, 'Space')
-        self.memory.CreateNewLocalMemory(space)
+        NewLocalMemory.push(self.memory.CreateNewLocalMemory(space))
 
     def ProcessGOSUB(self, left, right):
         if right != '_':
@@ -208,11 +210,13 @@ class VirtualMachine():
         else:
             address = self.memory.directory.GetFunctionAddress(left)
         functions.push({'Name': left, 'Address': address})
+        self.memory.MountNewLocalMemory(NewLocalMemory.pop())
 
     def ProcessPARAMETRO(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         print("PARAM " + str(iz) + ' --->' + str(result))
-        self.memory.SetValue(result, iz)
+        currentMemory = NewLocalMemory.top()
+        currentMemory.SetValue(result, iz)
 
     def ProcessReturn(self, res):
         value = self.GetValueInsideValueIfParenthesis(res)

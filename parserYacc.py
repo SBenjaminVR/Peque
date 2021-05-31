@@ -305,7 +305,7 @@ def p_input_aux2(p):
     p[0] = None
 def p_llamada(p):
     '''
-    llamada : llamadaID startCall L_PARENTHESIS llamada_aux2 R_PARENTHESIS endCall
+    llamada : llamadaID  L_PARENTHESIS llamada_aux2 R_PARENTHESIS  endCall
     '''
     
     p[0]=None
@@ -314,19 +314,20 @@ def p_llamadaID(p):
     llamadaID : ID 
     | ID llamada_aux
     '''
-    
+    popper.push('(')
     
     funct.push(p[1])
+
+    global paramChecktype
+    paramChecktype = []
+    memoria.ResetLocalMemory()
 
     p[0] = None
 def p_startCall(p):
     '''
     startCall : empty
     '''
-    global paramChecktype
-    paramChecktype = []
-    memoria.ResetLocalMemory()
-
+    
     Funcion = funct.pop()
 
     if funct.top() == '.':
@@ -343,6 +344,7 @@ def p_startCall(p):
     else:
         CrearCuadruplo('ERA',Funcion,'_', '_') #Quiza se puede sustituir por numeros
     funct.push(Funcion)
+    
     p[0]=None
 def p_endCall(p):
     '''
@@ -351,6 +353,7 @@ def p_endCall(p):
     global DeclVar
     Funcion = funct.pop()
     objeto = None
+    popper.pop()
 
 
     
@@ -425,7 +428,7 @@ def p_llamada_aux2(p):
     llamada_aux2 :  parametros endParam  llamada_aux3
     |
     '''
-    
+   
     
     p[0]=None
 def p_llamada_aux3(p):
@@ -438,19 +441,21 @@ def p_llamada_aux3(p):
 
 def p_parametros(p):
     '''
-    parametros :  expresion 
+    parametros :  expresion startCall
     | 
     '''
+    global paramChecktype
+    paramChecktype.append(tipos.top())
+    address = memoria.AssignMemoryAddress(tipos.pop(),'LOCAL',Location)
+    CrearCuadruplo('PARAMETRO', values.pop(),'_',address)
+    
     p[0] = None
 def p_endParam(p):
     '''
     endParam : empty
 
     '''
-    global paramChecktype
-    paramChecktype.append(tipos.top())
-    address = memoria.AssignMemoryAddress(tipos.pop(),'LOCAL', Location)
-    CrearCuadruplo('PARAMETRO', values.pop(), '_', address)
+    
     
     
     p[0] = None
@@ -590,6 +595,7 @@ def p_rp_seen(p):
     '''
     #guardamos direccion del primer salto
     result = Temporales[-1]
+    print(tipos)
     if tipos.top() != 'bool':
         raise ErrorMsg('Se esperaba un tipo bool en el if')
     CrearCuadruplo('GOTOF',result,'_','_')

@@ -46,6 +46,9 @@ class Memory:
 
     def CreateNewLocalMemory(self, space):
         memory = LocalMemory(space)
+        return memory
+        
+    def MountNewLocalMemory(self, memory):
         self.memoryStack.push(memory)
 
     def UnloadLastLocalMemory(self):
