@@ -5,7 +5,7 @@ from direcciones import DireccionesMemoria
 Dir = DireccionesMemoria()
 
 def IsInLocalRange(address):
-    return address >= Dir.INT_LOCAL and address <= Dir.LIST_BOOL_LOCAL_TEMPORAL
+    return address >= Dir.INT_LOCAL and address <= Dir.BOOL_LOCAL_TEMPORAL
         
 def GetTypeOfValueGivenTheAddress(address):
     if address < Dir.INT_GLOBAL_TEMPORAL:

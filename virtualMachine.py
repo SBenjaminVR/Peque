@@ -237,7 +237,10 @@ class VirtualMachine():
             raise ErrorMsg('Se esta tratando de acceder a un espacio fuera del limite de un arreglo')
 
     def ProcessPRINT(self, left):
-        iz = self.GetValueInsideValueIfParenthesis(left)
+        if self.IsString(left):
+            iz = left
+        else:
+            iz = self.GetValueInsideValueIfParenthesis(left)
         print(str(iz))
 
     def ProcessINPUT(self, left):
@@ -261,6 +264,11 @@ class VirtualMachine():
             return current
         else:
             raise ErrorMsg('Se esta tratando de acceder a una casilla sin valor')
+
+    def IsString(self, var):
+        if isinstance(var, str):
+            return var[0] == '"':
+        return False
 
     def IsFloat(self, var):
         return isinstance(var, float)

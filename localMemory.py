@@ -25,14 +25,7 @@ def AssignLocalStorage(local, number, option):
         return InsertAddresses(local, number, Dir.FLOAT_LOCAL_TEMPORAL)
     if option == 8:
         return InsertAddresses(local, number, Dir.BOOL_LOCAL_TEMPORAL)
-    if option == 9:
-        return InsertAddresses(local, number, Dir.LIST_INT_LOCAL_TEMPORAL)
-    if option == 10:
-        return InsertAddresses(local, number, Dir.LIST_FLOAT_LOCAL_TEMPORAL)
-    if option == 11:
-        return InsertAddresses(local, number, Dir.LIST_BOOL_LOCAL_TEMPORAL)
-    
-
+        
 class LocalMemory():
     def __init__(self, space):
         self.local = {}
