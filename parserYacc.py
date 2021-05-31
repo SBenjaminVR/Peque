@@ -703,14 +703,15 @@ def p_guardar_nombre_funcion(p):
     global FuncionDeclarada
     FuncionDeclarada = p[1]
     CrearCuadruplo('START PROC','_','_',FuncionDeclarada)
-    print(cont)
     
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
         AuxList[0] = 'Funcion'
         address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
-        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,5)
+        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,cont-1)
+        print(Tabla.Clases)
+        print()
         Tabla.SetCurrentFunction(FuncionDeclarada)
 def p_declaracion_funciones_aux2(p):
     '''

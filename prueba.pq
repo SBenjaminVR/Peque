@@ -34,10 +34,7 @@ mini int dos(int a, float b){
         petite float c[4][4]
         petite float d
         
-        for(d to 10, 2)
-        {
-            d = c[2][1]
-        }
+        
         return d
     }
 
