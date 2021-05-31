@@ -191,9 +191,11 @@ class VirtualMachine():
 
     def IsGOTOF(self, left):
         value = self.GetValueInsideValueIfParenthesis(left)
+        print('ADENTRO DEL GOTOF')
+        print(value)
         if not value:
-            return False
-        return True
+            return True
+        return False
 
     def ProcessERA(self, left, res):
         self.memory.directory.Scope = res

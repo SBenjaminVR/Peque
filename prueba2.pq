@@ -2,6 +2,8 @@ programa prueba;
 
 mini int factorial(int i) {
     petite int c
+    petite int fact
+    fact = 1
     if (i < 0) {
         c = 0
     }
@@ -10,8 +12,6 @@ mini int factorial(int i) {
             c = 1
         }
         else {
-            petite int fact
-            fact = 1
             while (i > 1) {
                 fact = fact * i
                 i = i - 1
@@ -21,9 +21,21 @@ mini int factorial(int i) {
     if (fact <> 1) {
         c = fact
     }
+    print(fact)
+    return c
+}
+
+mini int factorialR(int i) {
+    petite int c 
+    if (i == 0 || i == 1) {
+            c = 1
+    }
+    else {
+        c = i * factorialR(i - 1)
+    }
     return c
 }
 
 main(){
-    print(factorial(5))
+    print(factorialR(5))
 }
