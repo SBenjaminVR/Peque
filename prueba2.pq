@@ -3,7 +3,7 @@ programa prueba;
 mini int factorial(int i) {
     petite int c
     if (i < 0) {
-        c = 0
+        return 0
     }
     else {
         if (i == 0 || i == 1) {
@@ -23,6 +23,8 @@ mini int factorial(int i) {
     }
     return c
 }
+
+
 
 main(){
     print(factorial(5))
