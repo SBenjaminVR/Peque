@@ -475,7 +475,8 @@ def p_endCall(p):
             Resultado = Temporales[-1]
             values.push(Resultado)
             AddressB = Tabla.GetObjectAtr(objeto,'Address')
-            Address = str(AddressB) + '.'+ str(AddressA)
+            print(AddressA)
+            Address = str(AddressB) + '.'+ str(int(AddressA))
             CrearCuadruplo('=',Address,'_',Resultado)
             Tabla.SetScope(tempScope)
 
@@ -880,9 +881,16 @@ def p_guardar_nombre_funcion(p):
     else:
         
         AuxList[0] = 'Funcion'
-        address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
-        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,parametros,cont-1)
-        Tabla.SetCurrentFunction(FuncionDeclarada)
+        if Tabla.Scope == 'class':
+            global atributos
+            atributos = atributos + 1
+            Tabla.AddFunction(FuncionDeclarada, AuxList[1], atributos,parametros,cont-1)
+            Tabla.SetCurrentFunction(FuncionDeclarada)
+
+        else:
+            address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
+            Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,parametros,cont-1)
+            Tabla.SetCurrentFunction(FuncionDeclarada)
         
 def p_declaracion_funciones_aux2(p):
     '''
