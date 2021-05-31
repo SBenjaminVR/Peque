@@ -170,30 +170,30 @@ def p_listas(p):
     #------------------Append---------------------#
     if p[3] == 'append':
         if(len(p) <= 6):
-            raise ErrorMsg(p[3] + 'debe tener 1 argumento')
+            raise ErrorMsg(p[3] + 'debe tener un argumento')
         typeCheckTemp = tipos.pop()
         typeCheckAns = 'list_' + typeCheckTemp
         if typeCheckAns != tipo :
-            raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
-        CrearCuadruplo('APPEND',address,'_',values.pop())
+            raise ErrorMsg(p[3] + ' el argumento debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
+        CrearCuadruplo('APPEND', values.pop(), '_', address)
     #------------------POP---------------------#
     elif p[3] == 'pop':
         if(len(p) > 6):
-            raise ErrorMsg(p[3] + ' no debe tener argumetos')
+            raise ErrorMsg(p[3] + ' no debe tener argumentos')
         CrearCuadruplo('POP',address,'_','_')
     #------------------Sort---------------------#
     elif p[3] == 'sort':
         if(len(p) > 6):
-            raise ErrorMsg(p[3] + ' no debe tener argumetos')
+            raise ErrorMsg(p[3] + ' no debe tener argumentos')
         CrearCuadruplo('SORT',address,'_','_')
    #------------------find---------------------#
     elif p[3] == 'find':
         if(len(p) <= 6):
-            raise ErrorMsg(p[3] + 'debe tener 1 argumento')
+            raise ErrorMsg(p[3] + 'debe tener un argumento')
         typeCheckTemp = tipos.pop()
         typeCheckAns = 'list_' + typeCheckTemp
         if typeCheckAns != tipo :
-            raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
+            raise ErrorMsg(p[3] + ' el argumento debe ser: ' + tipo + ' y se dio un tipo: ' + typeCheckAns)
         
         val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
@@ -1298,7 +1298,8 @@ def p_factor(p):
             values.push(address)
         elif isinstance(p[1],str):
             tipos.push('string')
-            address = Constantes.GetMemoryAddress(str(p[1]), 'string')
+            string = p[1][1:-1]
+            address = Constantes.GetMemoryAddress(str(string), 'string')
             values.push(address)
     p[0] = None
 def p_factor_aux(p):

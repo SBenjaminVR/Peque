@@ -114,6 +114,9 @@ class VirtualMachine():
             elif operation == 24:
                 self.ProcessEND()
 
+            elif operation == 27:
+                self.ProcessAPPEND(iz, res)
+
             current = current + 1
                 
                 
@@ -144,11 +147,14 @@ class VirtualMachine():
 
     def ProcessASSIGN(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
-        if not isinstance(result, int):
-            result = result[1:-1]
-            result = self.memory.GetValue(int(result))    
-        self.memory.SetValue(result, iz)
         print('Asignando ' + str(iz) + ' en direccion ' + str(result))
+        if not isinstance(result, int):
+            if result[0] == '(':
+                result = result[1:-1]
+                res = self.memory.GetValue(int(result))
+            else:
+                res = result.split('.')
+        self.memory.SetValue(res, iz)
         
 
     def ProcessBIGGER(self, left, right, result):
@@ -237,10 +243,6 @@ class VirtualMachine():
             raise ErrorMsg('Se esta tratando de acceder a un espacio fuera del limite de un arreglo')
 
     def ProcessPRINT(self, left):
-        print(left)
-        #if self.IsString(left):
-         #   iz = left
-        #else:
         iz = self.GetValueInsideValueIfParenthesis(left)
         print(str(iz))
 
@@ -251,6 +253,11 @@ class VirtualMachine():
 
     def ProcessEND(self):
         print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
+
+    def ProcessAPPEND(self, left, result):
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        available = self.GetNextAvailableSpaceOfList(result)
+        self.memory.SetValue(result + available, iz)
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):
@@ -265,6 +272,14 @@ class VirtualMachine():
             return current
         else:
             raise ErrorMsg('Se esta tratando de acceder a una casilla sin valor')
+
+    def GetNextAvailableSpaceOfList(self, baseAddress):
+        c = 0
+        res = self.memory.GetValue(baseAddress + c)
+        while res != None:
+            c = c + 1
+            res = self.memory.GetValue(baseAddress + c)
+        return c
 
     def IsString(self, var):
         if isinstance(var, str):

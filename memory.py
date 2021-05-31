@@ -25,18 +25,29 @@ class Memory:
         self.directory = data.get('Directorio')
 
         self.AssignConstants(data.get('Constantes'))
+        self.AssignObjects()
 
     def GetValue(self, address):
-        if (IsInLocalRange(address)):
-            return self.memoryStack.top().GetValue(address)
-        else:
-            return self.memory[address]
+        if isinstance(address, list):
+            objeto = int(address[0])
+            parametro = str(address[1])
+            self.memory[objeto].get(parametro)
+        else: 
+            if (IsInLocalRange(address)):
+                return self.memoryStack.top().GetValue(address)
+            else:
+                return self.memory[address]
     
     def SetValue(self, address, value):
-        if (IsInLocalRange(address)):
-            self.memoryStack.top().SetValue(address, value)
-        else:
-            self.memory[address] = value
+        if isinstance(address, list):
+            objeto = int(address[0])
+            parametro = str(address[1])
+            self.memory[objeto][parametro] = value
+        else: 
+            if (IsInLocalRange(address)):
+                self.memoryStack.top().SetValue(address, value)
+            else:
+                self.memory[address] = value
 
     def AssignConstants(self, constantes):
         # Se invierte la tabla de constantes para poder tener las direcciones
@@ -44,6 +55,11 @@ class Memory:
         print(constantes.Tabla)
         for constant in constantes.Tabla:
             self.memory[int(constant)] = constantes.GetConstant(constant) 
+        
+    def AssignObjects(self):
+        numObjetos = len(self.directory.Objetos)
+        for i in range(Dir.OBJETOS, Dir.OBJETOS + numObjetos):
+            self.memory[i] = {}
 
     def CreateNewLocalMemory(self, space):
         memory = LocalMemory(space)
