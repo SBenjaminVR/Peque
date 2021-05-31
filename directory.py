@@ -99,8 +99,8 @@ class Directory():
         newFunction = {
             'Type': type,
             'Address': address,
-            'Start' : 0,
-            'Space': start,
+            'Start' : start,
+            'Space': 0,
             'Variables': {},
             'Parametros': {}
         }
