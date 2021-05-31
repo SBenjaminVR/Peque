@@ -653,7 +653,7 @@ def p_declaracion_parametros_aux(p):
     if len(p ) > 1:
         
         tipo = AuxList[1]
-        agregarContVarFunciones(tipo,'NORMALES')
+        agregarContVarFunciones(tipo,'NORMAL')
         name = p[2]
         address = memoria.AssignMemoryAddress(tipo,Scope[0],'NORMAL')
         parametros[name] = { 'Type' :tipo,'Address':address}
