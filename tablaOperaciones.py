@@ -25,7 +25,14 @@ class TablaOperaciones:
             "PRINT": 22,
             "INPUT": 23,
             "END": 24,
-            "START PROC" : 26
+            "START PROC" : 26,
+            "APPEND" : 27,
+            "POP" : 28,
+            "SORT" : 29,
+            "FIND" : 30,
+            "HEAD" : 31,
+            "TAIL" : 32,
+            "KEY" : 33,
         }
 
     def GetNumber(self, Operation):
