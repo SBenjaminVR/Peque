@@ -19,6 +19,7 @@ Location = 'class'
 paramChecktype = []
 global lastVar
 global DeclVar
+global Funcion
 global FuncionDeclarada
 global cont
 global claseDeclarada
@@ -232,7 +233,6 @@ def p_listas(p):
         raise ErrorMsg('No existe el metodo para lista ' + p[3])
 
    
-    print('entro al metodo')
     p[0] = None
 #estatutos repeticion
 def p_estatutos_repeticion(p):
@@ -403,6 +403,7 @@ def p_llamadaID(p):
     llamadaID : ID 
     | ID llamada_aux
     '''
+
     popper.push('(')
     
     funct.push(p[1])
@@ -418,7 +419,6 @@ def p_startCall(p):
     '''
     
     Funcion = funct.pop()
-
     if funct.top() == '.':
         funct.pop()
         objeto = funct.pop()
@@ -439,13 +439,12 @@ def p_endCall(p):
     '''
     endCall : empty
     '''
-    global DeclVar
+    
     Funcion = funct.pop()
     objeto = None
     popper.pop()
 
 
-    
     if funct.top() == '.':
         funct.pop()
         objeto = funct.pop()
@@ -454,7 +453,9 @@ def p_endCall(p):
         Tabla.SetScope('class')
         clase = Tabla.GetObjectAtr(objeto,'Clase')
         Tabla.SetClass(clase)
+        
         parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
+
         if len(paramChecktype) != len(parametrosFunct):
             raise ErrorMsg('Incorrecto numero de parametros')
         for k in parametrosFunct.values() :
@@ -480,6 +481,7 @@ def p_endCall(p):
 
     else:
         parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
+
         if len(paramChecktype) != len(parametrosFunct):
             raise ErrorMsg('Incorrecto numero de parametros')
         listaTipos = []
@@ -684,7 +686,6 @@ def p_rp_seen(p):
     '''
     #guardamos direccion del primer salto
     result = Temporales[-1]
-    print(tipos)
     if tipos.top() != 'bool':
         raise ErrorMsg('Se esperaba un tipo bool en el if')
     CrearCuadruplo('GOTOF',result,'_','_')
@@ -738,6 +739,7 @@ def p_startDParam(p):
     '''
     startDParam : empty
     '''
+    
     global parametros
     parametros.clear()
     p[0]= None
@@ -747,18 +749,20 @@ def p_declaracion_parametros_aux(p):
     |
     '''
     if len(p ) > 1:
-        
         tipo = AuxList[1]
+        
         agregarContVarFunciones(tipo,'NORMAL')
         name = p[2]
         address = memoria.AssignMemoryAddress(tipo,Scope[0],'NORMAL')
         parametros[name] = { 'Type' :tipo,'Address':address}
+
     p[0] = None
 def p_declaracion_parametros_aux2(p):
     '''
     declaracion_parametros_aux2 : COMMA declaracion_parametros_aux
     |
     '''
+    
     p[0] = None
 def p_declaracion_clases(p):
     '''
@@ -771,7 +775,8 @@ def p_end_class(p):
     '''
     end_class : empty
     '''
-    Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
+    
+
     p[0]= None
 
 def p_guardar_nombre_clase(p):
@@ -833,10 +838,11 @@ def p_funciones_end(p):
     funciones_end : empty
     '''
     #Guarda contador de variables
-    
+    Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     CrearCuadruplo('END PROC','_','_','_')
     global Location
     Location = Tabla.Scope
+    
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
@@ -850,10 +856,10 @@ def p_save_variables(p):
     '''
     save_variables : empty
     '''
-    copiaDeLista = contVarLocal.copy()
-    Tabla.updateFunctionAttribute(FuncionDeclarada,'Space',copiaDeLista)
-    Tabla.updateFunctionAttribute(FuncionDeclarada,'Parametros',parametros)
-
+    global FuncionDeclarada
+    
+    Tabla.updateFunctionAttribute(FuncionDeclarada,'Space',contVarLocal.copy())
+    Tabla.updateFunctionAttribute(FuncionDeclarada,'Parametros',parametros.copy())
     p[0]= None
 def p_guardar_nombre_funcion(p):
     '''
@@ -863,20 +869,21 @@ def p_guardar_nombre_funcion(p):
     global contVarLocal
     resetConVarFunciones()
     
-
     global FuncionDeclarada
     FuncionDeclarada = p[1]
+    
     CrearCuadruplo('START PROC','_','_',FuncionDeclarada)
     
+
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
+        
         AuxList[0] = 'Funcion'
         address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
-        
         Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,parametros,cont-1)
-
         Tabla.SetCurrentFunction(FuncionDeclarada)
+        
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
@@ -892,7 +899,6 @@ def p_regreso(p):
     '''
     global FuncionDeclarada
     tipo = Tabla.GetFunctionAttribute(FuncionDeclarada, 'Type')
-    
 
     if len(p) > 1:
         if tipo == 'void':
@@ -948,7 +954,6 @@ def p_idChecker(p):
     global atributos
 
     sizeVar = 1
-    
     if Tabla.CheckIfVariableExists(p[1],Location):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
@@ -1015,6 +1020,7 @@ def p_instancear_objetos(p):
     instancear_objetos :  ID EQUALS NEW ID
 
     '''
+    
     
 
     clase = p[4]

@@ -85,12 +85,12 @@ def t_error(t):
     t.lexer.skip(1)
 #Float
 def t_CTEF(t):
-    r'\d+\.\d+'
+    r'-?\d+\.\d+'
     t.value = float(t.value)
     return t
 #Int
 def t_CTEI(t):
-    r'\d+'
+    r'-?\d+'
     t.value = int(t.value)
     return t
 #String

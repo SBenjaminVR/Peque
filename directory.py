@@ -116,7 +116,7 @@ class Directory():
             current = classObj.get('Funciones').get(name)
         else:
             current = self.Funciones.get(name)
-            
+  
         return current.get(val)
 #adds---------------------------------------------------------------
     def AddVariable(self, name, type, address, size, Location):
@@ -200,7 +200,12 @@ class Directory():
         if self.Scope == 'class':
             self.Clases[self.CurrentClass]['Funciones'][name].update(newVal)
         else:
+
+            
             self.Funciones[name].update(newVal)
+            
+
+            
     def updateHerencia(self,clase,padre):
         referencia = {'Padre' : padre}
         self.Clases.get(clase).update(referencia)
