@@ -439,7 +439,7 @@ def p_endCall(p):
     '''
     endCall : empty
     '''
-    
+    global DeclVar
     Funcion = funct.pop()
     objeto = None
     popper.pop()
@@ -451,11 +451,26 @@ def p_endCall(p):
         
         tempScope = Tabla.Scope
         Tabla.SetScope('class')
+        if not Tabla.CheckIfObjectExists(objeto):
+            raise ErrorMsg('no existe elobjeto')
+        
         clase = Tabla.GetObjectAtr(objeto,'Clase')
         Tabla.SetClass(clase)
+        padre = Tabla.GetClassAtribute(clase,'Padre')
+        
+        if not Tabla.CheckIfObjectExists(objeto):
+            raise ErrorMsg('no existe el objeto')
+        
+        if not Tabla.CheckIfFunctionExists(Funcion) :
+            if padre == None:
+                raise ErrorMsg('no existe la llamada')
+            else:
+                Tabla.SetClass(padre)
+                if not Tabla.CheckIfFunctionExists(Funcion):
+                    raise ErrorMsg('no existe la llamada')
         
         parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
-
+       
         if len(paramChecktype) != len(parametrosFunct):
             raise ErrorMsg('Incorrecto numero de parametros')
         for k in parametrosFunct.values() :
@@ -475,11 +490,9 @@ def p_endCall(p):
             Resultado = Temporales[-1]
             values.push(Resultado)
             AddressB = Tabla.GetObjectAtr(objeto,'Address')
-            print(AddressA)
-            Address = str(AddressB) + '.'+ str(int(AddressA))
+            Address = str(AddressB) + '.'+ str(AddressA)
             CrearCuadruplo('=',Address,'_',Resultado)
             Tabla.SetScope(tempScope)
-
     else:
         parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
 
@@ -502,7 +515,6 @@ def p_endCall(p):
             values.push(Resultado)
 
             CrearCuadruplo('=', Address, '_' ,Resultado)
-
 
     p[0]= None
 def p_llamada_aux(p):
@@ -614,16 +626,30 @@ def p_atributo(p):
         TempScope = Tabla.Scope
         Tabla.SetScope('class')
         Tabla.SetClass(clase)
-        if not Tabla.CheckIfVariableExists(atributo,'class'):
-            
-            raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
-        else:
+        padre = Tabla.GetClassAtribute(clase,'Padre')
+
+        if Tabla.CheckIfVariableExists(atributo,'class'):
+
             addressB = Tabla.GetAttribute(atributo,'Address','class')
             addressFinal = str(addressA)+'.' + str(addressB)
             tipo = Tabla.GetAttribute(atributo,'Type','class')
             values.push(addressFinal)
             tipos.push(tipo)
+        elif padre != None:
+                Tabla.SetScope('class')
+                Tabla.SetClass(padre)
+                if Tabla.CheckIfVariableExists(atributo,'class'):
+                    addressB = Tabla.GetAttribute(atributo,'Address','class')
+                    addressFinal = str(addressA)+'.' + str(addressB)
+                    tipo = Tabla.GetAttribute(atributo,'Type','class')
+                    values.push(addressFinal)
+                    tipos.push(tipo)
+                else:
+                    raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
+        else:
+            raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
         Tabla.SetScope(TempScope)
+    
 
 
 
@@ -687,6 +713,7 @@ def p_rp_seen(p):
     '''
     #guardamos direccion del primer salto
     result = Temporales[-1]
+    print(tipos)
     if tipos.top() != 'bool':
         raise ErrorMsg('Se esperaba un tipo bool en el if')
     CrearCuadruplo('GOTOF',result,'_','_')
@@ -740,7 +767,6 @@ def p_startDParam(p):
     '''
     startDParam : empty
     '''
-    
     global parametros
     parametros.clear()
     p[0]= None
@@ -763,7 +789,7 @@ def p_declaracion_parametros_aux2(p):
     declaracion_parametros_aux2 : COMMA declaracion_parametros_aux
     |
     '''
-    
+
     p[0] = None
 def p_declaracion_clases(p):
     '''
@@ -777,6 +803,8 @@ def p_end_class(p):
     end_class : empty
     '''
     
+
+   
 
     p[0]= None
 
@@ -812,6 +840,7 @@ def p_herencia(p):
         Tabla.updateHerencia(claseDeclarada,p[2])
         size = Tabla.ClassAtribute(p[2],'Space')
         atributos = size
+        
     else:
         raise ErrorMsg('La clase ' + p[2] + ' no existe')
 
@@ -858,7 +887,7 @@ def p_save_variables(p):
     save_variables : empty
     '''
     global FuncionDeclarada
-    
+    print(atributos)
     Tabla.updateFunctionAttribute(FuncionDeclarada,'Space',contVarLocal.copy())
     Tabla.updateFunctionAttribute(FuncionDeclarada,'Parametros',parametros.copy())
     p[0]= None
@@ -875,7 +904,7 @@ def p_guardar_nombre_funcion(p):
     
     CrearCuadruplo('START PROC','_','_',FuncionDeclarada)
     
-
+   
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
@@ -891,7 +920,7 @@ def p_guardar_nombre_funcion(p):
             address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
             Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,parametros,cont-1)
             Tabla.SetCurrentFunction(FuncionDeclarada)
-        
+
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
@@ -923,6 +952,7 @@ def p_declaracion_var(p):
     '''
     declaracion_var : declaracion_var_aux
     '''
+    Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     p[0] = None
 def p_declaracion_var_aux(p):
     '''
@@ -962,13 +992,16 @@ def p_idChecker(p):
     global atributos
 
     sizeVar = 1
+    
     if Tabla.CheckIfVariableExists(p[1],Location):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
+        print('entro a scope ' , Tabla.CurrentClass)
         if Tabla.Scope == 'class':
             DeclVar = p[1]
             atributos = atributos + 1
             address = atributos
+            
             Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
         else:
             DeclVar = p[1]
