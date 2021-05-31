@@ -1,5 +1,10 @@
 programa prueba;
 
+peque marmota{
+    petite int a
+}
+
+
 mini int factorialR(int i) {
     if (i == 0 || i == 1) {
             return 1
