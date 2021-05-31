@@ -198,6 +198,8 @@ def p_listas(p):
         val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('FIND',address,val,addressTemp)
+        addressTemp = GenerarNuevoTemporal(tipo)
+        CrearCuadruplo('FIND',address,val,addressTemp)
     #------------------Head---------------------#
     elif p[3] == 'head':
         if(len(p) > 6):
@@ -1294,7 +1296,7 @@ def p_factor(p):
             tipos.push('float')
             address = Constantes.GetMemoryAddress(float(p[1]), 'float')
             values.push(address)
-        elif isinstance(p[1],str) and len(p[1]) == 3 :
+        elif isinstance(p[1],str):
             tipos.push('string')
             address = Constantes.GetMemoryAddress(str(p[1]), 'string')
             values.push(address)
