@@ -7,17 +7,14 @@ Dir = DireccionesMemoria()
 def IsInLocalRange(address):
     return address >= Dir.INT_LOCAL and address <= Dir.LIST_BOOL_LOCAL_TEMPORAL
         
-def GetTypeGivenTheBase(address, base):
-    print('NOT YET IMPLEMENTED')
-
 def GetTypeOfValueGivenTheAddress(address):
-    if address < 4000:
+    if address < Dir.INT_GLOBAL_TEMPORAL:
         return GetTypeGivenTheBase(address, 0)
-    elif address < 8000:
+    elif address < Dir.INT_LOCAL:
         return GetTypeGivenTheBase(address, 4000)
-    elif address < 12000:
+    elif address < Dir.INT_LOCAL_TEMPORAL:
         return GetTypeGivenTheBase(address, 8000)
-    elif address < 20000:
+    elif address < Dir.INT_CONSTANTE:
         return GetTypeGivenTheBase(address, 12000)
 
 class Memory:

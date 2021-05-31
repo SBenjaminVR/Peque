@@ -23,12 +23,11 @@ class VirtualMachine():
         current = 0
         quadruples = len(self.memory.quadruples)
         while current < quadruples:
+            print('A continuación el cuarteto #' +str(current))
             quadruple = self.memory.quadruples[current]
             print(quadruple)
             operation = quadruple.get('op')
 
-            if operation != 14 or operation != 15:
-                current = current + 1
             iz, de, res = GetQuadrupleValue(quadruple)
 
             if operation == 1:
@@ -72,29 +71,30 @@ class VirtualMachine():
                 
             elif operation == 14:
                 current = res
+                continue
 
             elif operation == 15:
                 if self.IsGOTOF(iz):
                     current = res
-                else:
-                    current = current + 1
+                    continue
 
             elif operation == 16:
                 self.ProcessERA(iz, res)
 
             elif operation == 17:
-                # DEBE IR AL CUARTETO DONDE EMPIEZE LA FUNCION
                 returnDirection.push(current + 1)
+                current = 1
 
             elif operation == 18:
                 print('Not yet implemented')
 
             elif operation == 19:
-                print('Not yet implemented')
+                self.ProcessReturn(res)
 
             elif operation == 20:
                 self.ProcessENDPROC()
                 current = returnDirection.pop()
+                continue
 
             elif operation == 21:
                 self.ProcessVER(iz, de, res)
@@ -106,7 +106,8 @@ class VirtualMachine():
                 self.ProcessINPUT(iz)
 
             elif operation == 24:
-                print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
+                self.ProcessEND()
+            current = current + 1
                 
                 
     def ProcessPLUS(self, left, right, result):
@@ -191,6 +192,9 @@ class VirtualMachine():
         space = self.memory.directory.GetFunctionAttribute(left, 'Space')
         self.memory.CreateNewLocalMemory(space)
 
+    def ProcessReturn(self, res):
+        print('Return' + str(res))
+
     def ProcessENDPROC(self):
         self.memory.UnloadLastLocalMemory()
     
@@ -212,7 +216,7 @@ class VirtualMachine():
         self.memory.SetValue(left, userInput)
 
     def ProcessEND(self):
-        print('Programa se termino de ejecutar')
+        print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):
@@ -222,7 +226,7 @@ class VirtualMachine():
             value = value[1:-1]
             aux = self.memory.GetValue(int(value))
             current = self.memory.GetValue(aux)
-        #Se checa que no se este tratando de acceder a una casilla vacia
+        # Se checa que no se este tratando de acceder a una casilla vacia
         if current != None:
             return current
         else:
