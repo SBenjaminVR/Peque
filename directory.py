@@ -49,7 +49,7 @@ class Directory():
         return self.Objetos.get(object) != None
  
 
-    def GetAttribute(self, name, val,Location):
+    def GetAttribute(self, name, val, Location):
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)
         elif self.Scope == 'function':
@@ -170,3 +170,16 @@ class Directory():
 
     def ClassAtribute(self,clase,name):
         return self.Clases[clase].get(name)
+
+    def GetObjectAddress(self, name, function):
+        currentClass = self.Objetos.get(name).get('Clase')
+        foundFunction = False
+        while not foundFunction:
+            if self.Clases[currentClass]['Funciones'].get(function) != None:
+                foundFunction = True
+            else:
+                currentClass = self.Clases[currentClass].get('Padre')
+        return self.Clases[currentClass]['Funciones'][function].get('Address')
+    
+    def GetFunctionAddress(self, name):
+        return self.Funciones.get(name).get('Address')

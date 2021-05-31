@@ -3,6 +3,7 @@ from stack import Stack
 import time
 
 returnDirection = Stack()
+functions = Stack() 
 
 def GetQuadrupleValue(quadruple):
     iz = quadruple.get('iz')
@@ -80,10 +81,13 @@ class VirtualMachine():
 
             elif operation == 16:
                 self.ProcessERA(iz, res)
+                functions
 
             elif operation == 17:
+                self.ProcessGOSUB(iz, de)
                 returnDirection.push(current + 1)
-                current = 1
+                current = res
+                continue
 
             elif operation == 18:
                 print('Not yet implemented')
@@ -130,7 +134,10 @@ class VirtualMachine():
     def ProcessDIVIDE(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz / de)
+        if self.IsInt(iz) and self.IsInt(de):
+            self.memory.SetValue(result, iz // de)
+        else:
+            self.memory.SetValue(result, iz / de)
 
     def ProcessASSIGN(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
@@ -192,10 +199,21 @@ class VirtualMachine():
         space = self.memory.directory.GetFunctionAttribute(left, 'Space')
         self.memory.CreateNewLocalMemory(space)
 
+    def ProcessGOSUB(self, left, right):
+        if right != '_':
+            address = self.memory.directory.GetObjectAddress(right, left)
+        else:
+            address = self.memory.directory.GetFunctionAddress(left)
+        functions.push({'Name': left, 'Address': address})
+
     def ProcessReturn(self, res):
-        print('Return' + str(res))
+        value = self.memory.GetValue(res)
+        currentFunction = functions.top()
+        address = currentFunction.get('Address')
+        self.memory.SetValue(address, value)
 
     def ProcessENDPROC(self):
+        functions.pop()
         self.memory.UnloadLastLocalMemory()
     
     def ProcessVER(self, left, right, res):
@@ -232,14 +250,11 @@ class VirtualMachine():
         else:
             raise ErrorMsg('Se esta tratando de acceder a una casilla sin valor')
 
-    def esIntOFloat(self, var):
-        return isinstance(var, int) or isinstance(var, float)
+    def IsFloat(self, var):
+        return isinstance(var, float)
 
-    def esUnDigito(self, var):
-        return var.isdigit()
-
-    def esUnTemporal(self, var):
-        return var.startswith('_t')
+    def IsInt(self, var):
+        return isinstance(var, int)
 
     def procesarPrint(self, valores):
         Imprimir = []
