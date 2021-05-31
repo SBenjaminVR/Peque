@@ -1,14 +1,29 @@
 programa prueba;
-mini int testing(int a, int b) {
 
-    
-    if(a < 0)
-    {
-        print(a)
+mini int factorial(int i) {
+    petite int c
+    if (i < 0) {
+        c = 0
     }
-    return 2 + a + b
+    else {
+        if (i == 0 || i == 1) {
+            c = 1
+        }
+        else {
+            petite int fact
+            fact = 1
+            while (i > 1) {
+                fact = fact * i
+                i = i - 1
+            }
+        }
+    }
+    if (fact == 1) {
+        c = fact
+    }
+    return c
 }
-main(){
-    
 
+main(){
+    print(factorial(5))
 }
