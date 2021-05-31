@@ -5,7 +5,7 @@ mini int factorial(int i) {
     petite int fact
     fact = 1
     if (i < 0) {
-        c = 0
+        return 0
     }
     else {
         if (i == 0 || i == 1) {
@@ -35,6 +35,8 @@ mini int factorialR(int i) {
     }
     return c
 }
+
+
 
 main(){
     print(factorialR(5))

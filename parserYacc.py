@@ -130,6 +130,7 @@ def p_cuerpo_aux(p) :
     | estatutos_funciones
     | declaracion_var
     | instancear_objetos
+    | regreso
     '''
     
     p[0] = None
@@ -744,7 +745,7 @@ def p_funciones_end(p):
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
-    declaracion_funciones_aux : startF MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo regreso R_BRACKET save_variables
+    declaracion_funciones_aux : startF MINI declaracion_funciones_aux2 guardar_nombre_funcion L_PARENTHESIS declaracion_parametros R_PARENTHESIS L_BRACKET cuerpo  R_BRACKET save_variables
     |
     '''
     global Location
