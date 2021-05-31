@@ -154,6 +154,8 @@ class VirtualMachine():
                 res = self.memory.GetValue(int(result))
             else:
                 res = result.split('.')
+        else:
+            res = int(result)
         self.memory.SetValue(res, iz)
         
 
@@ -206,8 +208,7 @@ class VirtualMachine():
         return False
 
     def ProcessERA(self, left, res):
-        self.memory.directory.Scope = res
-        space = self.memory.directory.GetFunctionAttribute(left, 'Space')
+        space = self.memory.directory.GetFunctionSpace(left, res)
         NewLocalMemory.push(self.memory.CreateNewLocalMemory(space))
 
     def ProcessGOSUB(self, left, right):
@@ -264,9 +265,14 @@ class VirtualMachine():
             current = self.memory.GetValue(value)
         else:
             #Se quitan los parentesis y se accede al primer valor
-            value = value[1:-1]
-            aux = self.memory.GetValue(int(value))
+            if value[0] == '(':
+                value = value[1:-1]
+                aux = self.memory.GetValue(int(value))
+            else:
+                # Entonces detectamos que se esta accediendo a un parametro de un objeto
+                aux = value.split('.')
             current = self.memory.GetValue(aux)
+
         # Se checa que no se este tratando de acceder a una casilla vacia
         if current != None:
             return current
