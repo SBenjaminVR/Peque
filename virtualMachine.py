@@ -116,6 +116,9 @@ class VirtualMachine():
             elif operation == 27:
                 self.ProcessAPPEND(iz, res)
 
+            elif operation == 28:
+                self.ProcessPOP(iz)
+
             current = current + 1
                 
                 
@@ -260,6 +263,11 @@ class VirtualMachine():
         iz = self.GetValueInsideValueIfParenthesis(left)
         available = self.GetNextAvailableSpaceOfList(result)
         self.memory.SetValue(result + available, iz, functions.top())
+
+    def ProcessPOP(self, left):
+        iz = self.GetValueInsideValueIfParenthesis(left)
+        #available = self.GetNextAvailableSpaceOfList(result)
+        #self.memory.SetValue(result + available, iz, functions.top())
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):

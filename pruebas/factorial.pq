@@ -21,6 +21,6 @@ mini int factorial(int i) {
     }
 }
 
-main(){
+main() {
     print(factorial(2+3))
 }
