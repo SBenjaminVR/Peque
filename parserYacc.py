@@ -1399,6 +1399,8 @@ def p_factor(p):
     | CTEI
     | CTEF
     | CTES
+    | TRUE
+    | FALSE
     '''
     if p[1] != '(':
         if isinstance(p[1],int):
