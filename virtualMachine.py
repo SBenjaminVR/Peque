@@ -94,7 +94,7 @@ class VirtualMachine():
                 self.ProcessPARAMETRO(iz, res)
 
             elif operation == 19:
-                self.ProcessReturn(res)
+                self.ProcessRETURN(res)
 
             elif operation == 20:
                 self.ProcessENDPROC()
@@ -119,8 +119,22 @@ class VirtualMachine():
             elif operation == 28:
                 self.ProcessPOP(iz)
 
+            elif operation == 29:
+                self.ProcessSORT(iz)
+
+            elif operation == 30:
+                self.ProcessFIND(iz, de, res)
+
+            elif operation == 31:
+                self.ProcessHEAD(iz, res)
+
+            elif operation == 32:
+                self.ProcessTAIL(iz, res)
+
+            elif operation == 33:
+                self.ProcessKEY(iz, de, res)
+
             current = current + 1
-                
                 
     def ProcessPLUS(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
@@ -229,7 +243,7 @@ class VirtualMachine():
         currentMemory = NewLocalMemory.top()
         currentMemory.SetValue(result, iz)
 
-    def ProcessReturn(self, res):
+    def ProcessRETURN(self, res):
         value = self.GetValueInsideValueIfParenthesis(res)
         currentFunction = functions.top()
         address = currentFunction.get('Address')
@@ -264,10 +278,29 @@ class VirtualMachine():
         available = self.GetNextAvailableSpaceOfList(result)
         self.memory.SetValue(result + available, iz, functions.top())
 
-    def ProcessPOP(self, left):
-        iz = self.GetValueInsideValueIfParenthesis(left)
-        #available = self.GetNextAvailableSpaceOfList(result)
-        #self.memory.SetValue(result + available, iz, functions.top())
+    def ProcessPOP(self, address):
+        available = self.GetLastAvailableSpaceOfList(address)
+        self.memory.SetValue(address + available, None, functions.top())
+
+    def ProcessSORT(self, address):
+        print('NOT YET IMPLEMENTED')
+
+    def ProcessFIND(self, address, val, tempAddress):
+        print('NOT YET IMPLEMENTED')
+
+    def ProcessHEAD(self, address, tempAddress):
+        lastAvailable = self.GetLastAvailableSpaceOfList(address)
+        value = self.memory.GetValue(address + lastAvailable, functions.top())
+        self.memory.SetValue(tempAddress, value, functions.top())
+        print('HEAD: ' + str(value))
+
+    def ProcessTAIL(self, address, tempAddress):
+        value = self.memory.GetValue(address + lastAvailable, functions.top())
+        self.memory.SetValue(tempAddress, value, functions.top())
+        print('HEAD: ' + str(value))
+
+    def ProcessKEY(self, address, val, tempAddress):
+        print('NOT YET IMPLEMENTED')
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):
@@ -303,7 +336,9 @@ class VirtualMachine():
         if res != None:
             c = 0
             while res != None and c < 100:
+                c = c + 1
                 res = self.memory.GetValue(baseAddress + c, functions.top())
+            return c - 1
         else:
             raise ErrorMsg('Se esta tratando de hacer pop() de una lista vacia')
 

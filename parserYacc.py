@@ -200,14 +200,11 @@ def p_listas(p):
         val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('FIND',address,val,addressTemp)
-        addressTemp = GenerarNuevoTemporal(tipo)
-        CrearCuadruplo('FIND',address,val,addressTemp)
     #------------------Head---------------------#
     elif p[3] == 'head':
         if(len(p) > 6):
             raise ErrorMsg(p[3] + ' no debe tener argumetos')
         
-        val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('HEAD',address,'_',addressTemp)
     #------------------Tail---------------------#
@@ -215,9 +212,8 @@ def p_listas(p):
         if(len(p) > 6):
             raise ErrorMsg(p[3] + ' no debe tener argumetos')
        
-        val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
-        CrearCuadruplo('TAIL',address,val,addressTemp)
+        CrearCuadruplo('TAIL',address,'_',addressTemp)
     #------------------Key---------------------#
     elif p[3] == 'key':
         if(len(p) <= 6):
@@ -225,7 +221,7 @@ def p_listas(p):
         typeCheckTemp = tipos.pop()
         typeCheckAns = typeCheckTemp
         if typeCheckAns != 'int' :
-            raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + 'int' + ' se dio un tipo: ' + typeCheckAns)
+            raise ErrorMsg(p[3] + ' el argmunto debe ser un ' + 'int' + ' se dio un tipo: ' + typeCheckAns)
         
         val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
@@ -322,7 +318,7 @@ def p_for_final(p):
     Saltos.pop()
     Ret = Saltos[-1]
     Saltos.pop()
-    CrearCuadruplo('GOTO','_','_',Ret)
+    CrearCuadruplo('GOTO','_','_',Ret+1)
     Fill(falseJump,cont)
 
     
