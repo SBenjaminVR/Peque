@@ -63,8 +63,19 @@ class Directory():
     def CheckIfObjectExists(self, object):
         return self.Objetos.get(object) != None
  
-    def CheckIAributeExists(self, name,location):
+
+    def CheckIfAtributeExistsInFather(self, name,location):
+        clasePadre = self.Clases[self.CurrentClass].get('Father')
+        if clasePadre == None:
+            return False
+        else:
+            find = self.Clases[clasePadre].get('Variable')
+            return find.get(name) != None
+            
+
+
         
+    def CheckIAributeExists(self, name,location):
         if self.Scope == 'main':
             return self.Variables.get(name) != None
         elif self.Scope == 'function':
@@ -82,7 +93,6 @@ class Directory():
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)
         elif self.Scope == 'function':
-            
             current = self.Funciones.get(self.CurrentFunction)
         elif self.Scope == 'class':
             if Location == 'function' :
@@ -92,7 +102,11 @@ class Directory():
                 classObj = self.Clases.get(self.CurrentClass)
                 current = classObj
         return current.get('Variables').get(name).get(val)
-
+    def GetAttributeFromFather(self, name, val, Location):
+        if self.Scope == 'class':
+                classObj = self.Clases.get(self.CurrentClass)
+                current = classObj
+        return current.get('Variables').get(name).get(val)
     def GetAttributeForParameters(self, name, val, Location):
         if self.Scope == 'function':
             current = self.Funciones.get(self.CurrentFunction)

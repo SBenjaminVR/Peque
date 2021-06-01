@@ -922,7 +922,8 @@ def p_funciones_end(p):
         Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     CrearCuadruplo('END PROC','_','_','_')
     global Location
-    Location = LocationTemp
+    global LocationTemp
+    Location = Tabla.Scope
     
     p[0]= None
 def p_declaracion_funciones_aux(p):
@@ -933,6 +934,7 @@ def p_declaracion_funciones_aux(p):
     global Location
     global LocationTemp
     LocationTemp = Location
+    
     Location = 'function'
     p[0] = None
 def p_save_variables(p):
@@ -1045,7 +1047,6 @@ def p_idChecker(p):
     global atributos
 
     sizeVar = 1
-    
     if Tabla.CheckIfVariableExists(p[1],Location):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
@@ -1162,6 +1163,14 @@ def p_variable_aux2(p):
             address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
             values.push(address)
             tipos.push(Tabla.GetAttributeForParameters(p[1], 'Type',Location))
+        elif not Tabla.CheckIfAtributeExistsInFather(p[1],Location):
+            clasePadre = Tabla.GetClassAtribute(Tabla.CurrentClass,'Padre')
+            tempClass = Tabla.CurrentClass
+            Tabla.SetClass(clasePadre)
+            address = Tabla.GetAttributeFromFather(p[1],'Address',Location)
+            values.push(address)
+            tipos.push(Tabla.GetAttributeFromFather(p[1], 'Type',Location))
+            Tabla.SetClass(tempClass)
         else :
             raise ErrorMsg('No existe la variable ' + p[1])
     p[0] = None
