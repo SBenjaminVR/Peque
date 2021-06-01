@@ -205,6 +205,7 @@ def p_listas(p):
         if(tipo == 'list_float'):
             tipo ='float'
         addressTemp = GenerarNuevoTemporal(tipo)
+        values.push(addressTemp)
         CrearCuadruplo('FIND',address,val,addressTemp)
     #------------------Head---------------------#
     elif p[3] == 'head':
@@ -217,6 +218,7 @@ def p_listas(p):
         if(tipo == 'list_float'):
             tipo ='float'
         addressTemp = GenerarNuevoTemporal(tipo)
+        values.push(addressTemp)
         CrearCuadruplo('HEAD',address,'_',addressTemp)
     #------------------Tail---------------------#
     elif p[3] == 'tail':
@@ -230,6 +232,7 @@ def p_listas(p):
         if(tipo == 'list_float'):
             tipo ='float'
         addressTemp = GenerarNuevoTemporal(tipo)
+        values.push(addressTemp)
         CrearCuadruplo('TAIL',address,'_',addressTemp)
     #------------------Key---------------------#
     elif p[3] == 'key':
@@ -248,6 +251,7 @@ def p_listas(p):
         if(tipo == 'list_float'):
             tipo ='float'
         addressTemp = GenerarNuevoTemporal(tipo)
+        values.push(addressTemp)
         CrearCuadruplo('KEY',address,val,addressTemp)
     else:
         raise ErrorMsg('No existe el metodo para lista ' + p[3])

@@ -283,7 +283,15 @@ class VirtualMachine():
         self.memory.SetValue(address + available, None, functions.top())
 
     def ProcessSORT(self, address):
-        print('NOT YET IMPLEMENTED')
+        lista = []
+        lastAvailable = self.GetNextAvailableSpaceOfList(address)
+        for i in range(address, address + lastAvailable):
+            lista.append(self.memory.GetValue(i, functions.top()))
+        lista.sort()
+        current = 0
+        for i in range(address, address + lastAvailable):
+            lista.append(self.memory.SetValue(i, lista[current], functions.top()))
+            current = current + 1
 
     def ProcessFIND(self, address, val, tempAddress):
         print('NOT YET IMPLEMENTED')
@@ -300,7 +308,10 @@ class VirtualMachine():
         print('TAIL: ' + str(value))
 
     def ProcessKEY(self, address, val, tempAddress):
-        print('NOT YET IMPLEMENTED')
+        val = self.GetValueInsideValueIfParenthesis(val)
+        value = self.memory.GetValue(address + val, functions.top())
+        self.memory.SetValue(tempAddress, value, functions.top())
+        print('KEY[' + str(val) + '] = ' + str(value))
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):
