@@ -302,9 +302,8 @@ class VirtualMachine():
         res = self.memory.GetValue(baseAddress, functions.top())
         if res != None:
             c = 0
-            while res != None and c < 99:
+            while res != None and c < 100:
                 res = self.memory.GetValue(baseAddress + c, functions.top())
-            return c
         else:
             raise ErrorMsg('Se esta tratando de hacer pop() de una lista vacia')
 
