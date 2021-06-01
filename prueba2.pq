@@ -1,11 +1,16 @@
 programa prueba;
-main(){
-    petite int i
-    i = 0
-    for(0 to 3,1)
-    {   
-        print(i)
-        i = i + 1
-    }
 
+main() {
+    petite int chocolate
+    petite list int abc
+    abc->append(2)
+    abc->append(4)
+    abc->append(5)
+    abc->append(3)
+    abc->append(1)
+    abc->pop()
+    abc->head()
+    abc->tail()
+    chocolate = abc->head()
+    print(chocolate)
 }
