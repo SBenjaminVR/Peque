@@ -824,7 +824,6 @@ def p_declaracion_parametros_aux(p):
     '''
     if len(p ) > 1:
         tipo = AuxList[1]
-        
         agregarContVarFunciones(tipo,'NORMAL')
         name = p[2]
         address = memoria.AssignMemoryAddress(tipo,Scope[0],'NORMAL')
@@ -952,6 +951,7 @@ def p_guardar_nombre_funcion(p):
     #se resetea el contador de variables para funciones
     global contVarLocal
     resetConVarFunciones()
+    memoria.ResetLocalMemory()
     
     global FuncionDeclarada
     FuncionDeclarada = p[1]
