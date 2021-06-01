@@ -35,11 +35,9 @@ class LocalMemory():
         spaceSize = len(space)
         for i in range(spaceSize): 
             self.local = AssignLocalStorage(self.local, space[i], i)
-        print(self.local)
 
     def GetValue(self, address):
         address = str(address)
-        print(self.local)
         return self.local.get(address)
 
     def SetValue(self, address, value):
