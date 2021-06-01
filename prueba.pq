@@ -44,9 +44,12 @@ main()
     petite float b[8]
     
     petite int c[4][4]
+    
 
     jose = new micola
     pito = new micola
+
+    
     c[2][3] = 2 + 4
     for(2 to 3, 1)
     {

@@ -40,7 +40,7 @@ class TablaConstantes:
         address = str(address)
         if not self.IsInverted:
             self.InvertDictionary(self.Tabla)
-        return int(self.Tabla.get(address))
+        return self.Tabla.get(address)
 
     def InvertDictionary(self, d):
         self.IsInverted = not self.IsInverted

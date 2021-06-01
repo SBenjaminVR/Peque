@@ -31,6 +31,7 @@ class Directory():
             return parametros
            
 
+
         
     def CheckIfVariableExists(self, name,location):
         
@@ -62,8 +63,19 @@ class Directory():
     def CheckIfObjectExists(self, object):
         return self.Objetos.get(object) != None
  
-    def CheckIAributeExists(self, name,location):
+
+    def CheckIfAtributeExistsInFather(self, name,location):
+        clasePadre = self.Clases[self.CurrentClass].get('Father')
+        if clasePadre == None:
+            return False
+        else:
+            find = self.Clases[clasePadre].get('Variable')
+            return find.get(name) != None
+            
+
+
         
+    def CheckIAributeExists(self, name,location):
         if self.Scope == 'main':
             return self.Variables.get(name) != None
         elif self.Scope == 'function':
@@ -81,7 +93,6 @@ class Directory():
         if self.Scope == 'main':
             return self.Variables.get(name).get(val)
         elif self.Scope == 'function':
-            
             current = self.Funciones.get(self.CurrentFunction)
         elif self.Scope == 'class':
             if Location == 'function' :
@@ -91,7 +102,11 @@ class Directory():
                 classObj = self.Clases.get(self.CurrentClass)
                 current = classObj
         return current.get('Variables').get(name).get(val)
-
+    def GetAttributeFromFather(self, name, val, Location):
+        if self.Scope == 'class':
+                classObj = self.Clases.get(self.CurrentClass)
+                current = classObj
+        return current.get('Variables').get(name).get(val)
     def GetAttributeForParameters(self, name, val, Location):
         if self.Scope == 'function':
             current = self.Funciones.get(self.CurrentFunction)
@@ -116,7 +131,7 @@ class Directory():
             current = classObj.get('Funciones').get(name)
         else:
             current = self.Funciones.get(name)
-            
+  
         return current.get(val)
 #adds---------------------------------------------------------------
     def AddVariable(self, name, type, address, size, Location):
@@ -201,6 +216,7 @@ class Directory():
             self.Clases[self.CurrentClass]['Funciones'][name].update(newVal)
         else:
             self.Funciones[name].update(newVal)
+            
     def updateHerencia(self,clase,padre):
         referencia = {'Padre' : padre}
         self.Clases.get(clase).update(referencia)
@@ -212,15 +228,33 @@ class Directory():
     def ClassAtribute(self,clase,name):
         return self.Clases[clase].get(name)
 
-    def GetObjectAddress(self, name, function):
-        currentClass = self.Objetos.get(name).get('Clase')
+    def GetObjectAddress(self, function, objeto):
+        if objeto != '_':
+            return self.GetAttributeOfFunctionInObject(function, objeto, 'Address')
+        else:
+            return self.Funciones[function].get('Address')
+    
+    def GetFunctionAddress(self, name):
+        return self.Funciones.get(name).get('Address')
+
+    def GetFunctionSpace(self, function, objeto):
+        if objeto != '_':
+            return self.GetAttributeOfFunctionInObject(function, objeto, 'Space')
+        else:
+            return self.Funciones[function].get('Space')
+
+    def GetAttributeOfFunctionInObject(self, function, objeto, attribute):
+        currentClass = self.Objetos.get(objeto).get('Clase')
         foundFunction = False
         while not foundFunction:
             if self.Clases[currentClass]['Funciones'].get(function) != None:
                 foundFunction = True
             else:
                 currentClass = self.Clases[currentClass].get('Padre')
-        return self.Clases[currentClass]['Funciones'][function].get('Address')
+        return self.Clases[currentClass]['Funciones'][function].get(attribute)
     
     def GetFunctionAddress(self, name):
         return self.Funciones.get(name).get('Address')
+
+    def GetClassAtribute(self, name,atr):
+        return self.Clases.get(name).get(atr)

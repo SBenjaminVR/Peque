@@ -13,12 +13,14 @@ Saltos = []
 Scope = ['GLOBAL']
 parametros = {}
 sizeVar = 1
-contVarLocal = [0]*11
+contVarLocal = [0]*9
+LocationTemp = 'class'
 Location = 'class'
 
 paramChecktype = []
 global lastVar
 global DeclVar
+global Funcion
 global FuncionDeclarada
 global cont
 global claseDeclarada
@@ -143,7 +145,118 @@ def p_estatutos_funciones(p):
     | llamada
     | asignacion
     | condicion
+    | listas
     '''
+def p_listas(p):
+    '''
+    listas : ID METOD ID L_PARENTHESIS expresion R_PARENTHESIS
+    | ID METOD ID L_PARENTHESIS  R_PARENTHESIS
+
+
+    '''
+    address = -1
+    tipo = ''
+    #checar que exista el ID
+    if  Tabla.CheckIfVariableExists(p[1],Location):
+        address = Tabla.GetAttribute(p[1],'Address',Location)
+        tipo = Tabla.GetAttribute(p[1],'Type',Location)
+        
+    else:
+        if Tabla.CheckIfFunctExistInAtribute(p[1],Location):
+            address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
+            tipo = Tabla.GetAttribute(p[1],'Type',Location)
+        else :
+            raise ErrorMsg('No existe la variable ' + p[1])
+    #checar el id 2 este entre los metodos
+    
+    #------------------Append---------------------#
+    if p[3] == 'append':
+        if(len(p) <= 6):
+            raise ErrorMsg(p[3] + 'debe tener un argumento')
+        typeCheckTemp = tipos.pop()
+        typeCheckAns = 'list_' + typeCheckTemp
+        if typeCheckAns != tipo :
+            raise ErrorMsg(p[3] + ' el argumento debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
+        CrearCuadruplo('APPEND', values.pop(), '_', address)
+    #------------------POP---------------------#
+    elif p[3] == 'pop':
+        if(len(p) > 6):
+            raise ErrorMsg(p[3] + ' no debe tener argumentos')
+        CrearCuadruplo('POP',address,'_','_')
+    #------------------Sort---------------------#
+    elif p[3] == 'sort':
+        if(len(p) > 6):
+            raise ErrorMsg(p[3] + ' no debe tener argumentos')
+        CrearCuadruplo('SORT',address,'_','_')
+   #------------------find---------------------#
+    elif p[3] == 'find':
+        if(len(p) <= 6):
+            raise ErrorMsg(p[3] + 'debe tener un argumento')
+        typeCheckTemp = tipos.pop()
+        typeCheckAns = 'list_' + typeCheckTemp
+        if typeCheckAns != tipo :
+            raise ErrorMsg(p[3] + ' el argumento debe ser: ' + tipo + ' y se dio un tipo: ' + typeCheckAns)
+        
+        val = values.pop()
+        if(tipo == 'list_int'):
+            tipo ='int'
+        if(tipo == 'list_bool'):
+            tipo ='bool'
+        if(tipo == 'list_float'):
+            tipo ='float'
+        addressTemp = GenerarNuevoTemporal(tipo)
+        values.push(addressTemp)
+        CrearCuadruplo('FIND',address,val,addressTemp)
+    #------------------Head---------------------#
+    elif p[3] == 'head':
+        if(len(p) > 6):
+            raise ErrorMsg(p[3] + ' no debe tener argumetos')
+        if(tipo == 'list_int'):
+            tipo ='int'
+        if(tipo == 'list_bool'):
+            tipo ='bool'
+        if(tipo == 'list_float'):
+            tipo ='float'
+        addressTemp = GenerarNuevoTemporal(tipo)
+        values.push(addressTemp)
+        CrearCuadruplo('HEAD',address,'_',addressTemp)
+    #------------------Tail---------------------#
+    elif p[3] == 'tail':
+        if(len(p) > 6):
+            raise ErrorMsg(p[3] + ' no debe tener argumetos')
+        
+        if(tipo == 'list_int'):
+            tipo ='int'
+        if(tipo == 'list_bool'):
+            tipo ='bool'
+        if(tipo == 'list_float'):
+            tipo ='float'
+        addressTemp = GenerarNuevoTemporal(tipo)
+        values.push(addressTemp)
+        CrearCuadruplo('TAIL',address,'_',addressTemp)
+    #------------------Key---------------------#
+    elif p[3] == 'key':
+        if(len(p) <= 6):
+            raise ErrorMsg(p[3] + 'debe tener 1 argumento')
+        typeCheckTemp = tipos.pop()
+        typeCheckAns = typeCheckTemp
+        if typeCheckAns != 'int' :
+            raise ErrorMsg(p[3] + ' el argmunto debe ser un ' + 'int' + ' se dio un tipo: ' + typeCheckAns)
+        
+        val = values.pop()
+        if(tipo == 'list_int'):
+            tipo ='int'
+        if(tipo == 'list_bool'):
+            tipo ='bool'
+        if(tipo == 'list_float'):
+            tipo ='float'
+        addressTemp = GenerarNuevoTemporal(tipo)
+        values.push(addressTemp)
+        CrearCuadruplo('KEY',address,val,addressTemp)
+    else:
+        raise ErrorMsg('No existe el metodo para lista ' + p[3])
+
+   
     p[0] = None
 #estatutos repeticion
 def p_estatutos_repeticion(p):
@@ -202,7 +315,7 @@ def p_for_revision(p):
     #chechar por las variables y expresiones
     if tipos.top() != 'int':
         raise ErrorMsg('se esperaba un tipo int or float en la expresion del for')
-    popper.push('>=')
+    popper.push('<=')
     GenerarCuadruploDeOperador(popper,values,tipos)
     Saltos.append(cont)
     CrearCuadruplo('GOTOF',values.pop(),'_','_')
@@ -232,7 +345,7 @@ def p_for_final(p):
     Saltos.pop()
     Ret = Saltos[-1]
     Saltos.pop()
-    CrearCuadruplo('GOTO','_','_',Ret)
+    CrearCuadruplo('GOTO','_','_',Ret+1)
     Fill(falseJump,cont)
 
     
@@ -294,6 +407,7 @@ def p_leeInput(p):
     leeInput : empty
     '''
     res = values.pop()
+    tipos.pop()
     CrearCuadruplo('INPUT',res,'_','_')
     p[0] = None
 def p_input_aux2(p):
@@ -314,6 +428,7 @@ def p_llamadaID(p):
     llamadaID : ID 
     | ID llamada_aux
     '''
+
     popper.push('(')
     
     funct.push(p[1])
@@ -329,7 +444,6 @@ def p_startCall(p):
     '''
     
     Funcion = funct.pop()
-
     if funct.top() == '.':
         funct.pop()
         objeto = funct.pop()
@@ -356,16 +470,32 @@ def p_endCall(p):
     popper.pop()
 
 
-    
     if funct.top() == '.':
         funct.pop()
         objeto = funct.pop()
         
         tempScope = Tabla.Scope
         Tabla.SetScope('class')
+        if not Tabla.CheckIfObjectExists(objeto):
+            raise ErrorMsg('no existe elobjeto')
+        
         clase = Tabla.GetObjectAtr(objeto,'Clase')
         Tabla.SetClass(clase)
+        padre = Tabla.GetClassAtribute(clase,'Padre')
+        
+        if not Tabla.CheckIfObjectExists(objeto):
+            raise ErrorMsg('no existe el objeto')
+        
+        if not Tabla.CheckIfFunctionExists(Funcion) :
+            if padre == None:
+                raise ErrorMsg('no existe la llamada')
+            else:
+                Tabla.SetClass(padre)
+                if not Tabla.CheckIfFunctionExists(Funcion):
+                    raise ErrorMsg('no existe la llamada')
+        
         parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
+       
         if len(paramChecktype) != len(parametrosFunct):
             raise ErrorMsg('Incorrecto numero de parametros')
         for k in parametrosFunct.values() :
@@ -388,9 +518,9 @@ def p_endCall(p):
             Address = str(AddressB) + '.'+ str(AddressA)
             CrearCuadruplo('=',Address,'_',Resultado)
             Tabla.SetScope(tempScope)
-
     else:
         parametrosFunct = Tabla.GetFunctionAttribute(Funcion, 'Parametros')
+
         if len(paramChecktype) != len(parametrosFunct):
             raise ErrorMsg('Incorrecto numero de parametros')
         listaTipos = []
@@ -410,7 +540,6 @@ def p_endCall(p):
             values.push(Resultado)
 
             CrearCuadruplo('=', Address, '_' ,Resultado)
-
 
     p[0]= None
 def p_llamada_aux(p):
@@ -479,6 +608,7 @@ def p_finalVar(p):
     finalVar : empty
     '''
     res = values.pop()
+    tipos.pop()
     CrearCuadruplo('PRINT',res,'_','_')
     p[0] = None
 
@@ -486,6 +616,8 @@ def p_print_var_aux2(p):
     '''
     print_var_aux2 : llamada 
     | expresion
+    | atributo
+    | listas
     '''
     
     p[0] = None
@@ -504,6 +636,12 @@ def p_igualdadAtr(p):
     '''
     iz = values.pop()
     res = values.pop()
+
+    tipo1 = tipos.pop()
+    tipo2 = tipos.pop()
+
+    if tipo1 != tipo2:
+        raise ErrorMsg('Error: No se pueden asignar '+ tipo1 + ' a un tipo ' + tipo2)
     
     CrearCuadruplo('=', iz, '_', res)
     p[0] = None
@@ -522,16 +660,30 @@ def p_atributo(p):
         TempScope = Tabla.Scope
         Tabla.SetScope('class')
         Tabla.SetClass(clase)
-        if not Tabla.CheckIfVariableExists(atributo,'class'):
-            
-            raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
-        else:
+        padre = Tabla.GetClassAtribute(clase,'Padre')
+
+        if Tabla.CheckIfVariableExists(atributo,'class'):
+
             addressB = Tabla.GetAttribute(atributo,'Address','class')
             addressFinal = str(addressA)+'.' + str(addressB)
             tipo = Tabla.GetAttribute(atributo,'Type','class')
             values.push(addressFinal)
             tipos.push(tipo)
+        elif padre != None:
+                Tabla.SetScope('class')
+                Tabla.SetClass(padre)
+                if Tabla.CheckIfVariableExists(atributo,'class'):
+                    addressB = Tabla.GetAttribute(atributo,'Address','class')
+                    addressFinal = str(addressA)+'.' + str(addressB)
+                    tipo = Tabla.GetAttribute(atributo,'Type','class')
+                    values.push(addressFinal)
+                    tipos.push(tipo)
+                else:
+                    raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
+        else:
+            raise ErrorMsg('El objeto ' + p[1] + ' no contiene '+p[3])
         Tabla.SetScope(TempScope)
+    
 
 
 
@@ -546,8 +698,15 @@ def p_igualdadArr(p):
     '''
     igualdadArr : arreglo EQUALS asignacion_aux
     '''
+
     iz = values.pop()
     res = values.pop()
+    
+    tipo1 = tipos.pop()
+    tipo2 = tipos.pop()
+    print(tipo1, ' ', tipo2)
+    if tipo1 != tipo2:
+        raise ErrorMsg('Error: No se pueden asignar '+ tipo1 + ' a un tipo ' + tipo2)
 
     CrearCuadruplo(p[2], iz, '_', res)
     p[0] = None
@@ -555,14 +714,21 @@ def p_igualdadVar(p):
     '''
     igualdadVar : ID EQUALS asignacion_aux
     '''
+
     if Tabla.CheckIfVariableExists(p[1],Location) :
         iz = values.pop()
+        tipo = tipos.pop()
+        if tipo != Tabla.GetAttribute(p[1],'Type',Location):
+            raise ErrorMsg('Error: No se pueden asignar a: ' + p[1] + ' el tipo ' + tipo + ' ya que es de tipo ' + Tabla.GetAttribute(p[1],'Type',Location) )
         address = Tabla.GetAttribute(p[1],'Address',Location)
         CrearCuadruplo(p[2], iz, '_',address )
 
     else:
         if Tabla.CheckIfFunctExistInAtribute(p[1],Location):
             iz = values.pop()
+            tipo = tipos.pop()
+            if tipo != Tabla.GetAttributeForParameters(p[1],'Type',Location):
+                raise ErrorMsg('Error: No se pueden asignar a ' + p[1] + ' el tipo ' + tipo + ' ya que es de tipo ' + Tabla.GetAttributeForParameters(p[1],'Type',Location) )
             address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
             CrearCuadruplo(p[2], iz, '_',address )
         else:
@@ -595,7 +761,6 @@ def p_rp_seen(p):
     '''
     #guardamos direccion del primer salto
     result = Temporales[-1]
-    print(tipos)
     if tipos.top() != 'bool':
         raise ErrorMsg('Se esperaba un tipo bool en el if')
     CrearCuadruplo('GOTOF',result,'_','_')
@@ -658,18 +823,19 @@ def p_declaracion_parametros_aux(p):
     |
     '''
     if len(p ) > 1:
-        
         tipo = AuxList[1]
         agregarContVarFunciones(tipo,'NORMAL')
         name = p[2]
         address = memoria.AssignMemoryAddress(tipo,Scope[0],'NORMAL')
         parametros[name] = { 'Type' :tipo,'Address':address}
+
     p[0] = None
 def p_declaracion_parametros_aux2(p):
     '''
     declaracion_parametros_aux2 : COMMA declaracion_parametros_aux
     |
     '''
+
     p[0] = None
 def p_declaracion_clases(p):
     '''
@@ -682,7 +848,10 @@ def p_end_class(p):
     '''
     end_class : empty
     '''
-    Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
+    
+
+   
+
     p[0]= None
 
 def p_guardar_nombre_clase(p):
@@ -713,10 +882,14 @@ def p_herencia(p):
     herencia : AGRANDA ID
     '''
     global atributos
+
+    if claseDeclarada == p[2]:
+        raise ErrorMsg('No puede haber herencia entre si mismo: ' + p[2])
     if Tabla.CheckIfClassExists(p[2]):
         Tabla.updateHerencia(claseDeclarada,p[2])
         size = Tabla.ClassAtribute(p[2],'Space')
         atributos = size
+        
     else:
         raise ErrorMsg('La clase ' + p[2] + ' no existe')
 
@@ -744,10 +917,13 @@ def p_funciones_end(p):
     funciones_end : empty
     '''
     #Guarda contador de variables
-    
+    if Tabla.Scope == 'class':
+        Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     CrearCuadruplo('END PROC','_','_','_')
     global Location
+    global LocationTemp
     Location = Tabla.Scope
+    
     p[0]= None
 def p_declaracion_funciones_aux(p):
     '''
@@ -755,16 +931,18 @@ def p_declaracion_funciones_aux(p):
     |
     '''
     global Location
+    global LocationTemp
+    LocationTemp = Location
+    
     Location = 'function'
     p[0] = None
 def p_save_variables(p):
     '''
     save_variables : empty
     '''
-    copiaDeLista = contVarLocal.copy()
-    Tabla.updateFunctionAttribute(FuncionDeclarada,'Space',copiaDeLista)
-    Tabla.updateFunctionAttribute(FuncionDeclarada,'Parametros',parametros)
-
+    global FuncionDeclarada
+    Tabla.updateFunctionAttribute(FuncionDeclarada,'Space',contVarLocal.copy())
+    Tabla.updateFunctionAttribute(FuncionDeclarada,'Parametros',parametros.copy())
     p[0]= None
 def p_guardar_nombre_funcion(p):
     '''
@@ -773,21 +951,30 @@ def p_guardar_nombre_funcion(p):
     #se resetea el contador de variables para funciones
     global contVarLocal
     resetConVarFunciones()
+    memoria.ResetLocalMemory()
     
-
     global FuncionDeclarada
     FuncionDeclarada = p[1]
+    
     CrearCuadruplo('START PROC','_','_',FuncionDeclarada)
     
+   
     if Tabla.CheckIfFunctionExists(FuncionDeclarada):
         raise ErrorMsg('La funcion ' + FuncionDeclarada + ' ya habia sido declarada previamente')
     else:
-        AuxList[0] = 'Funcion'
-        address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
         
-        Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,parametros,cont-1)
+        AuxList[0] = 'Funcion'
+        if Tabla.Scope == 'class':
+            global atributos
+            atributos = atributos + 1
+            Tabla.AddFunction(FuncionDeclarada, AuxList[1], atributos,parametros,cont-1)
+            Tabla.SetCurrentFunction(FuncionDeclarada)
 
-        Tabla.SetCurrentFunction(FuncionDeclarada)
+        else:
+            address = memoria.AssignMemoryAddress(AuxList[1], 'GLOBAL', 'NORMAL')
+            Tabla.AddFunction(FuncionDeclarada, AuxList[1], address,parametros,cont-1)
+            Tabla.SetCurrentFunction(FuncionDeclarada)
+
 def p_declaracion_funciones_aux2(p):
     '''
     declaracion_funciones_aux2 : VOID
@@ -803,7 +990,6 @@ def p_regreso(p):
     '''
     global FuncionDeclarada
     tipo = Tabla.GetFunctionAttribute(FuncionDeclarada, 'Type')
-    
 
     if len(p) > 1:
         if tipo == 'void':
@@ -820,13 +1006,17 @@ def p_declaracion_var(p):
     '''
     declaracion_var : declaracion_var_aux
     '''
+    if Tabla.Scope == 'class':
+        Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     p[0] = None
 def p_declaracion_var_aux(p):
     '''
-    declaracion_var_aux : PETITE declaracion_var_aux2 assignAddress declaracion_var
+    declaracion_var_aux : PETITE declaracion_var_aux2 assignAddress declaracion_var 
     |
     '''
 
+
+    p[0] = None
 def p_assignAddress(p):
     # Funcion que asigna los espacios de memoria faltantes en caso de ser un array o matriz
     '''
@@ -835,11 +1025,13 @@ def p_assignAddress(p):
     global sizeVar
     
     # Se ignora el primer espacio ya que fue asignado al momento de guardar la variable por primera vez
+    print(contVarLocal)
     if Tabla.Scope != 'class':
         for i in range(1, sizeVar):
+            print('entro')
             agregarContVarFunciones(AuxList[1],'NORMAL')
             address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
-    
+        
     p[0] = None
 def p_declaracion_var_aux2(p):
     '''
@@ -857,15 +1049,22 @@ def p_idChecker(p):
     global atributos
 
     sizeVar = 1
-    
     if Tabla.CheckIfVariableExists(p[1],Location):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
         if Tabla.Scope == 'class':
-            DeclVar = p[1]
-            atributos = atributos + 1
-            address = atributos
-            Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
+            if(AuxList[1] == 'list_int' or AuxList[1] == 'list_bool' or AuxList[1] == 'list_float'):
+                DeclVar = p[1]
+                address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
+                agregarContVarFunciones(AuxList[1],'NORMAL',sizeVar)
+                Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
+
+            
+            else:
+                DeclVar = p[1]
+                atributos = atributos + 1
+                address = atributos
+                Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
         else:
             DeclVar = p[1]
             address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
@@ -883,6 +1082,9 @@ def p_declaracion_var_aux5(p):
     declaracion_var_aux5 : L_CORCHETE save_size R_CORCHETE declaracion_var_aux7
     |
     '''
+   
+    if Tabla.Scope == 'class' and Location == 'class':
+        raise ErrorMsg('no se pueden declarar arreglos como atributos de objetos')
     p[0] = None
 
 def p_save_size(p):
@@ -925,6 +1127,10 @@ def p_instancear_objetos(p):
 
     '''
     
+    if Tabla.Scope == 'class':
+        raise ErrorMsg('No se puede declarar objetos dentro de funciones en clases')
+    if p[1] == p[4]:
+        raise ErrorMsg('El objeto no puede tener el mismo nombre que una clase')
 
     clase = p[4]
     objeto = p[1]
@@ -966,6 +1172,14 @@ def p_variable_aux2(p):
             address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
             values.push(address)
             tipos.push(Tabla.GetAttributeForParameters(p[1], 'Type',Location))
+        elif not Tabla.CheckIfAtributeExistsInFather(p[1],Location):
+            clasePadre = Tabla.GetClassAtribute(Tabla.CurrentClass,'Padre')
+            tempClass = Tabla.CurrentClass
+            Tabla.SetClass(clasePadre)
+            address = Tabla.GetAttributeFromFather(p[1],'Address',Location)
+            values.push(address)
+            tipos.push(Tabla.GetAttributeFromFather(p[1], 'Type',Location))
+            Tabla.SetClass(tempClass)
         else :
             raise ErrorMsg('No existe la variable ' + p[1])
     p[0] = None
@@ -979,9 +1193,17 @@ def p_variable_aux(p):
 
 def p_tipo_especial(p):
     '''
-    tipo_especial : FILA
+    tipo_especial : LIST INT
+    | LIST FLOAT
+    | LIST BOOL
     '''
-    AuxList[1] = p[1]
+    if(p[2] == 'int'):
+        AuxList[1] = 'list_int'
+    elif(p[2] == 'float'):
+        AuxList[1] = 'list_float'
+    else:
+        AuxList[1] = 'list_bool'
+
     p[0] = None
 def p_tipo_retorno(p):
     '''
@@ -1000,6 +1222,9 @@ def p_arreglo(p):
     '''
     arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
+
+    
+        
     dirBase = Tabla.GetAttribute( lastVar, 'Address', Location)
     popper.push('+')
 
@@ -1009,6 +1234,10 @@ def p_arreglo(p):
 
     GenerarCuadruploDeOperador(popper,values,tipos)
     fix = values.pop()
+    if  Tabla.CheckIfVariableExists(lastVar,Location):
+        tipos.push(Tabla.GetAttribute(lastVar, 'Type',Location))
+    else:
+       raise ErrorMsg ('No existe la variable: ' + lastVar)
     values.push('('+str(fix)+')')
 
     
@@ -1019,6 +1248,8 @@ def p_startArray(p):
     '''
     global lastVar
     lastVar = p[1]
+    
+   
     popper.push('(')
     p[0]= None
 def p_checkLimits(p):
@@ -1187,6 +1418,8 @@ def p_factor(p):
     | CTEI
     | CTEF
     | CTES
+    | TRUE
+    | FALSE
     '''
     if p[1] != '(':
         if isinstance(p[1],int):
@@ -1197,9 +1430,10 @@ def p_factor(p):
             tipos.push('float')
             address = Constantes.GetMemoryAddress(float(p[1]), 'float')
             values.push(address)
-        elif isinstance(p[1],str) and len(p[1]) == 3 :
+        elif isinstance(p[1],str):
             tipos.push('string')
-            address = Constantes.GetMemoryAddress(str(p[1]), 'string')
+            string = p[1][1:-1]
+            address = Constantes.GetMemoryAddress(str(string), 'string')
             values.push(address)
     p[0] = None
 def p_factor_aux(p):
@@ -1268,6 +1502,7 @@ def GenerarNuevoTemporal(tipo):
     addressTemporal = memoria.AssignMemoryAddress(tipo,Scope[0],'TEMPORAL')
     Temporales.append(addressTemporal)
     tipos.push(tipo)
+    return addressTemporal
 
 def Fill(cuarteto, llenado):
     global Cuartetos
@@ -1279,29 +1514,29 @@ def agregarContVarFunciones(type,location,size=1):
             contVarLocal[0]  = contVarLocal[0] + size
         elif(type == 'float'):
             contVarLocal[1]  = contVarLocal[1] + size
-        elif(type == 'char'):
-            contVarLocal[2]  = contVarLocal[2] + size
         elif(type == 'bool'):
+            contVarLocal[2]  = contVarLocal[2] + size
+        elif(type == 'list_int'):
             contVarLocal[3]  = contVarLocal[3] + size
-        elif(type == 'ListInt'):
+        elif(type == 'list_float'):
             contVarLocal[4]  = contVarLocal[4] + size
-        elif(type == 'ListBool'):
-            contVarLocal[5]  = contVarLocal[6] + size
-        elif(type == 'ListFloat'):
-            contVarLocal[6]  = contVarLocal[6] + size
+        elif(type == 'list_bool'):
+            contVarLocal[5]  = contVarLocal[5] + size
     else:
         if(type == 'int'):
-            contVarLocal[7]  = contVarLocal[7] + size 
+            contVarLocal[6]  = contVarLocal[6] + size 
         elif(type == 'float'):
-            contVarLocal[8]  = contVarLocal[8] + size 
+            contVarLocal[7]  = contVarLocal[7] + size 
         elif(type == 'bool'):
-             contVarLocal[9]  = contVarLocal[9] + size
+             contVarLocal[8]  = contVarLocal[8] + size
         
     
 def resetConVarFunciones():
     global contVarLocal
+    global Temporales
     contVarLocal.clear()
-    contVarLocal = [0]*11
+    contVarLocal = [0]*9
+
     
 def getContVarFunciones(type,location):
     if location == 'NORMAL':
@@ -1309,23 +1544,21 @@ def getContVarFunciones(type,location):
                 return contVarLocal[0] 
         elif(type == 'float'):
                 return contVarLocal[1]  
-        elif(type == 'char'):
-                return contVarLocal[2] 
         elif(type == 'bool'):
-                return contVarLocal[3] 
-        elif(type == 'ListInt'):
-                return contVarLocal[4]  
-        elif(type == 'ListBool'):
-                return  contVarLocal[5]  
-        elif(type == 'ListFloat'):
-                return contVarLocal[6] 
+                return contVarLocal[2] 
+        elif(type == 'list_int'):
+                return contVarLocal[3]  
+        elif(type == 'list_float'):
+                return  contVarLocal[4]  
+        elif(type == 'list_bool'):
+                return contVarLocal[5] 
     else:
         if(type == 'int'):
-            return contVarLocal[7]  
+            return contVarLocal[6]  
         elif(type == 'float'):
-            return contVarLocal[8]   
+            return contVarLocal[7]   
         elif(type == 'bool'):
-            return contVarLocal[9]  
+            return contVarLocal[8]  
 
 
 # crear el parser

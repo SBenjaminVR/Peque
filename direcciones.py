@@ -24,9 +24,6 @@ class DireccionesMemoria:
         self.INT_LOCAL_TEMPORAL = 18000
         self.FLOAT_LOCAL_TEMPORAL = 19000
         self.BOOL_LOCAL_TEMPORAL = 20000
-        self.LIST_INT_LOCAL_TEMPORAL = 21000 
-        self.LIST_FLOAT_LOCAL_TEMPORAL = 22000
-        self.LIST_BOOL_LOCAL_TEMPORAL = 23000
         
         self.INT_CONSTANTE = 25000
         self.FLOAT_CONSTANTE = 26000
