@@ -139,6 +139,8 @@ class VirtualMachine():
     def ProcessPLUS(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
+        
+        
         print(str(iz) + ' + ' + str(de))
         self.memory.SetValue(result, iz + de, functions.top())
     
