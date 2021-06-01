@@ -25,7 +25,10 @@ reserved = {
     'to' : 'TO',
     'main': 'MAIN',
     'new' : 'NEW',
-    'lista' : 'LISTA'
+    'list' : 'LIST',
+    'false' : 'FALSE',
+    'true' :'TRUE'
+
 }
 #--------------------------------------- Tokens---------------------------------------
 

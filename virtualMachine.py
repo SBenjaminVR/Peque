@@ -289,12 +289,24 @@ class VirtualMachine():
             raise ErrorMsg('Se esta tratando de acceder a una casilla sin valor')
 
     def GetNextAvailableSpaceOfList(self, baseAddress):
+        # TO DO: Tirar error si todos estan ocupados
         c = 0
         res = self.memory.GetValue(baseAddress + c, functions.top())
-        while res != None:
+        while res != None and c < 99:
             c = c + 1
             res = self.memory.GetValue(baseAddress + c, functions.top())
         return c
+
+    def GetLastAvailableSpaceOfList(self, baseAddress):
+        # TO DO: Tirar error si estan todos vacios
+        res = self.memory.GetValue(baseAddress, functions.top())
+        if res != None:
+            c = 0
+            while res != None and c < 99:
+                res = self.memory.GetValue(baseAddress + c, functions.top())
+            return c
+        else:
+            raise ErrorMsg('Se esta tratando de hacer pop() de una lista vacia')
 
     def IsString(self, var):
         if isinstance(var, str):

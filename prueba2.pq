@@ -1,33 +1,23 @@
 programa prueba;
 
-peque animal {
-    petite int genero
-}
 
-peque marmota {
-    petite int nombre
 
-    mini float suma(float a) {
-        return nombre + a
-    }
-}
-peque mago  {
-    petite int nombre
-
-}
-mini int abc() {
-    return 2
-}
 
 main(){
-    petite float calamardo
-    print("Declarando un objeto")
-    print(abc())
-    print(2 + 3)
-    perry = new marmota
-    perry.nombre = 2
-    calamardo = perry.suma(3.1)
-    
+    petite int calamardo
+    petite int jose[3][3]
+    petite int miguel[3][3]
+    petite int prueba[4]
 
-    # jose->find(4)
+    petite int i
+    petite int x
+    i = 0
+
+    for(i to 3,1)
+    {
+        prueba[i] = i
+        print(prueba[i])
+
+    }
+
 }
