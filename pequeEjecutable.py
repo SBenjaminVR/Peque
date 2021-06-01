@@ -11,10 +11,18 @@ Data = {
 }
 
 def main(argv):
-    fileData = Path(argv[1]).read_text()
-    py.parser.parse(fileData)
-    vm = VirtualMachine(Data)
-    vm.run()
+    if checkIfFileIsDOTPQ(argv[1]):
+        fileData = Path(argv[1]).read_text()
+        py.parser.parse(fileData)
+        vm = VirtualMachine(Data)
+        vm.run()
+    else:
+        print('El archivo no tiene una extension .pq')
     
+def checkIfFileIsDOTPQ(file):
+    extension = file[-3:]
+    return extension == '.pq'
+
+
 if __name__ == '__main__':
     main(sys.argv)

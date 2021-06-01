@@ -290,11 +290,22 @@ class VirtualMachine():
         lista.sort()
         current = 0
         for i in range(address, address + lastAvailable):
-            lista.append(self.memory.SetValue(i, lista[current], functions.top()))
+            self.memory.SetValue(i, lista[current], functions.top())
             current = current + 1
 
     def ProcessFIND(self, address, val, tempAddress):
-        print('NOT YET IMPLEMENTED')
+        lastAvailable = self.GetNextAvailableSpaceOfList(address)
+        value = self.GetValueInsideValueIfParenthesis(val)
+        spot = -1
+        number = 0
+        for i in range(address, address + lastAvailable):
+            current = self.memory.GetValue(i, functions.top())
+            if current == value:
+                spot = number
+                break
+            number = number + 1
+        self.memory.SetValue(tempAddress, spot, functions.top())
+        
 
     def ProcessHEAD(self, address, tempAddress):
         lastAvailable = self.GetLastAvailableSpaceOfList(address)
