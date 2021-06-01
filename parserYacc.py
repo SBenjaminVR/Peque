@@ -200,24 +200,18 @@ def p_listas(p):
         val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('FIND',address,val,addressTemp)
-        addressTemp = GenerarNuevoTemporal(tipo)
-        CrearCuadruplo('FIND',address,val,addressTemp)
     #------------------Head---------------------#
     elif p[3] == 'head':
         if(len(p) > 6):
             raise ErrorMsg(p[3] + ' no debe tener argumetos')
-        
-        val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('HEAD',address,'_',addressTemp)
     #------------------Tail---------------------#
     elif p[3] == 'tail':
         if(len(p) > 6):
             raise ErrorMsg(p[3] + ' no debe tener argumetos')
-       
-        val = values.pop()
         addressTemp = GenerarNuevoTemporal(tipo)
-        CrearCuadruplo('TAIL',address,val,addressTemp)
+        CrearCuadruplo('TAIL',address,'_',addressTemp)
     #------------------Key---------------------#
     elif p[3] == 'key':
         if(len(p) <= 6):
