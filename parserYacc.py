@@ -292,7 +292,7 @@ def p_for_revision(p):
     #chechar por las variables y expresiones
     if tipos.top() != 'int':
         raise ErrorMsg('se esperaba un tipo int or float en la expresion del for')
-    popper.push('>=')
+    popper.push('<=')
     GenerarCuadruploDeOperador(popper,values,tipos)
     Saltos.append(cont)
     CrearCuadruplo('GOTOF',values.pop(),'_','_')

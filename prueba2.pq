@@ -1,37 +1,23 @@
 programa prueba;
 
-peque animal {
-    
 
-}
 
-peque marmota agranda animal {
-    petite float nombre
-    mini void car()
-    {
-        petite float arr[3][3]
-        arr[1][2] = 1.0
-
-    }
- 
-}
-
-mini int car(int a, int b)
-    {
-        petite float miguel[3][3]
-        miguel[1][2] = 1.0
-
-        return miguel[1][2]
-    }
 
 main(){
-    petite float calamardo
- 
-    perry = new marmota
+    petite int calamardo
     petite int jose[3][3]
-    print(perry.nombre)
-    jose[1][2] = 2
+    petite int miguel[3][3]
+    petite int prueba[4]
 
+    petite int i
+    petite int x
+    i = 0
+
+    for(i to 3,1)
+    {
+        prueba[i] = i
+        print(prueba[i])
+
+    }
     
-    calamardo = perry.nombre
 }

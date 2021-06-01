@@ -44,7 +44,7 @@ main()
     petite float b[8]
     
     petite int c[4][4]
-    petite int pito
+    
 
     jose = new micola
     pito = new micola
