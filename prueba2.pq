@@ -5,11 +5,10 @@ peque animal {
 
 }
 
-peque marmota agranda animal {
+peque marmota {
     petite int nombre
 
     mini float suma(float a) {
-        nombre = 2
         return nombre + a
     }
 }
@@ -22,9 +21,11 @@ main(){
     petite float calamardo
     print("Declarando un objeto")
     print(abc())
+    print(2 + 3)
     perry = new marmota
+    perry.nombre = 2
     calamardo = perry.suma(3.1)
-    print(calamardo)
+    
 
     # jose->find(4)
 }

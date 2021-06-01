@@ -83,7 +83,6 @@ class VirtualMachine():
 
             elif operation == 16:
                 self.ProcessERA(iz, res)
-                functions
 
             elif operation == 17:
                 self.ProcessGOSUB(iz, de)
@@ -124,26 +123,26 @@ class VirtualMachine():
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
         print(str(iz) + ' + ' + str(de))
-        self.memory.SetValue(result, iz + de)
+        self.memory.SetValue(result, iz + de, functions.top())
     
     def ProcessMINUS(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
         print(str(iz) + ' - ' + str(de))
-        self.memory.SetValue(result, iz - de)
+        self.memory.SetValue(result, iz - de, functions.top())
 
     def ProcessTIMES(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz * de)
+        self.memory.SetValue(result, iz * de, functions.top())
 
     def ProcessDIVIDE(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
         if self.IsInt(iz) and self.IsInt(de):
-            self.memory.SetValue(result, iz // de)
+            self.memory.SetValue(result, iz // de, functions.top())
         else:
-            self.memory.SetValue(result, iz / de)
+            self.memory.SetValue(result, iz / de, functions.top())
 
     def ProcessASSIGN(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
@@ -151,53 +150,53 @@ class VirtualMachine():
         if not isinstance(result, int):
             if result[0] == '(':
                 result = result[1:-1]
-                res = self.memory.GetValue(int(result))
+                res = self.memory.GetValue(int(result), functions.top())
             else:
                 res = result.split('.')
         else:
             res = int(result)
-        self.memory.SetValue(res, iz)
+        self.memory.SetValue(res, iz, functions.top())
         
 
     def ProcessBIGGER(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz > de)
+        self.memory.SetValue(result, iz > de, functions.top())
     
     def ProcessLESS(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz < de)
+        self.memory.SetValue(result, iz < de, functions.top())
 
     def ProcessBIGGER_EQUAL(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz >= de)
+        self.memory.SetValue(result, iz >= de, functions.top())
 
     def ProcessLESS_EQUAL(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz <= de)
+        self.memory.SetValue(result, iz <= de, functions.top())
 
     def ProcessEQUAL(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz == de)
+        self.memory.SetValue(result, iz == de, functions.top())
 
     def ProcessDIFFERENT(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz != de)
+        self.memory.SetValue(result, iz != de, functions.top())
 
     def ProcessAND(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz and de)
+        self.memory.SetValue(result, iz and de, functions.top())
 
     def ProcessOR(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        self.memory.SetValue(result, iz or de)
+        self.memory.SetValue(result, iz or de, functions.top())
 
     def IsGOTOF(self, left):
         value = self.GetValueInsideValueIfParenthesis(left)
@@ -213,10 +212,12 @@ class VirtualMachine():
 
     def ProcessGOSUB(self, left, right):
         if right != '_':
-            address = self.memory.directory.GetObjectAddress(right, left)
-        else:
-            address = self.memory.directory.GetFunctionAddress(left)
-        functions.push({'Name': left, 'Address': address})
+            obj = self.memory.directory.Objetos[right].get('Address')
+        else: 
+            obj = '_'
+        address = self.memory.directory.GetObjectAddress(left, right)
+        functions.push({'Name': left, 'Address': address, 'Object': obj})
+        functions.printStack()
         self.memory.MountNewLocalMemory(NewLocalMemory.pop())
 
     def ProcessPARAMETRO(self, left, result):
@@ -229,7 +230,7 @@ class VirtualMachine():
         value = self.GetValueInsideValueIfParenthesis(res)
         currentFunction = functions.top()
         address = currentFunction.get('Address')
-        self.memory.SetValue(address, value)
+        self.memory.SetValue(address, value, functions.top())
 
     def ProcessENDPROC(self):
         functions.pop()
@@ -250,7 +251,7 @@ class VirtualMachine():
     def ProcessINPUT(self, left):
         userInput = int(input())
         print('Asignando ' + str(userInput) + ' en direccion ' + str(left))
-        self.memory.SetValue(left, userInput)
+        self.memory.SetValue(left, userInput, functions.top())
 
     def ProcessEND(self):
         print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
@@ -258,21 +259,21 @@ class VirtualMachine():
     def ProcessAPPEND(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         available = self.GetNextAvailableSpaceOfList(result)
-        self.memory.SetValue(result + available, iz)
+        self.memory.SetValue(result + available, iz, functions.top())
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):
-            current = self.memory.GetValue(value)
+            current = self.memory.GetValue(value, functions.top())
         else:
             #Se quitan los parentesis y se accede al primer valor
             if value[0] == '(':
                 value = value[1:-1]
-                aux = self.memory.GetValue(int(value))
+                aux = self.memory.GetValue(int(value), functions.top())
             else:
                 # Entonces detectamos que se esta accediendo a un parametro de un objeto
                 aux = value.split('.')
-            current = self.memory.GetValue(aux)
-
+            print(aux)
+            current = self.memory.GetValue(aux, functions.top())
         # Se checa que no se este tratando de acceder a una casilla vacia
         if current != None:
             return current
@@ -281,10 +282,10 @@ class VirtualMachine():
 
     def GetNextAvailableSpaceOfList(self, baseAddress):
         c = 0
-        res = self.memory.GetValue(baseAddress + c)
+        res = self.memory.GetValue(baseAddress + c, functions.top())
         while res != None:
             c = c + 1
-            res = self.memory.GetValue(baseAddress + c)
+            res = self.memory.GetValue(baseAddress + c, functions.top())
         return c
 
     def IsString(self, var):

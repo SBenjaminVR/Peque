@@ -200,11 +200,7 @@ class Directory():
         if self.Scope == 'class':
             self.Clases[self.CurrentClass]['Funciones'][name].update(newVal)
         else:
-
-            
             self.Funciones[name].update(newVal)
-            
-
             
     def updateHerencia(self,clase,padre):
         referencia = {'Padre' : padre}
@@ -217,29 +213,27 @@ class Directory():
     def ClassAtribute(self,clase,name):
         return self.Clases[clase].get(name)
 
-    def GetObjectAddress(self, name, function):
-        currentClass = self.Objetos.get(name).get('Clase')
-        foundFunction = False
-        while not foundFunction:
-            if self.Clases[currentClass]['Funciones'].get(function) != None:
-                foundFunction = True
-            else:
-                currentClass = self.Clases[currentClass].get('Padre')
-        return self.Clases[currentClass]['Funciones'][function].get('Address')
+    def GetObjectAddress(self, function, objeto):
+        if objeto != '_':
+            return self.GetAttributeOfFunctionInObject(function, objeto, 'Address')
+        else:
+            return self.Funciones[function].get('Address')
     
     def GetFunctionAddress(self, name):
         return self.Funciones.get(name).get('Address')
 
     def GetFunctionSpace(self, function, objeto):
         if objeto != '_':
-            currentClass = self.Objetos.get(objeto).get('Clase')
-            foundFunction = False
-            while not foundFunction:
-                if self.Clases[currentClass]['Funciones'].get(function) != None:
-                    foundFunction = True
-                else:
-                    currentClass = self.Clases[currentClass].get('Padre')
-            print(self.Clases[currentClass]['Funciones'])
-            return self.Clases[currentClass]['Funciones'][function].get('Space')
+            return self.GetAttributeOfFunctionInObject(function, objeto, 'Space')
         else:
             return self.Funciones[function].get('Space')
+
+    def GetAttributeOfFunctionInObject(self, function, objeto, attribute):
+        currentClass = self.Objetos.get(objeto).get('Clase')
+        foundFunction = False
+        while not foundFunction:
+            if self.Clases[currentClass]['Funciones'].get(function) != None:
+                foundFunction = True
+            else:
+                currentClass = self.Clases[currentClass].get('Padre')
+        return self.Clases[currentClass]['Funciones'][function].get(attribute)
