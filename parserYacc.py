@@ -407,13 +407,14 @@ def p_leeInput(p):
     leeInput : empty
     '''
     res = values.pop()
-    tipos.pop()
-    CrearCuadruplo('INPUT',res,'_','_')
+    
+    CrearCuadruplo('INPUT',res,tipos.pop(),'_')
     p[0] = None
 def p_input_aux2(p):
     '''
     input_aux2 : variable
     | arreglo
+    | atributo
     '''
 
     p[0] = None
