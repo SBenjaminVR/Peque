@@ -204,14 +204,12 @@ def p_listas(p):
     elif p[3] == 'head':
         if(len(p) > 6):
             raise ErrorMsg(p[3] + ' no debe tener argumetos')
-        
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('HEAD',address,'_',addressTemp)
     #------------------Tail---------------------#
     elif p[3] == 'tail':
         if(len(p) > 6):
             raise ErrorMsg(p[3] + ' no debe tener argumetos')
-       
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('TAIL',address,'_',addressTemp)
     #------------------Key---------------------#

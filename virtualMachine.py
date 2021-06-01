@@ -295,9 +295,9 @@ class VirtualMachine():
         print('HEAD: ' + str(value))
 
     def ProcessTAIL(self, address, tempAddress):
-        value = self.memory.GetValue(address + lastAvailable, functions.top())
+        value = self.memory.GetValue(address, functions.top())
         self.memory.SetValue(tempAddress, value, functions.top())
-        print('HEAD: ' + str(value))
+        print('TAIL: ' + str(value))
 
     def ProcessKEY(self, address, val, tempAddress):
         print('NOT YET IMPLEMENTED')
