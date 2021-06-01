@@ -593,6 +593,7 @@ def p_print_var_aux2(p):
     '''
     print_var_aux2 : llamada 
     | expresion
+    | atributo
     '''
     
     p[0] = None
