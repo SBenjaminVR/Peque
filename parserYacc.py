@@ -322,7 +322,7 @@ def p_for_final(p):
     Saltos.pop()
     Ret = Saltos[-1]
     Saltos.pop()
-    CrearCuadruplo('GOTO','_','_',Ret)
+    CrearCuadruplo('GOTO','_','_',Ret+1)
     Fill(falseJump,cont)
 
     
