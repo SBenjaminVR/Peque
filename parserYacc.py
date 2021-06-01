@@ -617,6 +617,7 @@ def p_print_var_aux2(p):
     print_var_aux2 : llamada 
     | expresion
     | atributo
+    | listas
     '''
     
     p[0] = None
@@ -1399,6 +1400,8 @@ def p_factor(p):
     | CTEI
     | CTEF
     | CTES
+    | TRUE
+    | FALSE
     '''
     if p[1] != '(':
         if isinstance(p[1],int):
