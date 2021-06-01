@@ -7,6 +7,7 @@ def InsertAddresses(local, number, base):
     return local
 
 def AssignLocalStorage(local, number, option):
+    print(number)
     if option == 0:
         return InsertAddresses(local, number, Dir.INT_LOCAL)
     if option == 1:
@@ -14,18 +15,18 @@ def AssignLocalStorage(local, number, option):
     if option == 2:
         return InsertAddresses(local, number, Dir.BOOL_LOCAL)
     if option == 3:
-        return InsertAddresses(local, number, Dir.LIST_INT_LOCAL)
+        return InsertAddresses(local, number*100, Dir.LIST_INT_LOCAL)
     if option == 4:
-        return InsertAddresses(local, number, Dir.LIST_FLOAT_LOCAL)
+        return InsertAddresses(local, number*100, Dir.LIST_FLOAT_LOCAL)
     if option == 5:
-        return InsertAddresses(local, number, Dir.LIST_BOOL_LOCAL)
+        return InsertAddresses(local, number*100, Dir.LIST_BOOL_LOCAL)
     if option == 6:
         return InsertAddresses(local, number, Dir.INT_LOCAL_TEMPORAL)
     if option == 7:
         return InsertAddresses(local, number, Dir.FLOAT_LOCAL_TEMPORAL)
     if option == 8:
         return InsertAddresses(local, number, Dir.BOOL_LOCAL_TEMPORAL)
-        
+
 class LocalMemory():
     def __init__(self, space):
         self.local = {}
