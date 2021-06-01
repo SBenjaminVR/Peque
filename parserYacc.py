@@ -893,7 +893,8 @@ def p_funciones_end(p):
     funciones_end : empty
     '''
     #Guarda contador de variables
-    Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
+    if Tabla.Scope == 'class':
+        Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     CrearCuadruplo('END PROC','_','_','_')
     global Location
     Location = LocationTemp
@@ -978,7 +979,8 @@ def p_declaracion_var(p):
     '''
     declaracion_var : declaracion_var_aux
     '''
-    Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
+    if Tabla.Scope == 'class':
+        Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     p[0] = None
 def p_declaracion_var_aux(p):
     '''
