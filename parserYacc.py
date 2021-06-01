@@ -14,6 +14,7 @@ Scope = ['GLOBAL']
 parametros = {}
 sizeVar = 1
 contVarLocal = [0]*9
+LocationTemp = 'class'
 Location = 'class'
 
 paramChecktype = []
@@ -383,6 +384,7 @@ def p_leeInput(p):
     leeInput : empty
     '''
     res = values.pop()
+    tipos.pop()
     CrearCuadruplo('INPUT',res,'_','_')
     p[0] = None
 def p_input_aux2(p):
@@ -583,6 +585,7 @@ def p_finalVar(p):
     finalVar : empty
     '''
     res = values.pop()
+    tipos.pop()
     CrearCuadruplo('PRINT',res,'_','_')
     p[0] = None
 
@@ -608,6 +611,12 @@ def p_igualdadAtr(p):
     '''
     iz = values.pop()
     res = values.pop()
+
+    tipo1 = tipos.pop()
+    tipo2 = tipos.pop()
+
+    if tipo1 != tipo2:
+        raise ErrorMsg('Error: No se pueden asignar '+ tipo1 + ' a un tipo ' + tipo2)
     
     CrearCuadruplo('=', iz, '_', res)
     p[0] = None
@@ -664,8 +673,15 @@ def p_igualdadArr(p):
     '''
     igualdadArr : arreglo EQUALS asignacion_aux
     '''
+
     iz = values.pop()
     res = values.pop()
+    
+    tipo1 = tipos.pop()
+    tipo2 = tipos.pop()
+    print(tipo1, ' ', tipo2)
+    if tipo1 != tipo2:
+        raise ErrorMsg('Error: No se pueden asignar '+ tipo1 + ' a un tipo ' + tipo2)
 
     CrearCuadruplo(p[2], iz, '_', res)
     p[0] = None
@@ -673,14 +689,21 @@ def p_igualdadVar(p):
     '''
     igualdadVar : ID EQUALS asignacion_aux
     '''
+
     if Tabla.CheckIfVariableExists(p[1],Location) :
         iz = values.pop()
+        tipo = tipos.pop()
+        if tipo != Tabla.GetAttribute(p[1],'Type',Location):
+            raise ErrorMsg('Error: No se pueden asignar a: ' + p[1] + ' el tipo ' + tipo + ' ya que es de tipo ' + Tabla.GetAttribute(p[1],'Type',Location) )
         address = Tabla.GetAttribute(p[1],'Address',Location)
         CrearCuadruplo(p[2], iz, '_',address )
 
     else:
         if Tabla.CheckIfFunctExistInAtribute(p[1],Location):
             iz = values.pop()
+            tipo = tipos.pop()
+            if tipo != Tabla.GetAttributeForParameters(p[1],'Type',Location):
+                raise ErrorMsg('Error: No se pueden asignar a ' + p[1] + ' el tipo ' + tipo + ' ya que es de tipo ' + Tabla.GetAttributeForParameters(p[1],'Type',Location) )
             address = Tabla.GetAttributeForParameters(p[1],'Address',Location)
             CrearCuadruplo(p[2], iz, '_',address )
         else:
@@ -713,7 +736,6 @@ def p_rp_seen(p):
     '''
     #guardamos direccion del primer salto
     result = Temporales[-1]
-    print(tipos)
     if tipos.top() != 'bool':
         raise ErrorMsg('Se esperaba un tipo bool en el if')
     CrearCuadruplo('GOTOF',result,'_','_')
@@ -836,6 +858,9 @@ def p_herencia(p):
     herencia : AGRANDA ID
     '''
     global atributos
+
+    if claseDeclarada == p[2]:
+        raise ErrorMsg('No puede haber herencia entre si mismo: ' + p[2])
     if Tabla.CheckIfClassExists(p[2]):
         Tabla.updateHerencia(claseDeclarada,p[2])
         size = Tabla.ClassAtribute(p[2],'Space')
@@ -871,7 +896,7 @@ def p_funciones_end(p):
     Tabla.updateClassAtribute(claseDeclarada,'Space',atributos)
     CrearCuadruplo('END PROC','_','_','_')
     global Location
-    Location = Tabla.Scope
+    Location = LocationTemp
     
     p[0]= None
 def p_declaracion_funciones_aux(p):
@@ -880,6 +905,8 @@ def p_declaracion_funciones_aux(p):
     |
     '''
     global Location
+    global LocationTemp
+    LocationTemp = Location
     Location = 'function'
     p[0] = None
 def p_save_variables(p):
@@ -887,7 +914,6 @@ def p_save_variables(p):
     save_variables : empty
     '''
     global FuncionDeclarada
-    print(atributos)
     Tabla.updateFunctionAttribute(FuncionDeclarada,'Space',contVarLocal.copy())
     Tabla.updateFunctionAttribute(FuncionDeclarada,'Parametros',parametros.copy())
     p[0]= None
@@ -996,7 +1022,6 @@ def p_idChecker(p):
     if Tabla.CheckIfVariableExists(p[1],Location):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
-        print('entro a scope ' , Tabla.CurrentClass)
         if Tabla.Scope == 'class':
             DeclVar = p[1]
             atributos = atributos + 1
@@ -1020,6 +1045,9 @@ def p_declaracion_var_aux5(p):
     declaracion_var_aux5 : L_CORCHETE save_size R_CORCHETE declaracion_var_aux7
     |
     '''
+   
+    if Tabla.Scope == 'class' and Location == 'class':
+        raise ErrorMsg('no se pueden declarar arreglos como atributos de objetos')
     p[0] = None
 
 def p_save_size(p):
@@ -1062,7 +1090,10 @@ def p_instancear_objetos(p):
 
     '''
     
-    
+    if Tabla.Scope == 'class':
+        raise ErrorMsg('No se puede declarar objetos dentro de funciones en clases')
+    if p[1] == p[4]:
+        raise ErrorMsg('El objeto no puede tener el mismo nombre que una clase')
 
     clase = p[4]
     objeto = p[1]
@@ -1117,9 +1148,9 @@ def p_variable_aux(p):
 
 def p_tipo_especial(p):
     '''
-    tipo_especial : LISTA INT
-    | LISTA FLOAT
-    | LISTA BOOL
+    tipo_especial : LIST INT
+    | LIST FLOAT
+    | LIST BOOL
     '''
     if(p[2] == 'int'):
         AuxList[1] = 'list_int'
@@ -1146,6 +1177,9 @@ def p_arreglo(p):
     '''
     arreglo : startArray L_CORCHETE expresion R_CORCHETE checkLimits arreglo2
     '''
+
+    
+        
     dirBase = Tabla.GetAttribute( lastVar, 'Address', Location)
     popper.push('+')
 
@@ -1155,6 +1189,10 @@ def p_arreglo(p):
 
     GenerarCuadruploDeOperador(popper,values,tipos)
     fix = values.pop()
+    if  Tabla.CheckIfVariableExists(lastVar,Location):
+        tipos.push(Tabla.GetAttribute(lastVar, 'Type',Location))
+    else:
+       raise ErrorMsg ('No existe la variable: ' + lastVar)
     values.push('('+str(fix)+')')
 
     
@@ -1165,6 +1203,8 @@ def p_startArray(p):
     '''
     global lastVar
     lastVar = p[1]
+    
+   
     popper.push('(')
     p[0]= None
 def p_checkLimits(p):

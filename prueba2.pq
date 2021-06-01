@@ -1,38 +1,37 @@
 programa prueba;
 
 peque animal {
-    petite int genero
-    mini float resta(float a) {
-      
-        return genero - 2
-    }
+    
+
 }
 
 peque marmota agranda animal {
-    petite int nombre
+    petite float nombre
+    mini void car()
+    {
+        petite float arr[3][3]
+        arr[1][2] = 1.0
 
-    mini float suma(float a) {
-        nombre = 2
-        return nombre + a
     }
+ 
 }
-peque mago  {
-    petite int nombre
 
-}
-mini int abc() {
-    return 2
-}
+mini int car(int a, int b)
+    {
+        petite float miguel[3][3]
+        miguel[1][2] = 1.0
+
+        return miguel[1][2]
+    }
 
 main(){
     petite float calamardo
-    print("Declarando un objeto")
-    print(abc())
+ 
     perry = new marmota
-    calamardo = perry.genero
+    petite int jose[3][3]
+    
+    jose[1][2] = 2
 
-    calamardo = perry.resta(3.1)
-    print(calamardo)
-
-    # jose->find(4)
+    
+    calamardo = perry.nombre
 }
