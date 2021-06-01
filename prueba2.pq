@@ -2,7 +2,6 @@ programa prueba;
 
 peque animal {
     petite int genero
-
 }
 
 peque marmota {
@@ -12,7 +11,10 @@ peque marmota {
         return nombre + a
     }
 }
+peque mago  {
+    petite int nombre
 
+}
 mini int abc() {
     return 2
 }

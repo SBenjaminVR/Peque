@@ -31,6 +31,7 @@ class Directory():
             return parametros
            
 
+
         
     def CheckIfVariableExists(self, name,location):
         
@@ -237,3 +238,9 @@ class Directory():
             else:
                 currentClass = self.Clases[currentClass].get('Padre')
         return self.Clases[currentClass]['Funciones'][function].get(attribute)
+    
+    def GetFunctionAddress(self, name):
+        return self.Funciones.get(name).get('Address')
+
+    def GetClassAtribute(self, name,atr):
+        return self.Clases.get(name).get(atr)
