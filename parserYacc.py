@@ -176,7 +176,7 @@ def p_listas(p):
         typeCheckTemp = tipos.pop()
         typeCheckAns = 'list_' + typeCheckTemp
         if typeCheckAns != tipo :
-            raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
+            raise ErrorMsg(p[3] + ' el argumento debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
         CrearCuadruplo('APPEND',address,'_',values.pop())
     #------------------POP---------------------#
     elif p[3] == 'pop':
@@ -198,18 +198,37 @@ def p_listas(p):
             raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + tipo + ' se dio un tipo: ' + typeCheckAns)
         
         val = values.pop()
+        if(tipo == 'list_int'):
+            tipo ='int'
+        if(tipo == 'list_bool'):
+            tipo ='bool'
+        if(tipo == 'list_float'):
+            tipo ='float'
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('FIND',address,val,addressTemp)
     #------------------Head---------------------#
     elif p[3] == 'head':
         if(len(p) > 6):
             raise ErrorMsg(p[3] + ' no debe tener argumetos')
+        if(tipo == 'list_int'):
+            tipo ='int'
+        if(tipo == 'list_bool'):
+            tipo ='bool'
+        if(tipo == 'list_float'):
+            tipo ='float'
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('HEAD',address,'_',addressTemp)
     #------------------Tail---------------------#
     elif p[3] == 'tail':
         if(len(p) > 6):
             raise ErrorMsg(p[3] + ' no debe tener argumetos')
+        
+        if(tipo == 'list_int'):
+            tipo ='int'
+        if(tipo == 'list_bool'):
+            tipo ='bool'
+        if(tipo == 'list_float'):
+            tipo ='float'
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('TAIL',address,'_',addressTemp)
     #------------------Key---------------------#
@@ -222,6 +241,12 @@ def p_listas(p):
             raise ErrorMsg(p[3] + ' el argmuten debe ser un ' + 'int' + ' se dio un tipo: ' + typeCheckAns)
         
         val = values.pop()
+        if(tipo == 'list_int'):
+            tipo ='int'
+        if(tipo == 'list_bool'):
+            tipo ='bool'
+        if(tipo == 'list_float'):
+            tipo ='float'
         addressTemp = GenerarNuevoTemporal(tipo)
         CrearCuadruplo('KEY',address,val,addressTemp)
     else:
