@@ -1053,13 +1053,18 @@ def p_idChecker(p):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
         if Tabla.Scope == 'class':
-            
             if(AuxList[1] == 'list_int' or AuxList[1] == 'list_bool' or AuxList[1] == 'list_float'):
+                DeclVar = p[1]
+                address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
                 agregarContVarFunciones(AuxList[1],'NORMAL',sizeVar)
-            DeclVar = p[1]
-            atributos = atributos + 1
-            address = atributos
-            Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
+                Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
+
+            
+            else:
+                DeclVar = p[1]
+                atributos = atributos + 1
+                address = atributos
+                Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
         else:
             DeclVar = p[1]
             address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
