@@ -276,6 +276,7 @@ class VirtualMachine():
         print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
 
     def ProcessAPPEND(self, left, result):
+        print(self.memory.directory.Clases['canino']['Funciones']['suma']['Variables'])
         iz = self.GetValueInsideValueIfParenthesis(left)
         available = self.GetNextAvailableSpaceOfList(result)
         self.memory.SetValue(result + available, iz, functions.top())

@@ -1025,8 +1025,10 @@ def p_assignAddress(p):
     global sizeVar
     
     # Se ignora el primer espacio ya que fue asignado al momento de guardar la variable por primera vez
+    print(contVarLocal)
     if Tabla.Scope != 'class':
         for i in range(1, sizeVar):
+            print('entro')
             agregarContVarFunciones(AuxList[1],'NORMAL')
             address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
         
@@ -1051,10 +1053,12 @@ def p_idChecker(p):
         raise ErrorMsg('La variable ' + p[1] + ' ya habia sido declarada previamente')
     else:
         if Tabla.Scope == 'class':
+            
+            if(AuxList[1] == 'list_int' or AuxList[1] == 'list_bool' or AuxList[1] == 'list_float'):
+                agregarContVarFunciones(AuxList[1],'NORMAL',sizeVar)
             DeclVar = p[1]
             atributos = atributos + 1
             address = atributos
-            
             Tabla.AddVariable(DeclVar, AuxList[1], address, sizeVar,Location)
         else:
             DeclVar = p[1]

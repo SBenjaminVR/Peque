@@ -34,5 +34,4 @@ main() {
     camaleon.clasificacion = 6
     print(zury)
     print(camaleon.resta(3.0))
-    
 }
