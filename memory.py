@@ -7,16 +7,6 @@ Dir = DireccionesMemoria()
 def IsInLocalRange(address):
     return address >= Dir.INT_LOCAL and address <= Dir.BOOL_LOCAL_TEMPORAL
         
-def GetTypeOfValueGivenTheAddress(address):
-    if address < Dir.INT_GLOBAL_TEMPORAL:
-        return GetTypeGivenTheBase(address, 0)
-    elif address < Dir.INT_LOCAL:
-        return GetTypeGivenTheBase(address, 4000)
-    elif address < Dir.INT_LOCAL_TEMPORAL:
-        return GetTypeGivenTheBase(address, 8000)
-    elif address < Dir.INT_CONSTANTE:
-        return GetTypeGivenTheBase(address, 12000)
-
 def GetTypeOfConstantGivenTheAddress(address):
     if address < Dir.FLOAT_CONSTANTE:
         return 'int'
