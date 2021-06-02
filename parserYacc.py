@@ -65,20 +65,13 @@ Operadores = TablaOperaciones()
 
 def p_programa(p):
     '''
-    programa : PROGRAMA ID SEMICOLON scopeClases mainLol declaracion_clases scopeFunction declaracion_funciones scopeMain principal
+    programa : PROGRAMA ID SEMICOLON scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
     | PROGRAMA ID SEMICOLON
     '''
     CrearCuadruplo('END','_','_','_')
 
     #addScope(p[2])
     p[0] = None
-def p_mainLol(p):
-    '''
-    mainLol : empty
-    '''
-    CrearCuadruplo('GOTO','_','_','_')
-    p[0] = None
-
 
 def p_scopeClases(p):
     '''
