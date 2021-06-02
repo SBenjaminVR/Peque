@@ -434,7 +434,6 @@ def p_llamadaID(p):
         funct.push(p[3])
         funct.push(p[2])
     funct.push(p[1])
-    funct.printStack()
     p[0] = None
 def p_startCall(p):
     '''

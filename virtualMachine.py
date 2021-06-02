@@ -15,7 +15,6 @@ def GetQuadrupleValue(quadruple):
 
 class VirtualMachine():
     def __init__(self, data):
-        print('CREANDO LA VM')
         self.memory = Memory(data)
         self.start_time = time.time()
 
@@ -26,11 +25,8 @@ class VirtualMachine():
         current = 0
         quadruples = len(self.memory.quadruples)
         while current < quadruples:
-            print('A continuación el cuarteto #' +str(current))
             quadruple = self.memory.quadruples[current]
-            print(quadruple)
             operation = quadruple.get('op')
-
             iz, de, res = GetQuadrupleValue(quadruple)
 
             if operation == 1:
@@ -139,15 +135,11 @@ class VirtualMachine():
     def ProcessPLUS(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        
-        
-        print(str(iz) + ' + ' + str(de))
         self.memory.SetValue(result, iz + de, functions.top())
     
     def ProcessMINUS(self, left, right, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
         de = self.GetValueInsideValueIfParenthesis(right)
-        print(str(iz) + ' - ' + str(de))
         self.memory.SetValue(result, iz - de, functions.top())
 
     def ProcessTIMES(self, left, right, result):
@@ -165,7 +157,6 @@ class VirtualMachine():
 
     def ProcessASSIGN(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
-        print('Asignando ' + str(iz) + ' en direccion ' + str(result))
         if not isinstance(result, int):
             if result[0] == '(':
                 result = result[1:-1]
@@ -219,8 +210,6 @@ class VirtualMachine():
 
     def IsGOTOF(self, left):
         value = self.GetValueInsideValueIfParenthesis(left)
-        print('ADENTRO DEL GOTOF')
-        print(value)
         if not value:
             return True
         return False
@@ -236,12 +225,10 @@ class VirtualMachine():
             obj = '_'
         address = self.memory.directory.GetObjectAddress(left, right)
         functions.push({'Name': left, 'Address': address, 'Object': obj})
-        functions.printStack()
         self.memory.MountNewLocalMemory(NewLocalMemory.pop())
 
     def ProcessPARAMETRO(self, left, result):
         iz = self.GetValueInsideValueIfParenthesis(left)
-        print("PARAM " + str(iz) + ' --->' + str(result))
         currentMemory = NewLocalMemory.top()
         currentMemory.SetValue(result, iz)
 
@@ -257,7 +244,6 @@ class VirtualMachine():
     
     def ProcessVER(self, left, right, res):
         val = self.GetValueInsideValueIfParenthesis(left)
-        print (str(val) + ' debe estar entre ' + str(right)  + ' y ' + str(res))
         if right <= val and val <= res:
             return
         else: 
@@ -278,14 +264,12 @@ class VirtualMachine():
                 res = left.split('.')
         else:
             res = int(left)
-        print('Asignando ' + str(value) + ' en direccion ' + str(res))
         self.memory.SetValue(res, value, functions.top())
 
     def ProcessEND(self):
         print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
 
     def ProcessAPPEND(self, left, result):
-        print(self.memory.directory.Clases['canino']['Funciones']['suma']['Variables'])
         iz = self.GetValueInsideValueIfParenthesis(left)
         available = self.GetNextAvailableSpaceOfList(result)
         self.memory.SetValue(result + available, iz, functions.top())
@@ -323,18 +307,15 @@ class VirtualMachine():
         lastAvailable = self.GetLastAvailableSpaceOfList(address)
         value = self.memory.GetValue(address + lastAvailable, functions.top())
         self.memory.SetValue(tempAddress, value, functions.top())
-        print('HEAD: ' + str(value))
 
     def ProcessTAIL(self, address, tempAddress):
         value = self.memory.GetValue(address, functions.top())
         self.memory.SetValue(tempAddress, value, functions.top())
-        print('TAIL: ' + str(value))
 
     def ProcessKEY(self, address, val, tempAddress):
         val = self.GetValueInsideValueIfParenthesis(val)
         value = self.memory.GetValue(address + val, functions.top())
         self.memory.SetValue(tempAddress, value, functions.top())
-        print('KEY[' + str(val) + '] = ' + str(value))
 
     def GetValueInsideValueIfParenthesis(self, value):
         if isinstance(value, int):
@@ -347,7 +328,6 @@ class VirtualMachine():
             else:
                 # Entonces detectamos que se esta accediendo a un parametro de un objeto
                 aux = value.split('.')
-            print(aux)
             current = self.memory.GetValue(aux, functions.top())
         # Se checa que no se este tratando de acceder a una casilla vacia
         if current != None:

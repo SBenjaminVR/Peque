@@ -30,6 +30,7 @@ main() {
     camaleon = new animal
     perro.nombre = 2
     perro.clasificacion = 3
+    input(perro.nombre)
     zury = perro.suma(5.0)
     camaleon.clasificacion = 6
     print(zury)

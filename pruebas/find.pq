@@ -1,5 +1,6 @@
 programa prueba;
 
+# Funcion que te dice en que lugar del arreglo esta el numero
 mini int find(int number) {
     petite int a[50]
     petite int i, j, lugar

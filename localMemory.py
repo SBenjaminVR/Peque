@@ -7,7 +7,6 @@ def InsertAddresses(local, number, base):
     return local
 
 def AssignLocalStorage(local, number, option):
-    print(number)
     if option == 0:
         return InsertAddresses(local, number, Dir.INT_LOCAL)
     if option == 1:
@@ -30,8 +29,6 @@ def AssignLocalStorage(local, number, option):
 class LocalMemory():
     def __init__(self, space):
         self.local = {}
-        print('--------------------------')
-        print(space)
         spaceSize = len(space)
         for i in range(spaceSize): 
             self.local = AssignLocalStorage(self.local, space[i], i)
