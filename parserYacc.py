@@ -65,7 +65,7 @@ Operadores = TablaOperaciones()
 
 def p_programa(p):
     '''
-    programa : PROGRAMA ID SEMICOLON mainLol scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
+    programa : PROGRAMA ID SEMICOLON scopeClases mainLol declaracion_clases scopeFunction declaracion_funciones scopeMain principal
     | PROGRAMA ID SEMICOLON
     '''
     CrearCuadruplo('END','_','_','_')
@@ -409,7 +409,7 @@ def p_leeInput(p):
     '''
     res = values.pop()
     tipo = tipos.pop()
-    CrearCuadruplo('INPUT',res,tipos,'_')
+    CrearCuadruplo('INPUT',res,tipo,'_')
     p[0] = None
 def p_input_aux2(p):
     '''
@@ -420,23 +420,24 @@ def p_input_aux2(p):
     p[0] = None
 def p_llamada(p):
     '''
-    llamada : llamadaID  L_PARENTHESIS llamada_aux2 R_PARENTHESIS  endCall
+    llamada : llamadaID llamada_aux startCall  L_PARENTHESIS llamada_aux2 R_PARENTHESIS  endCall
     '''
     
     p[0]=None
 def p_llamadaID(p):
     '''
     llamadaID : ID 
-    | ID llamada_aux
     '''
 
     popper.push('(')
     
     funct.push(p[1])
-
+    funct.printStack()
     global paramChecktype
     paramChecktype = []
     memoria.ResetLocalMemory()
+    print('llamada')
+
 
     p[0] = None
 def p_startCall(p):
@@ -453,11 +454,13 @@ def p_startCall(p):
         Funcion = temp
         funct.push(objeto)
         funct.push('.')
-        
+        print('ERA')
         CrearCuadruplo('ERA',Funcion,'_', objeto) #Quiza se puede sustituir por numeros
 
     else:
+        print('ERA')
         CrearCuadruplo('ERA',Funcion,'_', '_') #Quiza se puede sustituir por numeros
+    
     funct.push(Funcion)
     
     p[0]=None
@@ -546,10 +549,12 @@ def p_endCall(p):
 def p_llamada_aux(p):
     '''
     llamada_aux : PERIOD ID
+    |
     '''
         #temp = funct.pop()
-    funct.push(p[2])
-    funct.push(p[1])
+    if len(p) > 1 :
+        funct.push(p[2])
+        funct.push(p[1])
     
         #funct.push(temp)
     p[0]=None
@@ -571,7 +576,7 @@ def p_llamada_aux3(p):
 
 def p_parametros(p):
     '''
-    parametros :  expresion startCall
+    parametros :  expresion
     | 
     '''
     global paramChecktype
