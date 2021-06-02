@@ -749,7 +749,8 @@ def p_rp_seen(p):
     '''
     #guardamos direccion del primer salto
     result = Temporales[-1]
-    if tipos.top() != 'bool':
+
+    if tipos.pop() != 'bool':
         raise ErrorMsg('Se esperaba un tipo bool en el if')
     CrearCuadruplo('GOTOF',result,'_','_')
     Saltos.append(cont-1)
