@@ -22,9 +22,6 @@ peque canino agranda animal {
         print(facha->key(1))
         return a + nombre + clasificacion
     }
-    mini float ir(){
-        return 2.3 + 4.3
-    }
 }
 
 main() {
@@ -33,8 +30,7 @@ main() {
     camaleon = new animal
     perro.nombre = 2
     perro.clasificacion = 3
-    zury = perro.resta(2.3)
-    input(perro.ir())
+    zury = perro.suma(5.0)
     camaleon.clasificacion = 6
     print(zury)
     print(camaleon.resta(3.0))

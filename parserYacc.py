@@ -424,14 +424,12 @@ def p_llamadaID(p):
     | ID PERIOD ID
 
     '''
-    print("Entra")
     popper.push('(')
     
     
     global paramChecktype
     paramChecktype = []
     memoria.ResetLocalMemory()
-    print('llamada')
     if(len(p) > 2):
         funct.push(p[3])
         funct.push(p[2])
@@ -452,11 +450,9 @@ def p_startCall(p):
         Funcion = temp
         funct.push(objeto)
         funct.push('.')
-        print('ERA')
         CrearCuadruplo('ERA',Funcion,'_', objeto) #Quiza se puede sustituir por numeros
 
     else:
-        print('ERA')
         CrearCuadruplo('ERA',Funcion,'_', '_') #Quiza se puede sustituir por numeros
     
     funct.push(Funcion)
@@ -697,7 +693,6 @@ def p_igualdadArr(p):
     
     tipo1 = tipos.pop()
     tipo2 = tipos.pop()
-    print(tipo1, ' ', tipo2)
     if tipo1 != tipo2:
         raise ErrorMsg('Error: No se pueden asignar '+ tipo1 + ' a un tipo ' + tipo2)
 
@@ -1018,10 +1013,8 @@ def p_assignAddress(p):
     global sizeVar
     
     # Se ignora el primer espacio ya que fue asignado al momento de guardar la variable por primera vez
-    print(contVarLocal)
     if Tabla.Scope != 'class':
         for i in range(1, sizeVar):
-            print('entro')
             agregarContVarFunciones(AuxList[1],'NORMAL')
             address = memoria.AssignMemoryAddress(AuxList[1], Scope[0], 'NORMAL')
         
