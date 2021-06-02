@@ -74,7 +74,7 @@ def p_programa(p):
     p[0] = None
 def p_mainLol(p):
     '''
-    main_Lol : empty
+    mainLol : empty
     '''
     CrearCuadruplo('GOTO','_','_','_')
     p[0] = None
