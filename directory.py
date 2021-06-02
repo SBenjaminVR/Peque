@@ -1,14 +1,16 @@
 class Directory():
+    
     def __init__(self, clases, funciones, variables,Objetos):
-        self.Clases = clases
-        self.Funciones = funciones
-        self.Variables = variables
-        self.Scope = ''
-        self.CurrentFunction = ''
-        self.CurrentClass = ''
-        self.Objetos = Objetos
-        self.currentObject = ''
+        self.Clases = clases #Directory of clases
+        self.Funciones = funciones #Directory of variables
+        self.Variables = variables #directory of the variables
+        self.Scope = '' #Direcotry of the scope
+        self.CurrentFunction = '' #Curent functions
+        self.CurrentClass = '' #Curretn class
+        self.Objetos = Objetos # Directory of objects
+        self.currentObject = '' #Current Object
 
+    #Set a new scope
     def SetScope(self, scope):
         self.Scope = scope
     

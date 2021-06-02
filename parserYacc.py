@@ -65,7 +65,7 @@ Operadores = TablaOperaciones()
 
 def p_programa(p):
     '''
-    programa : PROGRAMA ID SEMICOLON mainInicio scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
+    programa : PROGRAMA ID SEMICOLON scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
     | PROGRAMA ID SEMICOLON
     '''
     CrearCuadruplo('END','_','_','_')
@@ -77,6 +77,7 @@ def p_scopeClases(p):
     '''
     scopeClases : empty
     '''
+    CrearCuadruplo('GOTO','_','_','_')
     Tabla.SetScope('class')
     Location = 'class'
     Scope[0] = 'LOCAL'
@@ -104,13 +105,6 @@ def p_principal(p):
     '''
     principal : MAIN mainFin L_PARENTHESIS R_PARENTHESIS L_BRACKET cuerpo R_BRACKET 
     '''
-    p[0] = None
-def p_mainInicio(p):
-    '''
-    mainInicio : empty
-    '''
-    CrearCuadruplo('GOTO','_','_','_')
-
     p[0] = None
 def p_mainFin(p):
     '''
@@ -407,8 +401,8 @@ def p_leeInput(p):
     leeInput : empty
     '''
     res = values.pop()
-    tipos.pop()
-    CrearCuadruplo('INPUT',res,'_','_')
+    tipo = tipos.pop()
+    CrearCuadruplo('INPUT',res,tipo,'_')
     p[0] = None
 def p_input_aux2(p):
     '''
