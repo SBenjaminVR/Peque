@@ -108,7 +108,7 @@ class VirtualMachine():
                 self.ProcessPRINT(iz)
 
             elif operation == 23:
-                self.ProcessINPUT(iz)
+                self.ProcessINPUT(iz, de)
 
             elif operation == 24:
                 self.ProcessEND()
@@ -267,10 +267,19 @@ class VirtualMachine():
         iz = self.GetValueInsideValueIfParenthesis(left)
         print(str(iz))
 
-    def ProcessINPUT(self, left):
-        userInput = int(input())
-        print('Asignando ' + str(userInput) + ' en direccion ' + str(left))
-        self.memory.SetValue(left, userInput, functions.top())
+    def ProcessINPUT(self, left, right):
+        userInput = input()
+        value = self.GetUserInput(userInput, right)
+        if not isinstance(left, int):
+            if left[0] == '(':
+                left = left[1:-1]
+                res = self.memory.GetValue(int(left), functions.top())
+            else:
+                res = left.split('.')
+        else:
+            res = int(left)
+        print('Asignando ' + str(value) + ' en direccion ' + str(res))
+        self.memory.SetValue(res, value, functions.top())
 
     def ProcessEND(self):
         print('Programa se termino de ejecutar en: ' + str(time.time() - self.start_time) + ' s')
@@ -366,6 +375,13 @@ class VirtualMachine():
             return c - 1
         else:
             raise ErrorMsg('Se esta tratando de hacer pop() de una lista vacia')
+
+    def GetUserInput(self, input, type):
+        if type == 'int':
+            input = int(input)
+        if type == 'float':
+            input = float(input)
+        return input
 
     def IsString(self, var):
         if isinstance(var, str):
