@@ -408,30 +408,35 @@ def p_input_aux2(p):
     '''
     input_aux2 : variable
     | arreglo
+    | atributo
     '''
 
     p[0] = None
 def p_llamada(p):
     '''
-    llamada : llamadaID llamada_aux startCall  L_PARENTHESIS llamada_aux2 R_PARENTHESIS  endCall
+    llamada : llamadaID llamada_aux startCall L_PARENTHESIS llamada_aux2 R_PARENTHESIS  endCall
     '''
     
     p[0]=None
 def p_llamadaID(p):
     '''
-    llamadaID : ID 
-    '''
+    llamadaID : ID
+    | ID PERIOD ID
 
+    '''
+    print("Entra")
     popper.push('(')
     
-    funct.push(p[1])
-    funct.printStack()
+    
     global paramChecktype
     paramChecktype = []
     memoria.ResetLocalMemory()
     print('llamada')
-
-
+    if(len(p) > 2):
+        funct.push(p[3])
+        funct.push(p[2])
+    funct.push(p[1])
+    funct.printStack()
     p[0] = None
 def p_startCall(p):
     '''
@@ -544,16 +549,15 @@ def p_llamada_aux(p):
     llamada_aux : PERIOD ID
     |
     '''
-        #temp = funct.pop()
-    if len(p) > 1 :
+    ''''if len(p) > 1 :
         funct.push(p[2])
         funct.push(p[1])
+    '''
     
-        #funct.push(temp)
     p[0]=None
 def p_llamada_aux2(p):
     '''
-    llamada_aux2 :  parametros endParam  llamada_aux3
+    llamada_aux2 :  parametros  llamada_aux3
     |
     '''
    
@@ -569,22 +573,12 @@ def p_llamada_aux3(p):
 
 def p_parametros(p):
     '''
-    parametros :  expresion
-    | 
+    parametros : expresion
     '''
     global paramChecktype
     paramChecktype.append(tipos.top())
     address = memoria.AssignMemoryAddress(tipos.pop(),'LOCAL',Location)
     CrearCuadruplo('PARAMETRO', values.pop(),'_',address)
-    
-    p[0] = None
-def p_endParam(p):
-    '''
-    endParam : empty
-
-    '''
-    
-    
     
     p[0] = None
 
