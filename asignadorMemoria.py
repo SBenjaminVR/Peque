@@ -1,15 +1,26 @@
+#this class assign the address of memory when ask for
+#it is just a counter for each space of memory
+#this class needs DirrecionesMemoria
+#since you can find the exact base address anything
+
 from direcciones import DireccionesMemoria
 Dir = DireccionesMemoria()
+
 
 class AsignadorMemoria:
     last = []
     def __init__(self):
         self.last = [0]*25
-   
+    #special function to assign address to an object
     def AssignMemoryAddressObject(self):
         address = Dir.OBJETOS + self.last[24]
         self.last[24] = self.last[24] + 1
         return address
+    #function to assign memory depending on this values
+    #type of function
+    #scope of where are we
+    #Location if we are assigning inside a function in a class or inside a function outside the class
+    #we need the location, so we can return a temporal, a constant or a normal address dependening on the actual scope
     def AssignMemoryAddress(self, tipo, scope, location):
         address = -1
         i = 0
@@ -108,6 +119,8 @@ class AsignadorMemoria:
         self.last[i] = self.last[i] + N               
         return address
         
+        #function to reset the local memory
+        #use when trying to reset the memory assing to a function which is temporal
     def ResetLocalMemory(self):
         for x in range(12, 23):
             self.last[x] = 0
