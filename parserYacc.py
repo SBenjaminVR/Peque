@@ -65,13 +65,20 @@ Operadores = TablaOperaciones()
 
 def p_programa(p):
     '''
-    programa : PROGRAMA ID SEMICOLON scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
+    programa : PROGRAMA ID SEMICOLON mainLol scopeClases declaracion_clases scopeFunction declaracion_funciones scopeMain principal
     | PROGRAMA ID SEMICOLON
     '''
     CrearCuadruplo('END','_','_','_')
 
     #addScope(p[2])
     p[0] = None
+def p_mainLol(p):
+    '''
+    main_Lol : emoty
+    '''
+    CrearCuadruplo('GOTO','_','_','_')
+    p[0] = None
+
 
 def p_scopeClases(p):
     '''
@@ -402,7 +409,7 @@ def p_leeInput(p):
     '''
     res = values.pop()
     tipo = tipos.pop()
-    CrearCuadruplo('INPUT',res,tipo,'_')
+    CrearCuadruplo('INPUT',res,,'_')
     p[0] = None
 def p_input_aux2(p):
     '''
