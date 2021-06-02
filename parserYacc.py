@@ -409,7 +409,7 @@ def p_leeInput(p):
     '''
     res = values.pop()
     tipo = tipos.pop()
-    CrearCuadruplo('INPUT',res,,'_')
+    CrearCuadruplo('INPUT',res,tipos,'_')
     p[0] = None
 def p_input_aux2(p):
     '''
