@@ -1421,7 +1421,11 @@ def p_factor(p):
     | FALSE
     '''
     if p[1] != '(':
-        if isinstance(p[1],int):
+        if isinstance(p[1],bool):
+            tipos.push('bool')
+            address = Constantes.GetMemoryAddress(bool(p[1]), 'bool')
+            values.push(address)
+        elif isinstance(p[1],int):
             tipos.push('int')
             address = Constantes.GetMemoryAddress(int(p[1]), 'int')
             values.push(address)
@@ -1434,11 +1438,7 @@ def p_factor(p):
             string = p[1][1:-1]
             address = Constantes.GetMemoryAddress(str(string), 'string')
             values.push(address)
-        elif p[1] == 'true' or p[1] == 'false':
-            tipos.push('bool')
-            val = True if p[1] == 'true' else False            
-            address = Constantes.GetMemoryAddress(val, 'bool')
-            values.push(address)
+        
     p[0] = None
 def p_factor_aux(p):
     '''
