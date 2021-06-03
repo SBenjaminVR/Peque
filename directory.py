@@ -220,6 +220,7 @@ class Directory():
                 self.Clases[self.CurrentClass]['Funciones'][self.CurrentFunction]['Variables'][name].update(newSize)
             else:
                 self.Clases[self.CurrentClass]['Variables'][name].update(newSize)
+
 #update any value of the function in any scope
     def updateFunctionAttribute(self,name,nameOfChange,change):
         newVal = {nameOfChange: change}
@@ -235,25 +236,30 @@ class Directory():
     def updateClassAtribute(self,clase,name,val):
         referencia = {name : val}
         self.Clases[clase].update(referencia)
-    #update a class atribute
+
+    #get the value of a class in any scope
     def ClassAtribute(self,clase,name):
         return self.Clases[clase].get(name)
+    
     #get the object address
     def GetObjectAddress(self, function, objeto):
         if objeto != '_':
             return self.GetAttributeOfFunctionInObject(function, objeto, 'Address')
         else:
             return self.Funciones[function].get('Address')
-    #get the function address
+
+    #get the function of a address
     def GetFunctionAddress(self, name):
         return self.Funciones.get(name).get('Address')
-    #get the function space value
+      
+    #get the space of a object
     def GetFunctionSpace(self, function, objeto):
         if objeto != '_':
             return self.GetAttributeOfFunctionInObject(function, objeto, 'Space')
         else:
             return self.Funciones[function].get('Space')
-    #get the atribute of a function in a object
+
+    #get the attribute of a function which it is declare in a class and instance in a object
     def GetAttributeOfFunctionInObject(self, function, objeto, attribute):
         currentClass = self.Objetos.get(objeto).get('Clase')
         foundFunction = False
@@ -263,6 +269,7 @@ class Directory():
             else:
                 currentClass = self.Clases[currentClass].get('Padre')
         return self.Clases[currentClass]['Funciones'][function].get(attribute)
+
     #get the function address
     def GetFunctionAddress(self, name):
         return self.Funciones.get(name).get('Address')
