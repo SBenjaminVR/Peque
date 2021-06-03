@@ -1,3 +1,4 @@
+#this operations are translate when using the parser to a number, so teh vm can read it
 class TablaOperaciones:
     def __init__(self):
         self.Tabla = {
@@ -34,7 +35,7 @@ class TablaOperaciones:
             "TAIL" : 32,
             "KEY" : 33,
         }
-
+    #get the number depending on the values of the operator
     def GetNumber(self, Operation):
         Operation = str(Operation)
         return self.Tabla.get(Operation)

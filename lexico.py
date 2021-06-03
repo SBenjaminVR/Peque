@@ -25,9 +25,9 @@ reserved = {
     'to' : 'TO',
     'main': 'MAIN',
     'new' : 'NEW',
-    'list' : 'LIST'
-    
-    
+    'list' : 'LIST',
+    'false' : 'FALSE',
+    'true' :'TRUE'
 
 }
 #--------------------------------------- Tokens---------------------------------------
@@ -40,7 +40,7 @@ tokens = [
     'LESS', 'BIGGER', 'DIFFERENT','EQUAL','BIGGER_EQUAL', 'LESS_EQUAL',
     'L_PARENTHESIS', 'R_PARENTHESIS', 'L_BRACKET', 'R_BRACKET', 'L_CORCHETE', 'R_CORCHETE',
     'OR', 'AND','METOD',
-    'COMMENT','TRUE','FALSE'
+    'COMMENT',
 ] + list(reserved.values())
 #--------------------------------------- Simple regular expresion---------------------------------------
 
@@ -77,14 +77,6 @@ def t_newline(t):
      r'\n+'
      t.lexer.lineno += len(t.value)
 #id regular expresion
-def t_TRUE(t):
-    r'\btrue\b'
-    t.value = True
-    return t
-def t_FALSE(t):
-    r'\bfalse\b'
-    t.value = True
-    return t
 def t_ID(t):
     r'[a-zA-Z][a-zA-Z_0-9]*'
     t.type = reserved.get(t.value, 'ID')
@@ -95,13 +87,11 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 #Float
-
 def t_CTEF(t):
     r'-?\d+\.\d+'
     t.value = float(t.value)
     return t
 #Int
-
 def t_CTEI(t):
     r'-?\d+'
     t.value = int(t.value)

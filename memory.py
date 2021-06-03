@@ -4,19 +4,11 @@ from direcciones import DireccionesMemoria
 
 Dir = DireccionesMemoria()
 
+# Checks if the given address is the range of the local addresses
 def IsInLocalRange(address):
     return address >= Dir.INT_LOCAL and address <= Dir.BOOL_LOCAL_TEMPORAL
-        
-def GetTypeOfValueGivenTheAddress(address):
-    if address < Dir.INT_GLOBAL_TEMPORAL:
-        return GetTypeGivenTheBase(address, 0)
-    elif address < Dir.INT_LOCAL:
-        return GetTypeGivenTheBase(address, 4000)
-    elif address < Dir.INT_LOCAL_TEMPORAL:
-        return GetTypeGivenTheBase(address, 8000)
-    elif address < Dir.INT_CONSTANTE:
-        return GetTypeGivenTheBase(address, 12000)
 
+# Returns the data type of the constant given an address  
 def GetTypeOfConstantGivenTheAddress(address):
     if address < Dir.FLOAT_CONSTANTE:
         return 'int'
@@ -28,6 +20,7 @@ def GetTypeOfConstantGivenTheAddress(address):
         return 'string'
 
 class Memory:
+    # It mounts the memory, the directory and the quadruples. It also stores the value of the constants
     def __init__(self, data):
         self.memory = [None]*35000
         self.memoryStack = Stack()
@@ -37,21 +30,22 @@ class Memory:
         self.AssignConstants(data.get('Constantes'))
         self.AssignObjects()
 
+    # Gets the value of a given address, it also takes into account if you have to access an object
     def GetValue(self, address, object):
-        # Checa si estamos obteniendo un atributo de un objeto AFUERA de un objeto
+        # Checks if we are trying to access an atributte of an object OUTSIDE the object
         if isinstance(address, list):
             objeto = int(address[0])
             parametro = str(address[1])
             return self.memory[objeto][parametro]
         else: 
-            # Checa si esta en el rango de memoria local para saber si tiene que ir a buscar ahi
             if (IsInLocalRange(address)):
+                # Stores the value in the top local memory
                 return self.memoryStack.top().GetValue(address)
             else:
-                # Checa si estamos adentro de una funcion y no llamando a constantes
+                # Checks if we are inside of a function
                 if object != None and address < Dir.INT_CONSTANTE:
                     objectAddress = object.get('Object')
-                    # Checa si estamos dentro de un objeto para obtener un valor
+                    # Checks if we are inside of an object
                     if objectAddress == '_':
                         return self.memory[address]
                     else:
@@ -60,20 +54,20 @@ class Memory:
                     return self.memory[address]
     
     def SetValue(self, address, value, funcion):
-        # Checa si estamos asigando un atributo de un objeto AFUERA de un objeto
+        #  Checks if we are trying to access an atributte of an object OUTSIDE the object
         if isinstance(address, list):
             objeto = int(address[0])
             parametro = str(address[1])
             self.memory[objeto][str(parametro)] = value
         else: 
-            # Checa si esta en el rango de memoria local para saber si tiene que ir a buscar ahi
+            # Stores the value in the top local memory
             if (IsInLocalRange(address)):
                 self.memoryStack.top().SetValue(address, value)
             else:
-                # Checa si estamos adentro de una funcion y no llamando a constantes
+                # Checks if we are inside of an function
                 if funcion != None and address < Dir.INT_CONSTANTE:
                     objectAddress = funcion.get('Object')
-                    # Checa si estamos dentro de un objeto para asignar un atributo
+                    # Checks if we are inside of an object
                     if objectAddress == '_':
                         self.memory[address] = value
                     else:
@@ -81,8 +75,9 @@ class Memory:
                 else:
                     self.memory[address] = value
 
+    # Stores the constants in the memory
     def AssignConstants(self, constantes):
-        # Se invierte la tabla de constantes para poder tener las direcciones
+        # The constants table gets inverted to get the Constants
         constantes.InvertDictionary(constantes.Tabla)
         for constant in constantes.Tabla:
             type = GetTypeOfConstantGivenTheAddress(int(constant))
@@ -94,19 +89,23 @@ class Memory:
             if type == 'string':
                 value = str(value)
             self.memory[int(constant)] = value
-        
+
+    # Assigns the initial value of {} to the objects 
     def AssignObjects(self):
         numObjetos = len(self.directory.Objetos)
         for i in range(Dir.OBJETOS, Dir.OBJETOS + numObjetos):
             self.memory[i] = {}
 
+    # Creates a new local memory of the given space
     def CreateNewLocalMemory(self, space):
         memory = LocalMemory(space)
         return memory
         
+    # Pushes the a local memory in the memory stack
     def MountNewLocalMemory(self, memory):
         self.memoryStack.push(memory)
 
+    # Removes the last local memory from the stack
     def UnloadLastLocalMemory(self):
         self.memoryStack.pop()
 
