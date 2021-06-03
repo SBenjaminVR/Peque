@@ -159,7 +159,7 @@ class Directory():
             elif Location == 'class':
                 self.Clases[self.CurrentClass]['Variables'][name] = newVar
 
-    #add the function tot he function directory if it is in the function directory or to a class if it is in class scope
+    #add the function to the function directory if it is in the function directory or to a class if it is in class scope
     def AddFunction(self, name, type, address,param,start):
         newFunction = {
             'Type': type,
@@ -235,7 +235,7 @@ class Directory():
     def updateClassAtribute(self,clase,name,val):
         referencia = {name : val}
         self.Clases[clase].update(referencia)
-    #get the value of a classs in any scope
+    #update a class atribute
     def ClassAtribute(self,clase,name):
         return self.Clases[clase].get(name)
     #get the object address
@@ -244,16 +244,16 @@ class Directory():
             return self.GetAttributeOfFunctionInObject(function, objeto, 'Address')
         else:
             return self.Funciones[function].get('Address')
-    #get the function of a address
+    #get the function address
     def GetFunctionAddress(self, name):
         return self.Funciones.get(name).get('Address')
-    #get the space of a object
+    #get the function space value
     def GetFunctionSpace(self, function, objeto):
         if objeto != '_':
             return self.GetAttributeOfFunctionInObject(function, objeto, 'Space')
         else:
             return self.Funciones[function].get('Space')
-    #get the attribute of a function which it is declare in a class and instance in a object
+    #get the atribute of a function in a object
     def GetAttributeOfFunctionInObject(self, function, objeto, attribute):
         currentClass = self.Objetos.get(objeto).get('Clase')
         foundFunction = False
@@ -263,7 +263,9 @@ class Directory():
             else:
                 currentClass = self.Clases[currentClass].get('Padre')
         return self.Clases[currentClass]['Funciones'][function].get(attribute)
-    #get the functiona addre in any scope
+    #get the function address
     def GetFunctionAddress(self, name):
         return self.Funciones.get(name).get('Address')
-
+    #get the class atribute
+    def GetClassAtribute(self, name,atr):
+        return self.Clases.get(name).get(atr)
