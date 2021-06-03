@@ -1,3 +1,7 @@
+#Base address of all the variables
+#you can manually asssing where all the memory start
+# you need to make sure to leave a space between address
+
 class DireccionesMemoria:
     def __init__(self):
         self.INT_GLOBAL = 0
@@ -31,16 +35,3 @@ class DireccionesMemoria:
         self.STRING_CONSTANTE =  28000
 
         self.OBJETOS = 30000
-
-        '''
-        list int huachicol (4000) - 4099
-        list int mexicano (4100) - 4199
-        huachicol.append()
-        huachicol.pop()
-        huachicol[1] = 
-        huachicol.head()
-        huachicol.tail()
-        huachicol.sort()
-        huachicol.find()
-        huachicol.length()
-        '''
